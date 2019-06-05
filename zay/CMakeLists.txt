@@ -2,12 +2,16 @@ cmake_minimum_required(VERSION 3.9)
 
 # list the header files
 set(HEADER_FILES
-	include/zay/Dummy.h
+	include/zay/Rng.h
+	include/zay/Pos.h
+	include/zay/Tkn.h
+	include/zay/Token_Listing.h
+	include/zay/Err.h
 )
 
 # list the source files
 set(SOURCE_FILES
-	src/zay/Dummy.cpp
+	src/zay/Tkn.cpp
 )
 
 # add library target
