@@ -7,11 +7,15 @@ set(HEADER_FILES
 	include/zay/Tkn.h
 	include/zay/Token_Listing.h
 	include/zay/Err.h
+	include/zay/Src.h
+	include/zay/Scanner.h
 )
 
 # list the source files
 set(SOURCE_FILES
 	src/zay/Tkn.cpp
+	src/zay/Src.cpp
+	src/zay/Scanner.cpp
 )
 
 # add library target

@@ -18,15 +18,20 @@
 	TOKEN(DOT, "."), \
 	TOKEN(LESS, "<"), \
 	TOKEN(LESS_EQUAL, "<="), \
+	TOKEN(LEFT_SHIFT, "<<"), \
+	TOKEN(LEFT_SHIFT_EQUAL, "<<="), \
 	TOKEN(GREATER, ">"), \
 	TOKEN(GREATER_EQUAL, ">="), \
+	TOKEN(RIGHT_SHIFT, ">>"), \
+	TOKEN(RIGHT_SHIFT_EQUAL, ">>="), \
 	TOKEN(EQUAL, "="), \
 	TOKEN(EQUAL_EQUAL, "=="), \
-	TOKEN(NOT_EQUAL, "!="), \
 	TOKEN(PLUS, "+"), \
 	TOKEN(PLUS_EQUAL, "+="), \
+	TOKEN(INC, "++"), \
 	TOKEN(MINUS, "-"), \
 	TOKEN(MINUS_EQUAL, "-="), \
+	TOKEN(DEC, "--"), \
 	TOKEN(STAR, "*"), \
 	TOKEN(STAR_EQUAL, "*="), \
 	TOKEN(DIV, "/"), \
@@ -35,22 +40,26 @@
 	TOKEN(MOD_EQUAL, "%="), \
 	TOKEN(BIT_OR, "|"), \
 	TOKEN(BIT_OR_EQUAL, "|="), \
+	TOKEN(LOGIC_OR, "||"), \
 	TOKEN(BIT_AND, "&"), \
 	TOKEN(BIT_AND_EQUAL, "&="), \
+	TOKEN(LOGIC_AND, "&&"), \
 	TOKEN(BIT_XOR, "^"), \
 	TOKEN(BIT_XOR_EQUAL, "^="), \
 	TOKEN(BIT_NOT, "~"), \
-	TOKEN(LOGIC_OR, "||"), \
-	TOKEN(LOGIC_AND, "&&"), \
 	TOKEN(LOGIC_NOT, "!"), \
-	TOKEN(INC, "++"), \
-	TOKEN(DEC, "--"), \
+	TOKEN(NOT_EQUAL, "!="), \
 	TOKEN(KEYWORDS__BEGIN, ""), \
 	TOKEN(KEYWORD_PACKAGE, "package"), \
 	TOKEN(KEYWORD_TYPE, "type"), \
 	TOKEN(KEYWORD_STRUCT, "struct"), \
 	TOKEN(KEYWORD_VAR, "var"), \
 	TOKEN(KEYWORD_FUNC, "func"), \
+	TOKEN(KEYWORD_BREAK, "break"), \
+	TOKEN(KEYWORD_CONTINUE, "continue"), \
+	TOKEN(KEYWORD_RETURN, "return"), \
+	TOKEN(KEYWORD_FOR, "for"), \
+	TOKEN(KEYWORD_IF, "if"), \
 	TOKEN(KEYWORD_BOOL, "bool"), \
 	TOKEN(KEYWORD_INT, "int"), \
 	TOKEN(KEYWORD_UINT, "uint"), \

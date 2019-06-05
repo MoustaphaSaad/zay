@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.9)
 # list source files
 set(SOURCE_FILES
 	src/unittest_main.cpp
+	src/unittest_zay.cpp
 )
 
 # add executable target

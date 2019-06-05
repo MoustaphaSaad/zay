@@ -18,9 +18,12 @@ namespace zay
 
 		static const char* const NAMES[];
 
+		KIND kind;
 		const char* str;
 		Rng rng;
 		Pos pos;
+
+		inline operator bool() const { return kind != KIND_NONE; }
 	};
 }
 
