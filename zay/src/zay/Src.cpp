@@ -1,4 +1,5 @@
 #include "zay/Src.h"
+#include "zay/AST_Lisp.h"
 
 #include <mn/Memory.h>
 #include <mn/File.h>
@@ -19,6 +20,7 @@ namespace zay
 		self->str_table = str_intern_new();
 		self->errs = buf_new<Err>();
 		self->tkns = buf_new<Tkn>();
+		self->ast = ast_new();
 		return self;
 	}
 
@@ -32,6 +34,7 @@ namespace zay
 		self->str_table = str_intern_new();
 		self->errs = buf_new<Err>();
 		self->tkns = buf_new<Tkn>();
+		self->ast = ast_new();
 		return self;
 	}
 
@@ -44,6 +47,7 @@ namespace zay
 		str_intern_free(self->str_table);
 		destruct(self->errs);
 		buf_free(self->tkns);
+		ast_free(self->ast);
 		free(self);
 	}
 
@@ -97,6 +101,19 @@ namespace zay
 				Tkn::NAMES[t.kind],
 				t.str
 			);
+		}
+		return str_from_c(stream_str(out), allocator);
+	}
+
+	Str
+	src_ast_dump(Src self, Allocator allocator)
+	{
+		Stream out = stream_tmp();
+		AST_Lisp writer = ast_lisp_new(out);
+		for(size_t i = 0; i < self->ast->decls.count; ++i)
+		{
+			ast_lisp_decl(writer, self->ast->decls[i]);
+			vprintf(out, "\n");
 		}
 		return str_from_c(stream_str(out), allocator);
 	}

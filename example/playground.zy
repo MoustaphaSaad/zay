@@ -1,10 +1,10 @@
 type foo struct{
-	x, y: int;
-	z, w: float32;
+	x, y: int
+	z, w: float32
 }
 
-var x: int = 234;
+//var x: int = 234;
 
-func add(x, y: int): int {
-	return x + y;
-}
+//func add(x, y: int): int {
+//	return x + y;
+//}

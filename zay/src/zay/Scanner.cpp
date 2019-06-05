@@ -200,13 +200,13 @@ namespace zay
 			//windows style line ending \r\n
 			if(self->c == '\r')
 			{
-				if(scanner_eof(self) == false)
+				if(scanner_eat(self) == false)
 					break;
 				if(self->c == '\n')
 					break;
 			}
 
-			if(scanner_eof(self) == false)
+			if(scanner_eat(self) == false)
 				break;
 		}
 

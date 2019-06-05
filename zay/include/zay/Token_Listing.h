@@ -53,6 +53,8 @@
 	TOKEN(KEYWORD_PACKAGE, "package"), \
 	TOKEN(KEYWORD_TYPE, "type"), \
 	TOKEN(KEYWORD_STRUCT, "struct"), \
+	TOKEN(KEYWORD_UNION, "union"), \
+	TOKEN(KEYWORD_ENUM, "enum"), \
 	TOKEN(KEYWORD_VAR, "var"), \
 	TOKEN(KEYWORD_FUNC, "func"), \
 	TOKEN(KEYWORD_BREAK, "break"), \

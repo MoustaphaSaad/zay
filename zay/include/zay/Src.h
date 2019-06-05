@@ -4,6 +4,7 @@
 #include "zay/Rng.h"
 #include "zay/Err.h"
 #include "zay/Tkn.h"
+#include "zay/AST.h"
 
 #include <mn/Str.h>
 #include <mn/Str_Intern.h>
@@ -28,6 +29,8 @@ namespace zay
 		mn::Buf<Err> errs;
 		// tokens of this compilation unit
 		mn::Buf<Tkn> tkns;
+		// AST of this compilation unit
+		AST ast;
 	};
 	typedef ISrc* Src;
 
@@ -81,4 +84,7 @@ namespace zay
 
 	ZAY_EXPORT mn::Str
 	src_tkns_dump(Src self, mn::Allocator allocator = mn::allocator_top());
+
+	ZAY_EXPORT mn::Str
+	src_ast_dump(Src self, mn::Allocator allocator = mn::allocator_top());
 }

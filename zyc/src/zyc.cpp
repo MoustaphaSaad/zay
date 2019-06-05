@@ -5,6 +5,7 @@
 
 #include <zay/Src.h>
 #include <zay/Scanner.h>
+#include <zay/Parser.h>
 
 using namespace mn;
 using namespace zay;
@@ -18,6 +19,8 @@ COMMANDS:
     'zyc help'
   scan: scans the file
     'zyc scan path/to/file.zy'
+  parse: parses the file
+    'zyc parse path/to/file.zy'
 )MSG";
 
 inline static void
@@ -111,6 +114,37 @@ main(int argc, char** argv)
 
 			//write the tokens
 			printfmt("{}\n", src_tkns_dump(src, memory::tmp()));
+		}
+	}
+	else if(args.command == "parse")
+	{
+		for(size_t i = 0; i < args.targets.count; ++i)
+		{
+			if(path_is_file(args.targets[i]) == false)
+			{
+				printfmt_err("'{}' is not a file\n", args.targets[i]);
+				continue;
+			}
+
+			Src src = src_from_file(args.targets[i].ptr);
+			mn_defer(src_free(src));
+
+			//scan the file
+			if(src_scan(src) == false)
+			{
+				printfmt("{}\n", src_errs_dump(src, memory::tmp()));
+				continue;
+			}
+
+			//parse the file
+			if(src_parse(src) == false)
+			{
+				printfmt("{}\n", src_errs_dump(src, memory::tmp()));
+				continue;
+			}
+
+			//write the ast
+			printfmt("{}\n", src_ast_dump(src, memory::tmp()));
 		}
 	}
 	return 0;

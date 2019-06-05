@@ -1,6 +1,8 @@
 # Zay Specific Files
 zay/include/zay/Exports.h
 build
+*.sublime-project
+*.sublime-workspace
 
 # Prerequisites
 *.d

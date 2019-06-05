@@ -9,6 +9,9 @@ set(HEADER_FILES
 	include/zay/Err.h
 	include/zay/Src.h
 	include/zay/Scanner.h
+	include/zay/AST.h
+	include/zay/Parser.h
+	include/zay/AST_Lisp.h
 )
 
 # list the source files
@@ -16,6 +19,9 @@ set(SOURCE_FILES
 	src/zay/Tkn.cpp
 	src/zay/Src.cpp
 	src/zay/Scanner.cpp
+	src/zay/AST.cpp
+	src/zay/Parser.cpp
+	src/zay/AST_Lisp.cpp
 )
 
 # add library target

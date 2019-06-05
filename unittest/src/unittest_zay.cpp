@@ -2,6 +2,7 @@
 
 #include <zay/Src.h>
 #include <zay/Scanner.h>
+#include <zay/Parser.h>
 
 using namespace mn;
 using namespace zay;
@@ -14,6 +15,37 @@ scan(const char* str)
 	Str res = src_tkns_dump(src, memory::tmp());
 	src_free(src);
 	return res;
+}
+
+inline static Str
+parse(const char* str)
+{
+	Src src = src_from_str(str);
+	CHECK(src_scan(src));
+	CHECK(src_parse(src));
+	Str res = src_ast_dump(src, memory::tmp());
+	src_free(src);
+	return res;
+}
+
+TEST_CASE("[zay]: scan basic comment")
+{
+	const char* code = R"CODE(//type foo struct{}
+var x: int = 234;
+)CODE";
+
+	const char* expected = R"EXPECTED(line: 1, col: 0, kind: "<COMMENT>" str: "type foo struct{"
+line: 2, col: 1, kind: "var" str: "var"
+line: 2, col: 5, kind: "<ID>" str: "x"
+line: 2, col: 6, kind: ":" str: ":"
+line: 2, col: 8, kind: "int" str: "int"
+line: 2, col: 12, kind: "=" str: "="
+line: 2, col: 14, kind: "<INTEGER>" str: "234"
+line: 2, col: 17, kind: ";" str: ";"
+)EXPECTED";
+
+	Str answer = scan(code);
+	CHECK(answer == expected);
 }
 
 TEST_CASE("[zay]: basic scan")
@@ -75,5 +107,45 @@ line: 10, col: 1, kind: "}" str: "}"
 )EXPECTED";
 
 	Str answer = scan(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: parse basic struct")
+{
+	const char* code = R"CODE(type foo struct{
+	x, y: int
+	z, w: float32
+}
+)CODE";
+
+	const char* expected = R"EXPECTED((struct foo
+	(field x, y: (type  int))
+	(field z, w: (type  float32))
+)
+)EXPECTED";
+
+	Str answer = parse(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: parse basic union")
+{
+	const char* code = R"CODE(type foo union{
+	f64: float64
+	f32: [2]float32
+	u8: [8]uint8
+	ptr: [8]*uint8
+}
+)CODE";
+
+	const char* expected = R"EXPECTED((union foo
+	(field f64: (type  float64))
+	(field f32: (type [2] float32))
+	(field u8: (type [8] uint8))
+	(field ptr: (type [8]* uint8))
+)
+)EXPECTED";
+
+	Str answer = parse(code);
 	CHECK(answer == expected);
 }
