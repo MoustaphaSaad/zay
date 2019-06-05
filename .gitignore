@@ -1,3 +1,7 @@
+# Zay Specific Files
+zay/include/zay/Exports.h
+build
+
 # Prerequisites
 *.d
 
