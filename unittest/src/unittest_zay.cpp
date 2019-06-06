@@ -3,6 +3,7 @@
 #include <zay/Src.h>
 #include <zay/Scanner.h>
 #include <zay/Parser.h>
+#include <zay/AST_Lisp.h>
 
 using namespace mn;
 using namespace zay;
@@ -24,6 +25,26 @@ parse(const char* str)
 	CHECK(src_scan(src));
 	CHECK(src_parse(src));
 	Str res = src_ast_dump(src, memory::tmp());
+	src_free(src);
+	return res;
+}
+
+inline static Str
+parse_expr(const char* str)
+{
+	Src src = src_from_str(str);
+	CHECK(src_scan(src));
+
+	Parser parser = parser_new(src);
+	Expr e = parser_expr(parser);
+	parser_free(parser);
+
+	Stream out = stream_tmp();
+	AST_Lisp writer = ast_lisp_new(out);
+	ast_lisp_expr(writer, e);
+	Str res = str_from_c(stream_str(out), memory::tmp());
+
+	expr_free(e);
 	src_free(src);
 	return res;
 }
@@ -147,5 +168,29 @@ TEST_CASE("[zay]: parse basic union")
 )EXPECTED";
 
 	Str answer = parse(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: parse basic expression")
+{
+	const char* code = "123 + 456";
+	const char* expected = "(binary + (atom 123) (atom 456))";
+	Str answer = parse_expr(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: parse add mul expression")
+{
+	const char* code = "123 + 456 * v.xy";
+	const char* expected = "(binary + (atom 123) (binary * (atom 456) (dot (atom v).xy)))";
+	Str answer = parse_expr(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: complex expression")
+{
+	const char* code = "(*arr[v.x + b * c[123]]).koko(z: float, w)";
+	const char* expected = "(call (dot (paren (unary * (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]))).koko) (cast (atom z)(type  float)), (atom w))";
+	Str answer = parse_expr(code);
 	CHECK(answer == expected);
 }

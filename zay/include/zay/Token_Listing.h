@@ -60,6 +60,8 @@
 	TOKEN(KEYWORD_BREAK, "break"), \
 	TOKEN(KEYWORD_CONTINUE, "continue"), \
 	TOKEN(KEYWORD_RETURN, "return"), \
+	TOKEN(KEYWORD_TRUE, "true"), \
+	TOKEN(KEYWORD_FALSE, "false"), \
 	TOKEN(KEYWORD_FOR, "for"), \
 	TOKEN(KEYWORD_IF, "if"), \
 	TOKEN(KEYWORD_BOOL, "bool"), \

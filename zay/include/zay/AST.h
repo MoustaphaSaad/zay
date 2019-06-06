@@ -67,6 +67,102 @@ namespace zay
 	}
 
 
+	struct IExpr
+	{
+		enum KIND
+		{
+			KIND_NONE,
+			KIND_ATOM,
+			KIND_BINARY,
+			KIND_UNARY,
+			KIND_DOT,
+			KIND_INDEXED,
+			KIND_CALL,
+			KIND_CAST,
+			KIND_PAREN
+		};
+
+		KIND kind;
+		union
+		{
+			Tkn atom;
+
+			struct
+			{
+				IExpr* lhs;
+				Tkn op;
+				IExpr* rhs;
+			} binary;
+
+			struct
+			{
+				Tkn op;
+				IExpr* expr;
+			} unary;
+
+			struct
+			{
+				IExpr* base;
+				Tkn member;
+			} dot;
+
+			struct
+			{
+				IExpr* base;
+				IExpr* index;
+			} indexed;
+
+			struct
+			{
+				IExpr* base;
+				mn::Buf<IExpr*> args;
+			} call;
+
+			struct
+			{
+				IExpr* base;
+				Type_Sign type;
+			} cast;
+
+			IExpr* paren;
+		};
+	};
+	typedef IExpr* Expr;
+
+	ZAY_EXPORT Expr
+	expr_atom(const Tkn& t);
+
+	ZAY_EXPORT Expr
+	expr_paren(Expr e);
+
+	ZAY_EXPORT Expr
+	expr_call(Expr base, const mn::Buf<Expr>& args);
+
+	ZAY_EXPORT Expr
+	expr_indexed(Expr base, Expr index);
+
+	ZAY_EXPORT Expr
+	expr_dot(Expr base, const Tkn& t);
+
+	ZAY_EXPORT Expr
+	expr_unary(const Tkn& op, Expr expr);
+
+	ZAY_EXPORT Expr
+	expr_cast(Expr expr, const Type_Sign& type);
+
+	ZAY_EXPORT Expr
+	expr_binary(Expr lhs, const Tkn& op, Expr rhs);
+
+	ZAY_EXPORT void
+	expr_free(Expr self);
+
+	inline static void
+	destruct(Expr self)
+	{
+		expr_free(self);
+	}
+
+
 	struct Field
 	{
 		mn::Buf<Tkn> ids;

@@ -22,5 +22,8 @@ namespace zay
 	}
 
 	ZAY_EXPORT void
+	ast_lisp_expr(AST_Lisp& self, Expr expr);
+
+	ZAY_EXPORT void
 	ast_lisp_decl(AST_Lisp& self, Decl decl);
 }
