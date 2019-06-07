@@ -187,10 +187,19 @@ TEST_CASE("[zay]: parse add mul expression")
 	CHECK(answer == expected);
 }
 
-TEST_CASE("[zay]: complex expression")
+TEST_CASE("[zay]: complex dereference returned pointer")
+{
+	const char* code = "*arr[v.x + b * c[123]].koko(z: float, w)";
+	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type  float)), (atom w)))";
+	Str answer = parse_expr(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: complex dereference indexed expression")
 {
 	const char* code = "(*arr[v.x + b * c[123]]).koko(z: float, w)";
 	const char* expected = "(call (dot (paren (unary * (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]))).koko) (cast (atom z)(type  float)), (atom w))";
 	Str answer = parse_expr(code);
 	CHECK(answer == expected);
 }
+

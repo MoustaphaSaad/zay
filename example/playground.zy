@@ -1,10 +1,1 @@
-type foo struct{
-	x, y: int
-	z, w: float32
-}
-
-//var x: int = 234;
-
-//func add(x, y: int): int {
-//	return x + y;
-//}
+(*arr[v.x + b * c[123]]).koko(z: float, w)
