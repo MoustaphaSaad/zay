@@ -64,6 +64,7 @@
 	TOKEN(KEYWORD_FALSE, "false"), \
 	TOKEN(KEYWORD_FOR, "for"), \
 	TOKEN(KEYWORD_IF, "if"), \
+	TOKEN(KEYWORD_ELSE, "else"), \
 	TOKEN(KEYWORD_BOOL, "bool"), \
 	TOKEN(KEYWORD_INT, "int"), \
 	TOKEN(KEYWORD_UINT, "uint"), \

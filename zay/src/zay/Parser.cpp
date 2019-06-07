@@ -409,6 +409,177 @@ namespace zay
 	}
 
 
+	inline static bool
+	is_assign_op(const Tkn& t)
+	{
+		return (
+			t.kind == Tkn::KIND_EQUAL ||
+			t.kind == Tkn::KIND_PLUS_EQUAL ||
+			t.kind == Tkn::KIND_MINUS_EQUAL ||
+			t.kind == Tkn::KIND_STAR_EQUAL ||
+			t.kind == Tkn::KIND_DIV_EQUAL ||
+			t.kind == Tkn::KIND_MOD_EQUAL ||
+			t.kind == Tkn::KIND_BIT_OR_EQUAL ||
+			t.kind == Tkn::KIND_BIT_AND_EQUAL ||
+			t.kind == Tkn::KIND_BIT_XOR_EQUAL ||
+			t.kind == Tkn::KIND_LEFT_SHIFT_EQUAL ||
+			t.kind == Tkn::KIND_RIGHT_SHIFT_EQUAL
+		);
+	}
+
+	inline static Stmt
+	parser_stmt_block(Parser self)
+	{
+		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
+
+		Buf<Stmt> stmts = buf_new<Stmt>();
+		while(parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
+			buf_push(stmts, parser_stmt(self));
+
+		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
+		return stmt_block(stmts);
+	}
+
+	inline static Stmt
+	parser_stmt_if(Parser self)
+	{
+		parser_eat_must(self, Tkn::KIND_KEYWORD_IF);
+		Expr if_cond = parser_expr(self);
+		Stmt if_body = parser_stmt_block(self);
+		Stmt else_body = nullptr;
+		Buf<Else_If> else_ifs = buf_new<Else_If>();
+		while(parser_eat_kind(self, Tkn::KIND_KEYWORD_ELSE))
+		{
+			if(parser_eat_kind(self, Tkn::KIND_KEYWORD_IF))
+			{
+				Expr cond = parser_expr(self);
+				Stmt body = parser_stmt_block(self);
+				buf_push(else_ifs, Else_If{cond, body});
+			}
+			else
+			{
+				else_body = parser_stmt_block(self);
+				break;
+			}
+		}
+
+		return stmt_if(if_cond, if_body, else_ifs, else_body);
+	}
+
+	inline static Stmt
+	parser_stmt_for(Parser self)
+	{
+		parser_eat_must(self, Tkn::KIND_KEYWORD_FOR);
+
+		Stmt init_stmt = nullptr;
+		Expr loop_cond = nullptr;
+		Stmt post_stmt = nullptr;
+		Stmt loop_body = nullptr;
+
+		//for {}
+		if(parser_look_kind(self, Tkn::KIND_OPEN_CURLY))
+		{
+			loop_body = parser_stmt_block(self);
+		}
+		//for ;cond;post {}
+		else if(parser_eat_kind(self, Tkn::KIND_SEMICOLON))
+		{
+			loop_cond = parser_expr(self);
+			parser_eat_must(self, Tkn::KIND_SEMICOLON);
+			if(parser_look_kind(self, Tkn::KIND_OPEN_CURLY) == false)
+				post_stmt = parser_stmt(self);
+			loop_body = parser_stmt_block(self);
+		}
+		//for cond {}
+		//for init_stmt;loop_cond;post_stmt{}
+		else
+		{
+			init_stmt = parser_stmt(self);
+			if(parser_eat_kind(self, Tkn::KIND_SEMICOLON))
+			{
+				loop_cond = parser_expr(self);
+				parser_eat_must(self, Tkn::KIND_SEMICOLON);
+				if(parser_look_kind(self, Tkn::KIND_OPEN_CURLY) == false)
+					post_stmt = parser_stmt(self);
+				loop_body = parser_stmt_block(self);
+			}
+			else if(parser_look_kind(self, Tkn::KIND_OPEN_CURLY))
+			{
+				loop_cond = stmt_expr_decay(init_stmt);
+				init_stmt = nullptr;
+				loop_body = parser_stmt_block(self);
+			}
+		}
+
+		return stmt_for(init_stmt, loop_cond, post_stmt, loop_body);
+	}
+
+	inline static Stmt
+	parser_stmt_var(Parser self)
+	{
+		parser_eat_must(self, Tkn::KIND_KEYWORD_VAR);
+		Variable v = variable_new();
+
+		do
+		{
+			if(Tkn id = parser_eat_must(self, Tkn::KIND_ID))
+				buf_push(v.ids, id);
+		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+
+		if(parser_eat_kind(self, Tkn::KIND_COLON))
+			v.type = parser_type(self);
+
+		if(parser_eat_kind(self, Tkn::KIND_EQUAL))
+		{
+			do
+			{
+				if(Expr e = parser_expr(self))
+					buf_push(v.exprs, e);
+			}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+		}
+
+		return stmt_var(v);
+	}
+
+	inline static Stmt
+	parser_stmt_simple(Parser self)
+	{
+		//simple stmt could be assignment or expression
+		//assignment
+		Buf<Expr> lhs = buf_new<Expr>();
+		do
+		{
+			if(Expr e = parser_expr(self))
+				buf_push(lhs, e);
+		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+
+		if(is_assign_op(parser_look(self)))
+		{
+			Tkn op = parser_eat(self);
+			Buf<Expr> rhs = buf_new<Expr>();
+			do
+			{
+				if(Expr e = parser_expr(self))
+					buf_push(rhs, e);
+			}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+			return stmt_assign(lhs, op, rhs);
+		}
+
+		//this is not an assign stmt so it must be an expression stmt
+		if(lhs.count > 1)
+		{
+			src_err(
+				self->src,
+				err_str(strf("can't have multiple expression in the same statements"))
+			);
+		}
+
+		Stmt s = stmt_expr(lhs[0]);
+		buf_free(lhs);
+		return s;
+	}
+
+
 	//API
 	Parser
 	parser_new(Src src)
@@ -435,6 +606,45 @@ namespace zay
 	parser_expr(Parser self)
 	{
 		return parser_expr_or(self);
+	}
+
+	Stmt
+	parser_stmt(Parser self)
+	{
+		Tkn tkn = parser_look(self);
+		if(tkn.kind == Tkn::KIND_KEYWORD_BREAK)
+		{
+			return stmt_break(parser_eat(self));
+		}
+		else if(tkn.kind == Tkn::KIND_KEYWORD_CONTINUE)
+		{
+			return stmt_continue(parser_eat(self));
+		}
+		else if(tkn.kind == Tkn::KIND_KEYWORD_RETURN)
+		{
+			parser_eat(self); //for the return
+			return stmt_return(parser_expr(self));
+		}
+		else if(tkn.kind == Tkn::KIND_OPEN_CURLY)
+		{
+			return parser_stmt_block(self);
+		}
+		if(tkn.kind == Tkn::KIND_KEYWORD_IF)
+		{
+			return parser_stmt_if(self);
+		}
+		else if(tkn.kind == Tkn::KIND_KEYWORD_FOR)
+		{
+			return parser_stmt_for(self);
+		}
+		else if(tkn.kind == Tkn::KIND_KEYWORD_VAR)
+		{
+			return parser_stmt_var(self);
+		}
+		else
+		{
+			return parser_stmt_simple(self);
+		}
 	}
 
 	Decl

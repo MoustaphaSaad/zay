@@ -172,8 +172,32 @@ namespace zay
 	{
 		mn::Buf<Tkn> ids;
 		Type_Sign type;
-		mn::Buf<Expr> expr;
+		mn::Buf<Expr> exprs;
 	};
+
+	inline static Variable
+	variable_new()
+	{
+		return Variable{
+			mn::buf_new<Tkn>(),
+			type_sign_new(),
+			mn::buf_new<Expr>()
+		};
+	}
+
+	inline static void
+	variable_free(Variable& self)
+	{
+		mn::buf_free(self.ids);
+		type_sign_free(self.type);
+		destruct(self.exprs);
+	}
+
+	inline static void
+	destruct(Variable& self)
+	{
+		variable_free(self);
+	}
 
 	struct Else_If
 	{
@@ -191,7 +215,7 @@ namespace zay
 			KIND_RETURN,
 			KIND_IF,
 			KIND_FOR,
-			KIND_VAR_DECL,
+			KIND_VAR,
 			KIND_ASSIGN,
 			KIND_EXPR,
 			KIND_BLOCK
@@ -217,9 +241,9 @@ namespace zay
 			struct
 			{
 				Stmt init_stmt;
-				Expr cond_expr;
+				Expr loop_cond;
 				Stmt post_stmt;
-				Stmt body;
+				Stmt loop_body;
 			} for_stmt;
 
 			Variable var_stmt;
@@ -236,6 +260,45 @@ namespace zay
 			mn::Buf<Stmt> block_stmt;
 		};
 	};
+
+	ZAY_EXPORT Stmt
+	stmt_break(const Tkn& t);
+
+	ZAY_EXPORT Stmt
+	stmt_continue(const Tkn& t);
+
+	ZAY_EXPORT Stmt
+	stmt_return(Expr e);
+
+	ZAY_EXPORT Stmt
+	stmt_if(Expr if_cond, Stmt if_body, const mn::Buf<Else_If>& else_ifs, Stmt else_body);
+
+	ZAY_EXPORT Stmt
+	stmt_for(Stmt init_stmt, Expr loop_cond, Stmt post_stmt, Stmt loop_body);
+
+	ZAY_EXPORT Stmt
+	stmt_var(Variable v);
+
+	ZAY_EXPORT Stmt
+	stmt_block(const mn::Buf<Stmt>& stmts);
+
+	ZAY_EXPORT Stmt
+	stmt_assign(const mn::Buf<Expr>& lhs, const Tkn& op, const mn::Buf<Expr>& rhs);
+
+	ZAY_EXPORT Stmt
+	stmt_expr(Expr e);
+
+	ZAY_EXPORT Expr
+	stmt_expr_decay(Stmt expr);
+
+	ZAY_EXPORT void
+	stmt_free(Stmt self);
+
+	inline static void
+	destruct(Stmt self)
+	{
+		stmt_free(self);
+	}
 
 
 	//Declarations

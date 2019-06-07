@@ -33,6 +33,9 @@ namespace zay
 	ZAY_EXPORT Expr
 	parser_expr(Parser self);
 
+	ZAY_EXPORT Stmt
+	parser_stmt(Parser self);
+
 	ZAY_EXPORT Decl
 	parser_decl(Parser self);
 
