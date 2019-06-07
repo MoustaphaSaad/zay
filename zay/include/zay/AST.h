@@ -7,6 +7,7 @@
 
 namespace zay
 {
+	//Types
 	struct Type_Atom
 	{
 		enum KIND
@@ -51,7 +52,6 @@ namespace zay
 		return self;
 	}
 
-
 	typedef mn::Buf<Type_Atom> Type_Sign;
 
 	inline static Type_Sign
@@ -66,6 +66,9 @@ namespace zay
 		mn::buf_free(self);
 	}
 
+
+	//Expressions
+	typedef struct IExpr* Expr;
 
 	struct IExpr
 	{
@@ -89,45 +92,44 @@ namespace zay
 
 			struct
 			{
-				IExpr* lhs;
+				Expr lhs;
 				Tkn op;
-				IExpr* rhs;
+				Expr rhs;
 			} binary;
 
 			struct
 			{
 				Tkn op;
-				IExpr* expr;
+				Expr expr;
 			} unary;
 
 			struct
 			{
-				IExpr* base;
+				Expr base;
 				Tkn member;
 			} dot;
 
 			struct
 			{
-				IExpr* base;
-				IExpr* index;
+				Expr base;
+				Expr index;
 			} indexed;
 
 			struct
 			{
-				IExpr* base;
-				mn::Buf<IExpr*> args;
+				Expr base;
+				mn::Buf<Expr> args;
 			} call;
 
 			struct
 			{
-				IExpr* base;
+				Expr base;
 				Type_Sign type;
 			} cast;
 
-			IExpr* paren;
+			Expr paren;
 		};
 	};
-	typedef IExpr* Expr;
 
 	ZAY_EXPORT Expr
 	expr_atom(const Tkn& t);
@@ -163,6 +165,83 @@ namespace zay
 	}
 
 
+	//Statements
+	typedef struct IStmt* Stmt;
+
+	struct Variable
+	{
+		mn::Buf<Tkn> ids;
+		Type_Sign type;
+		mn::Buf<Expr> expr;
+	};
+
+	struct Else_If
+	{
+		Expr cond;
+		Stmt body;
+	};
+
+	struct IStmt
+	{
+		enum KIND
+		{
+			KIND_NONE,
+			KIND_BREAK,
+			KIND_CONTINUE,
+			KIND_RETURN,
+			KIND_IF,
+			KIND_FOR,
+			KIND_VAR_DECL,
+			KIND_ASSIGN,
+			KIND_EXPR,
+			KIND_BLOCK
+		};
+
+		KIND kind;
+		union
+		{
+			Tkn break_stmt;
+
+			Tkn continue_stmt;
+
+			Expr return_stmt;
+
+			struct
+			{
+				Expr if_cond;
+				Stmt if_body;
+				mn::Buf<Else_If> else_ifs;
+				Stmt else_body;
+			} if_stmt;
+
+			struct
+			{
+				Stmt init_stmt;
+				Expr cond_expr;
+				Stmt post_stmt;
+				Stmt body;
+			} for_stmt;
+
+			Variable var_stmt;
+
+			struct
+			{
+				mn::Buf<Expr> lhs;
+				Tkn op;
+				mn::Buf<Expr> rhs;
+			} assign_stmt;
+
+			Expr expr_stmt;
+
+			mn::Buf<Stmt> block_stmt;
+		};
+	};
+
+
+	//Declarations
+	typedef struct IDecl* Decl;
+
+	//Struct, Union Fields
 	struct Field
 	{
 		mn::Buf<Tkn> ids;
@@ -191,12 +270,12 @@ namespace zay
 		field_free(self);
 	}
 
+	//Function Arguments
 	struct Arg
 	{
 		mn::Buf<Tkn> ids;
 		Type_Sign type;
 	};
-
 
 	struct IDecl
 	{
@@ -234,7 +313,6 @@ namespace zay
 			} func_decl;
 		};
 	};
-	typedef IDecl* Decl;
 
 	ZAY_EXPORT Decl
 	decl_struct(const Tkn& name, const mn::Buf<Field>& fields);
@@ -252,6 +330,7 @@ namespace zay
 	}
 
 
+	//Abstract Syntax Tree
 	struct IAST
 	{
 		mn::Buf<Decl> decls;
