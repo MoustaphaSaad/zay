@@ -49,6 +49,26 @@ parse_expr(const char* str)
 	return res;
 }
 
+inline static Str
+parse_stmt(const char* str)
+{
+	Src src = src_from_str(str);
+	CHECK(src_scan(src));
+
+	Parser parser = parser_new(src);
+	Stmt s = parser_stmt(parser);
+	parser_free(parser);
+
+	Stream out = stream_tmp();
+	AST_Lisp writer = ast_lisp_new(out);
+	ast_lisp_stmt(writer, s);
+	Str res = str_from_c(stream_str(out), memory::tmp());
+
+	stmt_free(s);
+	src_free(src);
+	return res;
+}
+
 TEST_CASE("[zay]: scan basic comment")
 {
 	const char* code = R"CODE(//type foo struct{}
@@ -203,3 +223,68 @@ TEST_CASE("[zay]: complex dereference indexed expression")
 	CHECK(answer == expected);
 }
 
+TEST_CASE("[zay]: simple var")
+{
+	const char* code = R"CODE(var x, y, z: float = 1.0, 2.0, 3.0)CODE";
+	const char* expected = R"EXPECTED((var x, y, z
+	(type  float)
+	(atom 1.0), (atom 2.0), (atom 3.0)
+))EXPECTED";
+	Str answer = parse_stmt(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: complex stmt")
+{
+	const char* code = R"CODE({
+	for var i = 0; i < 1000; ++i {
+		if i % 2 == 0 {
+			print("% is even", i)
+		} else {
+			print("% is odd", i)
+		}
+		if i % 7 {
+			continue
+		} else {
+			break
+		}
+	}
+	return false
+})CODE";
+	const char* expected = R"EXPECTED((block-stmt
+	(for
+		(var i
+			(atom 0)
+		)
+		(binary < (atom i) (atom 1000))
+		(expr-stmt
+			(unary ++ (atom i))
+		)
+		(block-stmt
+			(if (binary == (binary % (atom i) (atom 2)) (atom 0))
+				(block-stmt
+					(expr-stmt
+						(call (atom print) (atom "% is even"), (atom i))
+					)
+				)
+				(block-stmt
+					(expr-stmt
+						(call (atom print) (atom "% is odd"), (atom i))
+					)
+				)
+			)
+			(if (binary % (atom i) (atom 7))
+				(block-stmt
+					(continue)
+				)
+				(block-stmt
+					(break)
+				)
+			)
+		)
+	)
+	(return (atom false))
+))EXPECTED";
+	Str answer = parse_stmt(code);
+	CHECK(answer == expected);
+}

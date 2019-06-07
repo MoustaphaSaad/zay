@@ -174,6 +174,214 @@ namespace zay
 		vprintf(self.out, ")");
 	}
 
+	inline static void
+	ast_lisp_stmt_break(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "({})", stmt->break_stmt.str);
+	}
+
+	inline static void
+	ast_lisp_stmt_continue(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "({})", stmt->continue_stmt.str);
+	}
+
+	inline static void
+	ast_lisp_stmt_return(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(return ");
+
+		ast_lisp_expr(self, stmt->return_stmt);
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_stmt_if(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(if ");
+		ast_lisp_expr(self, stmt->if_stmt.if_cond);
+
+		self.level++;
+
+		vprintf(self.out, "\n");
+		ast_lisp_stmt(self, stmt->if_stmt.if_body);
+
+		for(const Else_If& e: stmt->if_stmt.else_ifs)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_indent(self);
+			ast_lisp_expr(self, e.cond);
+
+			vprintf(self.out, "\n");
+			ast_lisp_stmt(self, e.body);
+		}
+
+		vprintf(self.out, "\n");
+		ast_lisp_stmt(self, stmt->if_stmt.else_body);
+
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_stmt_for(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(for");
+
+		self.level++;
+
+		if(stmt->for_stmt.init_stmt)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_stmt(self, stmt->for_stmt.init_stmt);
+		}
+
+		if(stmt->for_stmt.loop_cond)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_indent(self);
+			ast_lisp_expr(self, stmt->for_stmt.loop_cond);
+		}
+
+		if(stmt->for_stmt.post_stmt)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_stmt(self, stmt->for_stmt.post_stmt);
+		}
+
+		vprintf(self.out, "\n");
+		ast_lisp_stmt(self, stmt->for_stmt.loop_body);
+
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_stmt_var(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(var ");
+
+		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
+		{
+			if(i != 0)
+				vprintf(self.out, ", ");
+			vprintf(self.out, "{}", stmt->var_stmt.ids[i].str);
+		}
+
+		self.level++;
+
+		if(stmt->var_stmt.type.count != 0)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_indent(self);
+			ast_lisp_type(self, stmt->var_stmt.type);
+		}
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		for(size_t i = 0; i < stmt->var_stmt.exprs.count; ++i)
+		{
+			if(i != 0)
+				vprintf(self.out, ", ");
+			ast_lisp_expr(self, stmt->var_stmt.exprs[i]);
+		}
+
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_stmt_assign(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "({} ", stmt->assign_stmt.op.str);
+
+		self.level++;
+
+		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
+		{
+			if(i != 0)
+				vprintf(self.out, ", ");
+			ast_lisp_expr(self, stmt->assign_stmt.lhs[i]);
+		}
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		for(size_t i = 0; i < stmt->assign_stmt.rhs.count; ++i)
+		{
+			if(i != 0)
+				vprintf(self.out, ", ");
+			ast_lisp_expr(self, stmt->assign_stmt.rhs[i]);
+		}
+
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_stmt_expr(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(expr-stmt");
+
+		self.level++;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+		ast_lisp_expr(self, stmt->expr_stmt);
+
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_stmt_block(AST_Lisp& self, Stmt stmt)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(block-stmt");
+
+		self.level++;
+		for(size_t i = 0; i < stmt->block_stmt.count; ++i)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_stmt(self, stmt->block_stmt[i]);
+		}
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
 
 	//API
 	void
@@ -189,6 +397,24 @@ namespace zay
 		case IExpr::KIND_CALL: ast_lisp_call(self, expr); break;
 		case IExpr::KIND_CAST: ast_lisp_cast(self, expr); break;
 		case IExpr::KIND_PAREN: ast_lisp_paren(self, expr); break;
+		default: assert(false && "unreachable"); break;
+		}
+	}
+
+	void
+	ast_lisp_stmt(AST_Lisp& self, Stmt stmt)
+	{
+		switch(stmt->kind)
+		{
+		case IStmt::KIND_BREAK: ast_lisp_stmt_break(self, stmt); break;
+		case IStmt::KIND_CONTINUE: ast_lisp_stmt_continue(self, stmt); break;
+		case IStmt::KIND_RETURN: ast_lisp_stmt_return(self, stmt); break;
+		case IStmt::KIND_IF: ast_lisp_stmt_if(self, stmt); break;
+		case IStmt::KIND_FOR: ast_lisp_stmt_for(self, stmt); break;
+		case IStmt::KIND_VAR: ast_lisp_stmt_var(self, stmt); break;
+		case IStmt::KIND_ASSIGN: ast_lisp_stmt_assign(self, stmt); break;
+		case IStmt::KIND_EXPR: ast_lisp_stmt_expr(self, stmt); break;
+		case IStmt::KIND_BLOCK: ast_lisp_stmt_block(self, stmt); break;
 		default: assert(false && "unreachable"); break;
 		}
 	}

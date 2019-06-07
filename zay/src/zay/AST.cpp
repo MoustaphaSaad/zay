@@ -254,6 +254,9 @@ namespace zay
 				stmt_free(self->for_stmt.post_stmt);
 			stmt_free(self->for_stmt.loop_body);
 			break;
+		case IStmt::KIND_VAR:
+			variable_free(self->var_stmt);
+			break;
 		case IStmt::KIND_ASSIGN:
 			destruct(self->assign_stmt.lhs);
 			destruct(self->assign_stmt.rhs);
