@@ -333,12 +333,41 @@ namespace zay
 		field_free(self);
 	}
 
+	//Enum Field
+	struct Enum_Field
+	{
+		Tkn id;
+		Expr expr;
+	};
+
 	//Function Arguments
 	struct Arg
 	{
 		mn::Buf<Tkn> ids;
 		Type_Sign type;
 	};
+
+	inline static Arg
+	arg_new()
+	{
+		return Arg{
+			mn::buf_new<Tkn>(),
+			type_sign_new()
+		};
+	}
+
+	inline static void
+	arg_free(Arg& self)
+	{
+		mn::buf_free(self.ids);
+		type_sign_free(self.type);
+	}
+
+	inline static void
+	destruct(Arg& self)
+	{
+		arg_free(self);
+	}
 
 	struct IDecl
 	{
@@ -359,20 +388,18 @@ namespace zay
 		{
 			mn::Buf<Field> struct_decl;
 
+			//let's not care about unions right now
 			mn::Buf<Field> union_decl;
 
-			mn::Buf<Tkn> enum_decl;
+			mn::Buf<Enum_Field> enum_decl;
 
-			struct
-			{
-				mn::Buf<Tkn> ids;
-				Type_Sign type;
-			} var_decl;
+			Variable var_decl;
 
 			struct
 			{
 				mn::Buf<Arg> args;
-				Type_Sign type;
+				Type_Sign ret_type;
+				Stmt body;
 			} func_decl;
 		};
 	};
@@ -382,6 +409,15 @@ namespace zay
 
 	ZAY_EXPORT Decl
 	decl_union(const Tkn& name, const mn::Buf<Field>& fields);
+
+	ZAY_EXPORT Decl
+	decl_enum(const Tkn& name, const mn::Buf<Enum_Field>& fields);
+
+	ZAY_EXPORT Decl
+	decl_var(const Variable& v);
+
+	ZAY_EXPORT Decl
+	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt body);
 
 	ZAY_EXPORT void
 	decl_free(Decl self);

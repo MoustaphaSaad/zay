@@ -1,1 +1,33 @@
-(*arr[v.x + b * c[123]]).koko(z: float, w)
+type Direction enum
+{
+	Up = 1,
+	Down = -1,
+	Left,
+	Right
+}
+
+type Point struct
+{
+	x, y: float32
+}
+
+func point_new(x, y: float32): Point {
+	var self: Point
+	self.x = x
+	self.y = y
+	return self
+}
+
+var origin: Point = point_new(0, 0)
+
+func add(a, b: Point): Point {
+	var res: Point
+	res.x = a.x + b.x
+	res.y = a.y + b.y
+	return res
+}
+
+func foo(a: *Point, b: int) {
+	a.x *= b
+	a.y *= b
+}

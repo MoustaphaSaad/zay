@@ -164,17 +164,35 @@ namespace zay
 	}
 
 	inline static Decl
-	parser_decl_enum(Parser )
+	parser_decl_enum(Parser self)
 	{
-		//parse enum here
-		return nullptr;
+		parser_eat_must(self, Tkn::KIND_KEYWORD_TYPE);
+		Tkn name = parser_eat_must(self, Tkn::KIND_ID);
+		parser_eat_must(self, Tkn::KIND_KEYWORD_ENUM);
+
+		Buf<Enum_Field> enum_fields = buf_new<Enum_Field>();
+		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
+		do
+		{
+			if(Tkn id = parser_eat_kind(self, Tkn::KIND_ID))
+			{
+				Expr expr = nullptr;
+				if(parser_eat_kind(self, Tkn::KIND_EQUAL))
+					expr = parser_expr(self);
+				buf_push(enum_fields, Enum_Field{id, expr});
+			}
+		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
+
+		return decl_enum(name, enum_fields);
 	}
 
 	inline static Decl
 	parser_decl_type(Parser self)
 	{
+		//only working with struct, and enums
 		Tkn tkn = parser_look(self, 2);
-		if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT || Tkn::KIND_KEYWORD_UNION)
+		if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT || tkn.kind == Tkn::KIND_KEYWORD_UNION)
 		{
 			return parser_decl_aggregate(self);
 		}
@@ -184,23 +202,89 @@ namespace zay
 		}
 		else
 		{
-			//typedef here
+			//let's ignore typedefs for now
 			return nullptr;
 		}
 	}
 
-	inline static Decl
-	parser_decl_var(Parser )
+	inline static Variable
+	parser_variable(Parser self)
 	{
-		//parser variable here
-		return nullptr;
+		parser_eat_must(self, Tkn::KIND_KEYWORD_VAR);
+		Variable v = variable_new();
+
+		do
+		{
+			if(Tkn id = parser_eat_must(self, Tkn::KIND_ID))
+				buf_push(v.ids, id);
+		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+
+		if(parser_eat_kind(self, Tkn::KIND_COLON))
+			v.type = parser_type(self);
+
+		if(parser_eat_kind(self, Tkn::KIND_EQUAL))
+		{
+			do
+			{
+				if(Expr e = parser_expr(self))
+					buf_push(v.exprs, e);
+			}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+		}
+
+		return v;
 	}
 
 	inline static Decl
-	parser_decl_func(Parser )
+	parser_decl_var(Parser self)
 	{
-		//parser function here
-		return nullptr;
+		return decl_var(parser_variable(self));
+	}
+
+	inline static Arg
+	parser_arg(Parser self)
+	{
+		Arg arg = arg_new();
+		do
+		{
+			if(Tkn id = parser_eat_kind(self, Tkn::KIND_ID))
+				buf_push(arg.ids, id);
+		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+
+		//function arguments must have a type
+		parser_eat_must(self, Tkn::KIND_COLON);
+		arg.type = parser_type(self);
+		return arg;
+	}
+
+	inline static Stmt
+	parser_stmt_block(Parser self);
+
+	inline static Decl
+	parser_decl_func(Parser self)
+	{
+		parser_eat_must(self, Tkn::KIND_KEYWORD_FUNC);
+		Tkn name = parser_eat_must(self, Tkn::KIND_ID);
+
+		Buf<Arg> args = buf_new<Arg>();
+		parser_eat_must(self, Tkn::KIND_OPEN_PAREN);
+		do
+		{
+			//we didn't reach the end of the argument list
+			if(parser_look_kind(self, Tkn::KIND_CLOSE_PAREN) == false)
+			{
+				buf_push(args, parser_arg(self));
+			}
+		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
+		parser_eat_must(self, Tkn::KIND_CLOSE_PAREN);
+
+		//wait the return type ...
+		Type_Sign ret_type = type_sign_new();
+		if(parser_eat_kind(self, Tkn::KIND_COLON))
+			ret_type = parser_type(self);
+
+		//now that we have argument list we need to parse the body
+		Stmt body = parser_stmt_block(self);
+		return decl_func(name, args, ret_type, body);
 	}
 
 
@@ -517,28 +601,7 @@ namespace zay
 	inline static Stmt
 	parser_stmt_var(Parser self)
 	{
-		parser_eat_must(self, Tkn::KIND_KEYWORD_VAR);
-		Variable v = variable_new();
-
-		do
-		{
-			if(Tkn id = parser_eat_must(self, Tkn::KIND_ID))
-				buf_push(v.ids, id);
-		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
-
-		if(parser_eat_kind(self, Tkn::KIND_COLON))
-			v.type = parser_type(self);
-
-		if(parser_eat_kind(self, Tkn::KIND_EQUAL))
-		{
-			do
-			{
-				if(Expr e = parser_expr(self))
-					buf_push(v.exprs, e);
-			}while(parser_eat_kind(self, Tkn::KIND_COMMA));
-		}
-
-		return stmt_var(v);
+		return stmt_var(parser_variable(self));
 	}
 
 	inline static Stmt

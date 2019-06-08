@@ -191,6 +191,111 @@ TEST_CASE("[zay]: parse basic union")
 	CHECK(answer == expected);
 }
 
+TEST_CASE("[zay]: parse small program")
+{
+	const char* code = R"CODE(type Direction enum
+{
+	Up = 1,
+	Down = -1,
+	Left,
+	Right
+}
+
+type Point struct
+{
+	x, y: float32
+}
+
+func point_new(x, y: float32): Point {
+	var self: Point
+	self.x = x
+	self.y = y
+	return self
+}
+
+var origin: Point = point_new(0, 0)
+
+func add(a, b: Point): Point {
+	var res: Point
+	res.x = a.x + b.x
+	res.y = a.y + b.y
+	return res
+}
+
+func foo(a: *Point, b: int) {
+	a.x *= b
+	a.y *= b
+}
+)CODE";
+
+	const char* expected = R"EXPECTED((enum Direction
+	Up = (atom 1)
+	Down = (unary - (atom 1))
+	Left
+	Right
+)
+(struct Point
+	(field x, y: (type  float32))
+)
+(func point_new
+	x, y: (type  float32) 
+	: (type  Point)
+	(block-stmt
+		(var self
+			(type  Point)
+		)
+		(= 
+			(dot (atom self).x)
+			(atom x)
+		)
+		(= 
+			(dot (atom self).y)
+			(atom y)
+		)
+		(return (atom self))
+	)
+)
+(var origin
+	(type  Point)
+	(call (atom point_new) (atom 0), (atom 0))
+)
+(func add
+	a, b: (type  Point) 
+	: (type  Point)
+	(block-stmt
+		(var res
+			(type  Point)
+		)
+		(= 
+			(dot (atom res).x)
+			(binary + (dot (atom a).x) (dot (atom b).x))
+		)
+		(= 
+			(dot (atom res).y)
+			(binary + (dot (atom a).y) (dot (atom b).y))
+		)
+		(return (atom res))
+	)
+)
+(func foo
+	a: (type * Point) b: (type  int) 
+	(block-stmt
+		(*= 
+			(dot (atom a).x)
+			(atom b)
+		)
+		(*= 
+			(dot (atom a).y)
+			(atom b)
+		)
+	)
+)
+)EXPECTED";
+
+	Str answer = parse(code);
+	CHECK(answer == expected);
+}
+
 TEST_CASE("[zay]: parse basic expression")
 {
 	const char* code = "123 + 456";

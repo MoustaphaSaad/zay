@@ -98,6 +98,130 @@ namespace zay
 	}
 
 	inline static void
+	ast_lisp_enum(AST_Lisp& self, Decl decl)
+	{
+		ast_lisp_indent(self);
+
+		vprintf(self.out, "(enum {}\n", decl->name.str);
+
+		self.level++;
+		for(size_t i = 0; i < decl->enum_decl.count; ++i)
+		{
+			ast_lisp_indent(self);
+			vprintf(self.out, "{}", decl->enum_decl[i].id.str);
+			if(decl->enum_decl[i].expr)
+			{
+				vprintf(self.out , " = ");
+				ast_lisp_expr(self, decl->enum_decl[i].expr);
+			}
+			vprintf(self.out, "\n");
+		}
+		self.level--;
+
+		ast_lisp_indent(self);
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_variable(AST_Lisp& self, const Variable& v)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(var ");
+
+		for(size_t i = 0; i < v.ids.count; ++i)
+		{
+			if(i != 0)
+				vprintf(self.out, ", ");
+			vprintf(self.out, "{}", v.ids[i].str);
+		}
+
+		self.level++;
+
+		if(v.type.count != 0)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_indent(self);
+			ast_lisp_type(self, v.type);
+		}
+
+		for(size_t i = 0; i < v.exprs.count; ++i)
+		{
+			if(i == 0)
+			{
+				vprintf(self.out, "\n");
+				ast_lisp_indent(self);
+			}
+			else
+			{
+				vprintf(self.out, ", ");
+			}
+			ast_lisp_expr(self, v.exprs[i]);
+		}
+
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
+	inline static void
+	ast_lisp_var(AST_Lisp& self, Decl decl)
+	{
+		ast_lisp_variable(self, decl->var_decl);
+	}
+
+	inline static void
+	ast_lisp_func(AST_Lisp& self, Decl decl)
+	{
+		ast_lisp_indent(self);
+		vprintf(self.out, "(func {}", decl->name.str);
+
+		self.level++;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		//write the args
+		for(const Arg& a: decl->func_decl.args)
+		{
+			for(size_t i = 0; i < a.ids.count; ++i)
+			{
+				if(i != 0)
+					vprintf(self.out, ", ");
+				vprintf(self.out, "{}", a.ids[i].str);
+			}
+
+			vprintf(self.out, ": ");
+			ast_lisp_type(self, a.type);
+			vprintf(self.out, " ");
+		}
+
+		//write the ret type
+		if(decl->func_decl.ret_type.count != 0)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_indent(self);
+			vprintf(self.out, ": ");
+			ast_lisp_type(self, decl->func_decl.ret_type);
+		}
+
+		if(decl->func_decl.body)
+		{
+			vprintf(self.out, "\n");
+			ast_lisp_stmt(self, decl->func_decl.body);
+		}
+
+		self.level--;
+
+		vprintf(self.out, "\n");
+		ast_lisp_indent(self);
+
+		vprintf(self.out, ")");
+	}
+
+	inline static void
 	ast_lisp_atom(AST_Lisp& self, Expr expr)
 	{
 		vprintf(self.out, "(atom {})", expr->atom.str);
@@ -272,41 +396,7 @@ namespace zay
 	inline static void
 	ast_lisp_stmt_var(AST_Lisp& self, Stmt stmt)
 	{
-		ast_lisp_indent(self);
-		vprintf(self.out, "(var ");
-
-		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
-		{
-			if(i != 0)
-				vprintf(self.out, ", ");
-			vprintf(self.out, "{}", stmt->var_stmt.ids[i].str);
-		}
-
-		self.level++;
-
-		if(stmt->var_stmt.type.count != 0)
-		{
-			vprintf(self.out, "\n");
-			ast_lisp_indent(self);
-			ast_lisp_type(self, stmt->var_stmt.type);
-		}
-
-		vprintf(self.out, "\n");
-		ast_lisp_indent(self);
-
-		for(size_t i = 0; i < stmt->var_stmt.exprs.count; ++i)
-		{
-			if(i != 0)
-				vprintf(self.out, ", ");
-			ast_lisp_expr(self, stmt->var_stmt.exprs[i]);
-		}
-
-		self.level--;
-
-		vprintf(self.out, "\n");
-		ast_lisp_indent(self);
-
-		vprintf(self.out, ")");
+		ast_lisp_variable(self, stmt->var_stmt);
 	}
 
 	inline static void
@@ -319,18 +409,29 @@ namespace zay
 
 		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
 		{
-			if(i != 0)
+			if(i == 0)
+			{
+				vprintf(self.out, "\n");
+				ast_lisp_indent(self);
+			}
+			else
+			{
 				vprintf(self.out, ", ");
+			}
 			ast_lisp_expr(self, stmt->assign_stmt.lhs[i]);
 		}
 
-		vprintf(self.out, "\n");
-		ast_lisp_indent(self);
-
 		for(size_t i = 0; i < stmt->assign_stmt.rhs.count; ++i)
 		{
-			if(i != 0)
+			if(i == 0)
+			{
+				vprintf(self.out, "\n");
+				ast_lisp_indent(self);
+			}
+			else
+			{
 				vprintf(self.out, ", ");
+			}
 			ast_lisp_expr(self, stmt->assign_stmt.rhs[i]);
 		}
 
@@ -427,6 +528,18 @@ namespace zay
 		case IDecl::KIND_STRUCT:
 		case IDecl::KIND_UNION:
 			ast_lisp_aggregate(self, decl);
+			break;
+
+		case IDecl::KIND_ENUM:
+			ast_lisp_enum(self, decl);
+			break;
+
+		case IDecl::KIND_VAR:
+			ast_lisp_var(self, decl);
+			break;
+
+		case IDecl::KIND_FUNC:
+			ast_lisp_func(self, decl);
 			break;
 
 		default: assert(false && "unreachable"); break;
