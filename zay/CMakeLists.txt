@@ -12,6 +12,8 @@ set(HEADER_FILES
 	include/zay/AST.h
 	include/zay/Parser.h
 	include/zay/AST_Lisp.h
+	include/zay/Sym.h
+	include/zay/Scope.h
 )
 
 # list the source files
@@ -22,6 +24,7 @@ set(SOURCE_FILES
 	src/zay/AST.cpp
 	src/zay/Parser.cpp
 	src/zay/AST_Lisp.cpp
+	src/zay/Scope.cpp
 )
 
 # add library target
