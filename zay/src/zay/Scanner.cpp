@@ -39,16 +39,19 @@ namespace zay
 		if(scanner_eof(self))
 			return false;
 
-		const char* prev = self->it;
+		const char* prev_it = self->it;
+		Rune prev_c = rune_read(self->it);
+
 		self->it = rune_next(self->it);
 		self->c = rune_read(self->it);
+
 		self->pos.col++;
 
-		if(self->c == '\n')
+		if(prev_c == '\n')
 		{
-			self->pos.col = 0;
+			self->pos.col = 1;
 			self->pos.line++;
-			src_line_end(self->src, prev);
+			src_line_end(self->src, prev_it);
 			src_line_begin(self->src, self->it);
 		}
 		return true;

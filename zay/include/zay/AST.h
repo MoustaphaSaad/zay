@@ -86,6 +86,8 @@ namespace zay
 		};
 
 		KIND kind;
+		Rng rng;
+		Pos pos;
 		union
 		{
 			Tkn atom;
@@ -222,6 +224,8 @@ namespace zay
 		};
 
 		KIND kind;
+		Rng rng;
+		Pos pos;
 		union
 		{
 			Tkn break_stmt;
@@ -384,6 +388,8 @@ namespace zay
 		KIND kind;
 		//all declarations have names
 		Tkn name;
+		Rng rng;
+		Pos pos;
 		union
 		{
 			mn::Buf<Field> struct_decl;

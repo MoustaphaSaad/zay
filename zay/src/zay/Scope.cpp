@@ -46,7 +46,8 @@ namespace zay
 	Sym
 	scope_add(Scope self, Sym sym)
 	{
-		map_insert(self->table, sym->name.str, sym);
+		buf_push(self->syms, sym);
+		map_insert(self->table, sym->name, sym);
 		return sym;
 	}
 }

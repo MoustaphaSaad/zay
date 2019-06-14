@@ -1,6 +1,9 @@
 #include "zay/Typer.h"
 
 #include <mn/Memory.h>
+#include <mn/IO.h>
+
+#include <assert.h>
 
 namespace zay
 {
@@ -16,6 +19,61 @@ namespace zay
 	typer_scope_leave(Typer self)
 	{
 		buf_pop(self->scope_stack);
+	}
+
+	inline static Scope
+	typer_scope(Typer self)
+	{
+		return buf_top(self->scope_stack);
+	}
+
+	inline static void
+	typer_sym(Typer self, Sym sym)
+	{
+		Scope scope = typer_scope(self);
+		if(Sym old = scope_has(scope, sym->name))
+		{
+			Tkn new_tkn = sym_tkn(sym);
+			Tkn old_tkn = sym_tkn(old);
+			Str msg = strf(
+				"'{}' symbol redefinition, it was first defined {}:{}",
+				new_tkn.str,
+				old_tkn.pos.line,
+				old_tkn.pos.col
+			);
+			src_err(self->src, err_tkn(new_tkn, msg));
+			sym_free(sym);
+		}
+
+		scope_add(scope, sym);
+	}
+
+	inline static void
+	typer_shallow_walk(Typer self)
+	{
+		for(Decl d: self->src->ast->decls)
+		{
+			switch(d->kind)
+			{
+			case IDecl::KIND_STRUCT:
+				typer_sym(self, sym_struct(d));
+				break;
+			case IDecl::KIND_UNION:
+				typer_sym(self, sym_union(d));
+				break;
+			case IDecl::KIND_ENUM:
+				typer_sym(self, sym_enum(d));
+				break;
+			case IDecl::KIND_VAR:
+				for(const Tkn& id: d->var_decl.ids)
+					typer_sym(self, sym_var(id));
+				break;
+			case IDecl::KIND_FUNC:
+				typer_sym(self, sym_func(d));
+				break;
+			default: assert(false && "unreachable"); break;
+			}
+		}
 	}
 
 
@@ -40,11 +98,8 @@ namespace zay
 	}
 
 	void
-	typer_check(Typer )
+	typer_check(Typer self)
 	{
-		//so we need to do type checking here
-		//but first let's check that we compile
-		//okay we compile
-		//let's have a break
+		typer_shallow_walk(self);
 	}
 }

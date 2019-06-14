@@ -3,6 +3,7 @@
 #include "zay/Pos.h"
 #include "zay/Rng.h"
 #include "zay/Tkn.h"
+#include "zay/AST.h"
 
 #include <mn/Str.h>
 
@@ -30,6 +31,36 @@ namespace zay
 		Err self{};
 		self.pos = t.pos;
 		self.rng = t.rng;
+		self.msg = m;
+		return self;
+	}
+
+	inline static Err
+	err_expr(Expr e, const mn::Str& m)
+	{
+		Err self{};
+		self.pos = e->pos;
+		self.rng = e->rng;
+		self.msg = m;
+		return self;
+	}
+
+	inline static Err
+	err_stmt(Stmt s, const mn::Str& m)
+	{
+		Err self{};
+		self.pos = s->pos;
+		self.rng = s->rng;
+		self.msg = m;
+		return self;
+	}
+
+	inline static Err
+	err_decl(Decl d, const mn::Str& m)
+	{
+		Err self{};
+		self.pos = d->pos;
+		self.rng = d->rng;
 		self.msg = m;
 		return self;
 	}

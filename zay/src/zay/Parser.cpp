@@ -8,6 +8,14 @@ namespace zay
 	using namespace mn;
 
 	inline static Tkn
+	parser_last_tkn(Parser self)
+	{
+		if(self->ix > 0)
+			return self->tkns[self->ix - 1];
+		return self->tkns[0];
+	}
+
+	inline static Tkn
 	parser_look(Parser self, size_t k)
 	{
 		if(self->ix + k >= self->tkns.count)
@@ -343,45 +351,56 @@ namespace zay
 	parser_expr_atom(Parser self)
 	{
 		Tkn tkn = parser_look(self);
+		Expr expr = nullptr;
 		if(tkn.kind == Tkn::KIND_INTEGER)
 		{
-			return expr_atom(parser_eat(self));
+			expr = expr_atom(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_FLOAT)
 		{
-			return expr_atom(parser_eat(self));
+			expr = expr_atom(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_STRING)
 		{
-			return expr_atom(parser_eat(self));
+			expr = expr_atom(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_ID)
 		{
-			return expr_atom(parser_eat(self));
+			expr = expr_atom(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_FALSE)
 		{
-			return expr_atom(parser_eat(self));
+			expr = expr_atom(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_TRUE)
 		{
-			return expr_atom(parser_eat(self));
+			expr = expr_atom(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_OPEN_PAREN)
 		{
 			parser_eat(self); // for the (
-			Expr expr = parser_expr(self);
+			expr = parser_expr(self);
 			parser_eat_must(self, Tkn::KIND_CLOSE_PAREN);
-			return expr_paren(expr);
+			expr = expr_paren(expr);
 		}
-		//error here
-		assert(false && "unreachable");
-		return nullptr;
+
+		if(expr)
+		{
+			expr->rng = Rng{ tkn.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = tkn.pos;
+		}
+		else
+		{
+			//error here
+			assert(false && "unreachable");
+		}
+		return expr;
 	}
 
 	inline static Expr
 	parser_expr_base(Parser self)
 	{
+		Tkn t = parser_look(self);
 		Expr expr = parser_expr_atom(self);
 		while(true)
 		{
@@ -415,80 +434,149 @@ namespace zay
 				break;
 			}
 		}
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
 		return expr;
 	}
 
 	inline static Expr
 	parser_expr_unary(Parser self)
 	{
+		Tkn t = parser_look(self);
+		Expr expr = nullptr;
 		if(is_unary_op(parser_look(self)))
 		{
 			Tkn op = parser_eat(self);
-			return expr_unary(op, parser_expr_unary(self));
+			expr = expr_unary(op, parser_expr_unary(self));
 		}
-		return parser_expr_base(self);
+		else
+		{
+			expr = parser_expr_base(self);
+		}
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
+		return expr;
 	}
 
 	inline static Expr
 	parser_expr_cast(Parser self)
 	{
+		Tkn t = parser_look(self);
 		Expr expr = parser_expr_unary(self);
 		if(parser_eat_kind(self, Tkn::KIND_COLON))
-			return expr_cast(expr, parser_type(self));
+			expr = expr_cast(expr, parser_type(self));
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
 		return expr;
 	}
 
 	inline static Expr
 	parser_expr_mul(Parser self)
 	{
+		Tkn t = parser_look(self);
+
 		Expr expr = parser_expr_cast(self);
 		while(is_mul_op(parser_look(self)))
 		{
 			Tkn op = parser_eat(self);
 			expr = expr_binary(expr, op, parser_expr_cast(self));
 		}
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
 		return expr;
 	}
 
 	inline static Expr
 	parser_expr_add(Parser self)
 	{
+		Tkn t = parser_look(self);
 		Expr expr = parser_expr_mul(self);
 		while(is_add_op(parser_look(self)))
 		{
 			Tkn op = parser_eat(self);
 			expr = expr_binary(expr, op, parser_expr_mul(self));
 		}
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
 		return expr;
 	}
 
 	inline static Expr
 	parser_expr_cmp(Parser self)
 	{
+		Tkn t = parser_look(self);
 		Expr expr = parser_expr_add(self);
 		if(is_cmp_op(parser_look(self)))
 		{
 			Tkn op = parser_eat(self);
 			expr = expr_binary(expr, op, parser_expr_add(self));
 		}
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
 		return expr;
 	}
 
 	inline static Expr
 	parser_expr_and(Parser self)
 	{
+		Tkn t = parser_look(self);
 		Expr expr = parser_expr_cmp(self);
 		while(Tkn tkn = parser_eat_kind(self, Tkn::KIND_LOGIC_AND))
 			expr = expr_binary(expr, tkn, parser_expr_cmp(self));
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
 		return expr;
 	}
 
 	inline static Expr
 	parser_expr_or(Parser self)
 	{
+		Tkn t = parser_look(self);
 		Expr expr = parser_expr_and(self);
 		while(Tkn tkn = parser_eat_kind(self, Tkn::KIND_LOGIC_OR))
 			expr = expr_binary(expr, tkn, parser_expr_and(self));
+
+		if(expr)
+		{
+			expr->rng = Rng{ t.rng.begin, parser_last_tkn(self).rng.end };
+			expr->pos = t.pos;
+		}
+
 		return expr;
 	}
 
@@ -675,57 +763,75 @@ namespace zay
 	parser_stmt(Parser self)
 	{
 		Tkn tkn = parser_look(self);
+		Stmt res = nullptr;
+
 		if(tkn.kind == Tkn::KIND_KEYWORD_BREAK)
 		{
-			return stmt_break(parser_eat(self));
+			res = stmt_break(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_CONTINUE)
 		{
-			return stmt_continue(parser_eat(self));
+			res = stmt_continue(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_RETURN)
 		{
 			parser_eat(self); //for the return
-			return stmt_return(parser_expr(self));
+			res = stmt_return(parser_expr(self));
 		}
 		else if(tkn.kind == Tkn::KIND_OPEN_CURLY)
 		{
-			return parser_stmt_block(self);
+			res = parser_stmt_block(self);
 		}
-		if(tkn.kind == Tkn::KIND_KEYWORD_IF)
+		else if(tkn.kind == Tkn::KIND_KEYWORD_IF)
 		{
-			return parser_stmt_if(self);
+			res = parser_stmt_if(self);
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_FOR)
 		{
-			return parser_stmt_for(self);
+			res = parser_stmt_for(self);
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_VAR)
 		{
-			return parser_stmt_var(self);
+			res = parser_stmt_var(self);
 		}
 		else
 		{
-			return parser_stmt_simple(self);
+			res = parser_stmt_simple(self);
 		}
+
+		if(res)
+		{
+			res->rng = Rng{ tkn.rng.begin, parser_last_tkn(self).rng.end };
+			res->pos = tkn.pos;
+		}
+
+		return res;
 	}
 
 	Decl
 	parser_decl(Parser self)
 	{
 		Tkn tkn = parser_look(self);
+		Decl res = nullptr;
+
 		if(tkn.kind == Tkn::KIND_KEYWORD_TYPE)
 		{
-			return parser_decl_type(self);
+			res = parser_decl_type(self);
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_VAR)
 		{
-			return parser_decl_var(self);
+			res = parser_decl_var(self);
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_FUNC)
 		{
-			return parser_decl_func(self);
+			res = parser_decl_func(self);
 		}
-		return nullptr;
+
+		if(res)
+		{
+			res->rng = Rng{ tkn.rng.begin, parser_last_tkn(self).rng.end };
+			res->pos = tkn.pos;
+		}
+		return res;
 	}
 };

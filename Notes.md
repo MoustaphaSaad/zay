@@ -46,3 +46,16 @@ func add(a, b: Point): Point {
 let's remember what we did last time
 we were able to parse the syntax i guess and was about to do type checking
 let's do it then
+```go
+func add(a, b: Point): Point {
+	var res: Point
+	res.x = a.x + b.x
+	res.y = a.y + b.y
+	return res
+}
+
+type Point struct {
+	x, y: float32
+}
+```
+you don't need to put the struct before the function add

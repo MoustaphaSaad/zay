@@ -27,6 +27,7 @@ set(SOURCE_FILES
 	src/zay/AST_Lisp.cpp
 	src/zay/Scope.cpp
 	src/zay/Typer.cpp
+	src/zay/Sym.cpp
 )
 
 # add library target
