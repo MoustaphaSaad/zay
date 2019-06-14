@@ -21,6 +21,8 @@ namespace zay
 		self->errs = buf_new<Err>();
 		self->tkns = buf_new<Tkn>();
 		self->ast = ast_new();
+		self->scopes = buf_new<Scope>();
+		self->scope_table = map_new<void*, Scope>();
 		return self;
 	}
 
@@ -35,6 +37,8 @@ namespace zay
 		self->errs = buf_new<Err>();
 		self->tkns = buf_new<Tkn>();
 		self->ast = ast_new();
+		self->scopes = buf_new<Scope>();
+		self->scope_table = map_new<void*, Scope>();
 		return self;
 	}
 
@@ -48,6 +52,8 @@ namespace zay
 		destruct(self->errs);
 		buf_free(self->tkns);
 		ast_free(self->ast);
+		destruct(self->scopes);
+		map_free(self->scope_table);
 		free(self);
 	}
 

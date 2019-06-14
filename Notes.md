@@ -43,3 +43,6 @@ func add(a, b: Point): Point {
 	}
 }
 ```
+let's remember what we did last time
+we were able to parse the syntax i guess and was about to do type checking
+let's do it then

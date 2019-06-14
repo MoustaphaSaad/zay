@@ -5,9 +5,12 @@
 #include "zay/Err.h"
 #include "zay/Tkn.h"
 #include "zay/AST.h"
+#include "zay/Scope.h"
 
 #include <mn/Str.h>
 #include <mn/Str_Intern.h>
+#include <mn/Buf.h>
+#include <mn/Map.h>
 
 namespace zay
 {
@@ -31,6 +34,10 @@ namespace zay
 		mn::Buf<Tkn> tkns;
 		// AST of this compilation unit
 		AST ast;
+		// All the scopes created for this translation unit
+		mn::Buf<Scope> scopes;
+		// Scopes can be attached to AST Entities so here's the attachment table
+		mn::Map<void*, Scope> scope_table;
 	};
 	typedef ISrc* Src;
 
@@ -77,6 +84,15 @@ namespace zay
 	src_tkn(Src self, const Tkn& t)
 	{
 		mn::buf_push(self->tkns, t);
+	}
+
+	inline static Scope
+	src_scope_new(Src self, void* ast_node, Scope parent)
+	{
+		Scope scope = scope_new(parent);
+		buf_push(self->scopes, scope);
+		map_insert(self->scope_table, ast_node, parent);
+		return scope;
 	}
 
 	ZAY_EXPORT mn::Str
