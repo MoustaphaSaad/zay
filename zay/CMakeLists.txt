@@ -15,6 +15,7 @@ set(HEADER_FILES
 	include/zay/Sym.h
 	include/zay/Scope.h
 	include/zay/Typer.h
+	include/zay/Type_Intern.h
 )
 
 # list the source files
@@ -28,6 +29,7 @@ set(SOURCE_FILES
 	src/zay/Scope.cpp
 	src/zay/Typer.cpp
 	src/zay/Sym.cpp
+	src/zay/Type_Intern.cpp
 )
 
 # add library target

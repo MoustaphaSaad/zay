@@ -6,6 +6,7 @@
 #include "zay/Tkn.h"
 #include "zay/AST.h"
 #include "zay/Scope.h"
+#include "zay/Type_Intern.h"
 
 #include <mn/Str.h>
 #include <mn/Str_Intern.h>
@@ -38,6 +39,8 @@ namespace zay
 		mn::Buf<Scope> scopes;
 		// Scopes can be attached to AST Entities so here's the attachment table
 		mn::Map<void*, Scope> scope_table;
+		// Type Interning table to hold all the types of this complication unit
+		Type_Intern type_table;
 	};
 	typedef ISrc* Src;
 

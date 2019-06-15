@@ -1,0 +1,168 @@
+#include "zay/Type_Intern.h"
+
+#include <mn/Memory.h>
+
+#include <assert.h>
+
+namespace zay
+{
+	using namespace mn;
+
+	inline static IType
+	builtin(IType::KIND k)
+	{
+		IType self{};
+		self.kind = k;
+		return self;
+	}
+
+	static IType _type_void = builtin(IType::KIND_VOID);
+	Type type_void = &_type_void;
+
+	static IType _type_bool = builtin(IType::KIND_BOOL);
+	Type type_bool = &_type_bool;
+
+	static IType _type_int = builtin(IType::KIND_INT);
+	Type type_int = &_type_int;
+
+	static IType _type_uint = builtin(IType::KIND_UINT);
+	Type type_uint = &_type_uint;
+
+	static IType _type_int8 = builtin(IType::KIND_INT8);
+	Type type_int8 = &_type_int8;
+
+	static IType _type_uint8 = builtin(IType::KIND_UINT8);
+	Type type_uint8 = &_type_uint8;
+
+	static IType _type_int16 = builtin(IType::KIND_INT16);
+	Type type_int16 = &_type_int16;
+
+	static IType _type_uint16 = builtin(IType::KIND_UINT16);
+	Type type_uint16 = &_type_uint16;
+
+	static IType _type_int32 = builtin(IType::KIND_INT32);
+	Type type_int32 = &_type_int32;
+
+	static IType _type_uint32 = builtin(IType::KIND_UINT32);
+	Type type_uint32 = &_type_uint32;
+
+	static IType _type_int64 = builtin(IType::KIND_INT64);
+	Type type_int64 = &_type_int64;
+
+	static IType _type_uint64 = builtin(IType::KIND_UINT64);
+	Type type_uint64 = &_type_uint64;
+
+	static IType _type_float32 = builtin(IType::KIND_FLOAT32);
+	Type type_float32 = &_type_float32;
+
+	static IType _type_float64 = builtin(IType::KIND_FLOAT64);
+	Type type_float64 = &_type_float64;
+
+	static IType _type_string = builtin(IType::KIND_STRING);
+	Type type_string = &_type_string;
+
+	//API
+	Type
+	type_func(const Func_Sign& sign)
+	{
+		Type self = alloc<IType>();
+		self->kind = IType::KIND_FUNC;
+		self->func = sign;
+		return self;
+	}
+
+	Type
+	type_ptr(Type base)
+	{
+		Type self = alloc<IType>();
+		self->kind = IType::KIND_PTR;
+		self->ptr.base = base;
+		return self;
+	}
+
+	Type
+	type_array(const Array_Sign& sign)
+	{
+		Type self = alloc<IType>();
+		self->kind = IType::KIND_ARRAY;
+		self->array = sign;
+		return self;
+	}
+
+	void
+	type_free(Type self)
+	{
+		switch(self->kind)
+		{
+		case IType::KIND_PTR:
+		case IType::KIND_ARRAY:
+			break;
+		case IType::KIND_FUNC:
+			func_sign_free(self->func);
+			break;
+		default: assert(false && "unreachable"); break;
+		}
+		free(self);
+	}
+
+
+	Type_Intern
+	type_intern_new()
+	{
+		Type_Intern self = alloc<IType_Intern>();
+		self->types = buf_new<Type>();
+		self->ptr_table = map_new<Type, Type>();
+		self->array_table = map_new<Array_Sign, Type, Array_Sign_Hasher>();
+		self->func_table = map_new<Func_Sign, Type, Func_Sign_Hasher>();
+		return self;
+	}
+
+	void
+	type_intern_free(Type_Intern self)
+	{
+		destruct(self->types);
+		map_free(self->ptr_table);
+		map_free(self->array_table);
+		map_free(self->func_table);
+		free(self);
+	}
+
+	Type
+	type_intern_ptr(Type_Intern self, Type base)
+	{
+		if(auto it = map_lookup(self->ptr_table, base))
+			return it->value;
+
+		Type new_type = type_ptr(base);
+		buf_push(self->types, new_type);
+		map_insert(self->ptr_table, base, new_type);
+		return new_type;
+	}
+
+	Type
+	type_intern_array(Type_Intern self, const Array_Sign& sign)
+	{
+		if(auto it = map_lookup(self->array_table, sign))
+			return it->value;
+
+		Type new_type = type_array(sign);
+		buf_push(self->types, new_type);
+		map_insert(self->array_table, sign, new_type);
+		return new_type;
+	}
+
+	Type
+	type_intern_func(Type_Intern self, Func_Sign& func)
+	{
+		if(auto it = map_lookup(self->func_table, func))
+		{
+			func_sign_free(func);
+			return it->value;
+		}
+
+		Type new_type = type_func(func);
+		buf_push(self->types, new_type);
+		map_insert(self->func_table, func, new_type);
+		return new_type;
+	}
+}

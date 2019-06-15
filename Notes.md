@@ -59,3 +59,9 @@ type Point struct {
 }
 ```
 you don't need to put the struct before the function add
+okay let's see what we needed to do, we were doing type checking
+first we did shallow walk
+second we need to resolve the types of the symbols we have
+first thing is that we need to do type interning which is quite similiar to string interning
+we just save 1 representation of the types in memory in some sort of hash table and get pointer
+to the one saved type in memory

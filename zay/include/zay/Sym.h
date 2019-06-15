@@ -8,6 +8,7 @@
 
 namespace zay
 {
+	typedef struct IType* Type;
 	typedef struct ISym* Sym;
 	struct ISym
 	{
@@ -31,6 +32,7 @@ namespace zay
 		KIND kind;
 		STATE state;
 		const char* name;
+		Type type;
 		union
 		{
 			Decl struct_sym;

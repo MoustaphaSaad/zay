@@ -4,6 +4,7 @@
 #include <zay/Scanner.h>
 #include <zay/Parser.h>
 #include <zay/AST_Lisp.h>
+#include <zay/Typer.h>
 
 using namespace mn;
 using namespace zay;
@@ -392,4 +393,20 @@ TEST_CASE("[zay]: complex stmt")
 ))EXPECTED";
 	Str answer = parse_stmt(code);
 	CHECK(answer == expected);
+}
+
+void
+typecheck(const char* str)
+{
+	Src src = src_from_str(str);
+	CHECK(src_scan(src));
+	CHECK(src_parse(src));
+	src_typecheck(src);
+	src_free(src);
+}
+
+TEST_CASE("[zay]: typecheck debugging")
+{
+	const char* code = R"CODE(func add(x, y: int): int { return x + y })CODE";
+	typecheck(code);
 }

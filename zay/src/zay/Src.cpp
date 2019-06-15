@@ -23,6 +23,7 @@ namespace zay
 		self->ast = ast_new();
 		self->scopes = buf_new<Scope>();
 		self->scope_table = map_new<void*, Scope>();
+		self->type_table = type_intern_new();
 		return self;
 	}
 
@@ -39,6 +40,7 @@ namespace zay
 		self->ast = ast_new();
 		self->scopes = buf_new<Scope>();
 		self->scope_table = map_new<void*, Scope>();
+		self->type_table = type_intern_new();
 		return self;
 	}
 
@@ -54,6 +56,7 @@ namespace zay
 		ast_free(self->ast);
 		destruct(self->scopes);
 		map_free(self->scope_table);
+		type_intern_free(self->type_table);
 		free(self);
 	}
 
