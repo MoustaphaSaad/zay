@@ -10,6 +10,16 @@ namespace zay
 	using namespace mn;
 
 	inline static void
+	typer_sym_resolve(Typer self, Sym sym);
+
+	inline static Type
+	typer_expr_resolve(Typer self, Expr expr);
+
+	inline static void
+	typer_stmt_resolve(Typer self, Stmt stmt);
+
+
+	inline static void
 	typer_scope_enter(Typer self, Scope scope)
 	{
 		buf_push(self->scope_stack, scope);
@@ -105,9 +115,6 @@ namespace zay
 		}
 	}
 
-	inline static void
-	typer_sym_resolve(Typer self, Sym sym);
-
 	inline static Type
 	typer_type_sign_resolve(Typer self, const Type_Sign& sign)
 	{
@@ -155,6 +162,258 @@ namespace zay
 
 		return res;
 	}
+
+
+	//expressions
+	inline static Type
+	typer_expr_atom_resolve(Typer self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_ATOM);
+		switch(expr->atom.kind)
+		{
+		case Tkn::KIND_INTEGER: return type_int;
+		case Tkn::KIND_FLOAT: return type_float64;
+		case Tkn::KIND_KEYWORD_STRING: return type_string;
+		case Tkn::KIND_KEYWORD_FALSE:
+		case Tkn::KIND_KEYWORD_TRUE:
+			return type_bool;
+		case Tkn::KIND_ID:
+			if(Sym sym = typer_sym_by_name(self, expr->atom.str))
+			{
+				typer_sym_resolve(self, sym);
+				return sym->type;
+			}
+			src_err(self->src, err_expr(expr, strf("'{}' undefined symbol", expr->atom.str)));
+			return type_void;
+		default: assert(false && "unreachable"); return type_void;
+		}
+	}
+
+	inline static Type
+	typer_expr_binary_resolve(Typer self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_BINARY);
+
+		Type lhs_type = typer_expr_resolve(self, expr->binary.lhs);
+		Type rhs_type = typer_expr_resolve(self, expr->binary.rhs);
+
+		if(lhs_type != rhs_type)
+			src_err(self->src, err_expr(expr, strf("type mismatch in binary expression")));
+
+		if(expr->binary.op.kind == Tkn::KIND_LOGIC_AND || expr->binary.op.kind == Tkn::KIND_LOGIC_OR)
+		{
+			if(lhs_type != type_bool)
+			{
+				src_err(
+					self->src,
+					err_expr(expr->binary.lhs, strf("logical operator only work on boolean types"))
+				);
+			}
+
+			if(rhs_type != type_bool)
+			{
+				src_err(
+					self->src,
+					err_expr(expr->binary.rhs, strf("logical operator only work on boolean types"))
+				);
+			}
+		}
+
+		if (expr->binary.op.kind == Tkn::KIND_LESS ||
+			expr->binary.op.kind == Tkn::KIND_LESS_EQUAL ||
+			expr->binary.op.kind == Tkn::KIND_GREATER ||
+			expr->binary.op.kind == Tkn::KIND_GREATER_EQUAL ||
+			expr->binary.op.kind == Tkn::KIND_EQUAL_EQUAL ||
+			expr->binary.op.kind == Tkn::KIND_NOT_EQUAL)
+		{
+			return type_bool;
+		}
+
+		return type_void;
+	}
+
+	inline static bool
+	type_is_numeric(Type t)
+	{
+		return (
+			t == type_int ||
+			t == type_uint ||
+			t == type_int8 ||
+			t == type_uint8 ||
+			t == type_int16 ||
+			t == type_uint16 ||
+			t == type_int32 ||
+			t == type_uint32 ||
+			t == type_int64 ||
+			t == type_uint64 ||
+			t == type_float32 ||
+			t == type_float64
+		);
+	}
+
+	inline static Type
+	typer_expr_unary_resolve(Typer self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_UNARY);
+
+		Type type = typer_expr_resolve(self, expr->unary.expr);
+
+		//works with numbers
+		if (expr->unary.op.kind == Tkn::KIND_INC ||
+			expr->unary.op.kind == Tkn::KIND_DEC ||
+			expr->unary.op.kind == Tkn::KIND_PLUS ||
+			expr->unary.op.kind == Tkn::KIND_MINUS)
+		{
+			if(type_is_numeric(type) == false)
+			{
+				src_err(
+					self->src,
+					err_expr(expr->unary.expr, strf("'{}' is only allowed for numeric types", expr->unary.op.str))
+				);
+			}
+		}
+		else if(expr->unary.op.kind == Tkn::KIND_LOGIC_NOT)
+		{
+			if(type != type_bool)
+			{
+				src_err(
+					self->src,
+					err_expr(expr, strf("logical not operator is only allowed for boolean types"))
+				);
+			}
+		}
+		else if(expr->unary.op.kind == Tkn::KIND_BIT_AND)
+		{
+			return type_intern_ptr(self->src->type_table, type);
+		}
+		else if(expr->unary.op.kind == Tkn::KIND_STAR)
+		{
+			if(type->kind != IType::KIND_PTR)
+			{
+				src_err(
+					self->src,
+					err_expr(expr->unary.expr, strf("cannot dereference non pointer type"))
+				);
+			}
+			else
+			{
+				return type->ptr.base;
+			}
+			
+		}
+		return type_void;
+	}
+
+	inline static Type
+	typer_expr_dot_resolve(Typer , Expr )
+	{
+		//let's leave this for now since we didn't add structs
+		//let's compile because i'm bored
+		return type_void;
+	}
+
+	inline static Type
+	typer_expr_indexed_resolve(Typer , Expr )
+	{
+		return type_void;
+	}
+
+	inline static Type
+	typer_expr_call_resolve(Typer , Expr )
+	{
+		return type_void;
+	}
+
+	inline static Type
+	typer_expr_cast_resolve(Typer , Expr )
+	{
+		return type_void;
+	}
+
+	inline static Type
+	typer_expr_paren_resolve(Typer , Expr )
+	{
+		return type_void;
+	}
+
+	inline static Type
+	typer_expr_resolve(Typer self, Expr expr)
+	{
+		switch(expr->kind)
+		{
+		case IExpr::KIND_ATOM: return typer_expr_atom_resolve(self, expr);
+		case IExpr::KIND_BINARY: return typer_expr_binary_resolve(self, expr);
+		case IExpr::KIND_UNARY: return typer_expr_unary_resolve(self, expr);
+		case IExpr::KIND_DOT: return typer_expr_dot_resolve(self, expr);
+		case IExpr::KIND_INDEXED: return typer_expr_indexed_resolve(self, expr);
+		case IExpr::KIND_CALL: return typer_expr_call_resolve(self, expr);
+		case IExpr::KIND_CAST: return typer_expr_cast_resolve(self, expr);
+		case IExpr::KIND_PAREN: return typer_expr_paren_resolve(self, expr);
+		default: assert(false && "unreachable"); return type_void;
+		}
+	}
+
+
+	inline static void
+	typer_stmt_break_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_continue_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_return_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_if_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_for_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_var_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_assign_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_expr_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_block_resolve(Typer , Stmt )
+	{
+
+	}
+
+	inline static void
+	typer_stmt_resolve(Typer , Stmt )
+	{
+		//type check here
+	}
+
 
 	inline static Type
 	typer_decl_func_resolve(Typer self, Sym sym)
