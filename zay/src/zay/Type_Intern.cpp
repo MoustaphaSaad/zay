@@ -89,6 +89,23 @@ namespace zay
 		return self;
 	}
 
+	Type
+	type_incomplete(Sym sym)
+	{
+		Type self = alloc<IType>();
+		self->kind = IType::KIND_INCOMPLETE;
+		self->aggregate.sym = sym;
+		return self;
+	}
+
+	void
+	type_struct_complete(Type self, const mn::Buf<Field_Sign>& fields)
+	{
+		assert(self->kind == IType::KIND_COMPLETING);
+		self->kind = IType::KIND_STRUCT;
+		self->aggregate.fields = fields;
+	}
+
 	void
 	type_free(Type self)
 	{
@@ -164,5 +181,13 @@ namespace zay
 		buf_push(self->types, new_type);
 		map_insert(self->func_table, func, new_type);
 		return new_type;
+	}
+
+	Type
+	type_intern_incomplete(Type_Intern self, Sym sym)
+	{
+		Type res = type_incomplete(sym);
+		buf_push(self->types, res);
+		return res;
 	}
 }

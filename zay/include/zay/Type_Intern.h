@@ -7,6 +7,7 @@
 
 namespace zay
 {
+	typedef struct ISym* Sym;
 	typedef struct IType* Type;
 
 	//now we'll need to represent function types since this is what we're currently doing
@@ -94,6 +95,14 @@ namespace zay
 	};
 
 
+	struct Field_Sign
+	{
+		const char* name;
+		Type type;
+		size_t offset;
+	};
+
+
 	struct IType
 	{
 		enum KIND
@@ -119,7 +128,8 @@ namespace zay
 			KIND_STRING,
 			KIND_PTR,
 			KIND_ARRAY,
-			KIND_FUNC
+			KIND_FUNC,
+			KIND_STRUCT
 		};
 
 		KIND kind;
@@ -128,6 +138,11 @@ namespace zay
 			struct { Type base; } ptr;
 			Array_Sign array;
 			Func_Sign func;
+			struct
+			{
+				Sym sym;
+				mn::Buf<Field_Sign> fields;
+			} aggregate;
 		};
 		
 	};
@@ -140,6 +155,12 @@ namespace zay
 
 	ZAY_EXPORT Type
 	type_func(const Func_Sign& sign);
+
+	ZAY_EXPORT Type
+	type_incomplete(Sym sym);
+
+	ZAY_EXPORT void
+	type_struct_complete(Type self, const mn::Buf<Field_Sign>& fields);
 
 	ZAY_EXPORT void
 	type_free(Type self);
@@ -196,4 +217,7 @@ namespace zay
 
 	ZAY_EXPORT Type
 	type_intern_func(Type_Intern self, Func_Sign& func);
+
+	ZAY_EXPORT Type
+	type_intern_incomplete(Type_Intern self, Sym sym);
 }
