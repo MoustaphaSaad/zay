@@ -15,7 +15,7 @@ namespace zay
 	inline static Type
 	typer_expr_resolve(Typer self, Expr expr);
 
-	inline static void
+	inline static Type
 	typer_stmt_resolve(Typer self, Stmt stmt);
 
 
@@ -511,64 +511,190 @@ namespace zay
 	}
 
 
-	inline static void
-	typer_stmt_break_resolve(Typer , Stmt )
-	{
-
-	}
-
-	inline static void
-	typer_stmt_continue_resolve(Typer , Stmt )
-	{
-
-	}
-
-	inline static void
-	typer_stmt_return_resolve(Typer , Stmt )
-	{
-
-	}
-
-	inline static void
-	typer_stmt_if_resolve(Typer , Stmt )
-	{
-
-	}
-
-	inline static void
-	typer_stmt_for_resolve(Typer , Stmt )
-	{
-
-	}
-
-	inline static void
-	typer_stmt_var_resolve(Typer , Stmt )
-	{
-
-	}
-
-	inline static void
-	typer_stmt_assign_resolve(Typer , Stmt )
-	{
-
-	}
-
-	inline static void
-	typer_stmt_expr_resolve(Typer , Stmt )
-	{
-
-	}
-
 	inline static Type
-	typer_stmt_block_resolve(Typer , Stmt )
+	typer_stmt_break_resolve(Typer , Stmt stmt)
 	{
+		assert(stmt->kind == IStmt::KIND_BREAK);
+		//check that break and continue is enabled
 		return type_void;
 	}
 
-	inline static void
-	typer_stmt_resolve(Typer , Stmt )
+	inline static Type
+	typer_stmt_continue_resolve(Typer , Stmt stmt)
 	{
-		//type check here
+		assert(stmt->kind == IStmt::KIND_CONTINUE);
+		//check that break and continue is enabled
+		return type_void;
+	}
+
+	inline static Type
+	typer_stmt_return_resolve(Typer self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_RETURN);
+		return typer_expr_resolve(self, stmt->return_stmt);
+	}
+
+	inline static Type
+	typer_stmt_if_resolve(Typer self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_IF);
+		Type type = typer_expr_resolve(self, stmt->if_stmt.if_cond);
+		if(type != type_bool)
+		{
+			src_err(
+				self->src,
+				err_expr(stmt->if_stmt.if_cond, strf("if conditions type '{}' is not a boolean", type))
+			);
+		}
+		typer_stmt_resolve(self, stmt->if_stmt.if_body);
+
+		for(const Else_If& e: stmt->if_stmt.else_ifs)
+		{
+			Type cond_type = typer_expr_resolve(self, e.cond);
+			if(cond_type != type_bool)
+			{
+				src_err(
+					self->src,
+					err_expr(e.cond, strf("if conditions type '{}' is not a boolean", cond_type))
+				);
+			}
+			typer_stmt_resolve(self, e.body);
+		}
+
+		if(stmt->if_stmt.else_body)
+			typer_stmt_resolve(self, stmt->if_stmt.else_body);
+		return type_void;
+	}
+
+	inline static Type
+	typer_stmt_for_resolve(Typer self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_FOR);
+		if(stmt->for_stmt.init_stmt)
+			typer_stmt_resolve(self, stmt->for_stmt.init_stmt);
+		if(stmt->for_stmt.loop_cond)
+		{
+			Type cond_type = typer_expr_resolve(self, stmt->for_stmt.loop_cond);
+			if(cond_type != type_bool)
+			{
+				src_err(
+					self->src,
+					err_expr(stmt->for_stmt.loop_cond, strf("for loop condition type '{}' is not a boolean", cond_type))
+				);
+			}
+		}
+		if(stmt->for_stmt.post_stmt)
+			typer_stmt_resolve(self, stmt->for_stmt.post_stmt);
+		typer_stmt_resolve(self, stmt->for_stmt.loop_body);
+		return type_void;
+	}
+
+	inline static Type
+	typer_stmt_var_resolve(Typer self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_VAR);
+
+		bool infer = stmt->var_stmt.type.count == 0;
+
+		Type type = type_void;
+		if(infer == false)
+			type = typer_type_sign_resolve(self, stmt->var_stmt.type);
+
+		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
+		{
+			Sym s = sym_var(stmt->var_stmt.ids[i]);
+
+			if(infer)
+			{
+				if(i < stmt->var_stmt.exprs.count)
+				{
+					s->type = typer_expr_resolve(self, stmt->var_stmt.exprs[i]);
+				}
+				else
+				{
+					src_err(
+						self->src,
+						err_tkn(stmt->var_stmt.ids[i], strf("no expression to infer type from"))
+					);
+				}
+			}
+			else
+			{
+				if(i < stmt->var_stmt.exprs.count)
+				{
+					Type expr_type = typer_expr_resolve(self, stmt->var_stmt.exprs[i]);
+					if(expr_type != type)
+					{
+						src_err(
+							self->src,
+							err_expr(stmt->var_stmt.exprs[i], strf("type mismatch expected '{}' but found '{}'", type, expr_type))
+						);
+					}
+				}
+				s->type = type;
+			}
+
+			typer_type_complete(self, s);
+			s->state = ISym::STATE_RESOLVED;
+			typer_sym(self, s);
+		}
+		return type_void;
+	}
+
+	inline static Type
+	typer_stmt_assign_resolve(Typer self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_ASSIGN);
+		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
+		{
+			Type lhs_type = typer_expr_resolve(self, stmt->assign_stmt.lhs[i]);
+			Type rhs_type = typer_expr_resolve(self, stmt->assign_stmt.rhs[i]);
+			if(lhs_type != rhs_type)
+			{
+				Str msg = strf(
+					"type mismatch in assignment statement, expected '{}' but found '{}'",
+					lhs_type,
+					rhs_type
+				);
+				src_err(self->src, err_expr(stmt->assign_stmt.rhs[i], msg));
+			}
+		}
+		return type_void;
+	}
+
+	inline static Type
+	typer_stmt_expr_resolve(Typer self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_EXPR);
+		return typer_expr_resolve(self, stmt->expr_stmt);
+	}
+
+	inline static Type
+	typer_stmt_block_resolve(Typer self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_BLOCK);
+		Type last_type = type_void;
+		for(Stmt s: stmt->block_stmt)
+			last_type = typer_stmt_resolve(self, s);
+		return last_type;
+	}
+
+	inline static Type
+	typer_stmt_resolve(Typer self, Stmt stmt)
+	{
+		switch(stmt->kind)
+		{
+		case IStmt::KIND_BREAK: return typer_stmt_break_resolve(self, stmt);
+		case IStmt::KIND_CONTINUE: return typer_stmt_continue_resolve(self, stmt);
+		case IStmt::KIND_RETURN: return typer_stmt_return_resolve(self, stmt);
+		case IStmt::KIND_IF: return typer_stmt_if_resolve(self, stmt);
+		case IStmt::KIND_FOR: return typer_stmt_for_resolve(self, stmt);
+		case IStmt::KIND_VAR: return typer_stmt_var_resolve(self, stmt);
+		case IStmt::KIND_ASSIGN: return typer_stmt_assign_resolve(self, stmt);
+		case IStmt::KIND_EXPR: return typer_stmt_expr_resolve(self, stmt);
+		case IStmt::KIND_BLOCK: return typer_stmt_block_resolve(self, stmt);
+		default: assert(false && "unreachable"); return type_void;
+		}
 	}
 
 
