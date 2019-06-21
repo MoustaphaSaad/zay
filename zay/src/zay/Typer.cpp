@@ -479,6 +479,35 @@ namespace zay
 	}
 
 	inline static void
+	typer_body_func_resolve(Typer self, Sym sym)
+	{
+		assert(sym->kind == ISym::KIND_FUNC);
+		Decl decl = sym->func_sym;
+
+		Scope scope = src_scope_new(self->src, decl, typer_scope(self));
+
+		typer_scope_enter(self, scope);
+
+		//push function args to scope
+		size_t i = 0;
+		for(const Arg& arg: decl->func_decl.args)
+		{
+			Type type = sym->type->func.args[i];
+			for(const Tkn& id: arg.ids)
+			{
+				Sym v = sym_var(id);
+				v->type = type;
+				v->state = ISym::STATE_RESOLVED;
+				typer_sym(self, v);
+			}
+			i += arg.ids.count;
+		}
+		typer_stmt_block_resolve(self, decl->func_decl.body);
+
+		typer_scope_leave(self);
+	}
+
+	inline static void
 	typer_sym_resolve(Typer self, Sym sym)
 	{
 		if(sym->state == ISym::STATE_RESOLVED)
@@ -508,7 +537,11 @@ namespace zay
 		}
 		sym->state = ISym::STATE_RESOLVED;
 
-		if(sym->kind == ISym::KIND_STRUCT)
+		if(sym->kind == ISym::KIND_FUNC)
+		{
+			typer_body_func_resolve(self, sym);
+		}
+		else if(sym->kind == ISym::KIND_STRUCT)
 		{
 			typer_type_complete(self, sym);
 		}
