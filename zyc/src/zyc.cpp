@@ -47,7 +47,7 @@ args_parse(Args& self, int argc, char** argv)
 	}
 
 	self.command = str_from_c(argv[1]);
-	for(size_t i = 2; i < argc; ++i)
+	for(size_t i = 2; i < size_t(argc); ++i)
 	{
 		if(str_prefix(argv[i], "--"))
 			buf_push(self.flags, str_from_c(argv[i] + 2));

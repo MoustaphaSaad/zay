@@ -1,13 +1,14 @@
 #pragma once 
 
 #include "zay/Exports.h"
+#include "zay/Sym.h"
 
 #include <mn/Buf.h>
 #include <mn/Map.h>
+#include <mn/IO.h>
 
 namespace zay
 {
-	typedef struct ISym* Sym;
 	typedef struct IType* Type;
 
 	//now we'll need to represent function types since this is what we're currently doing
@@ -169,6 +170,48 @@ namespace zay
 	destruct(Type self)
 	{
 		type_free(self);
+	}
+
+	inline static size_t
+	print_str(mn::Stream stream, mn::Print_Format&, Type type)
+	{
+		switch(type->kind)
+		{
+		case IType::KIND_VOID: return mn::vprintf(stream, "void");
+		case IType::KIND_INT: return mn::vprintf(stream, "int");
+		case IType::KIND_UINT: return mn::vprintf(stream, "uint");
+		case IType::KIND_INT8: return mn::vprintf(stream, "int8");
+		case IType::KIND_UINT8: return mn::vprintf(stream, "uint8");
+		case IType::KIND_INT16: return mn::vprintf(stream, "int16");
+		case IType::KIND_UINT16: return mn::vprintf(stream, "uint16");
+		case IType::KIND_INT32: return mn::vprintf(stream, "int32");
+		case IType::KIND_UINT32: return mn::vprintf(stream, "uint32");
+		case IType::KIND_INT64: return mn::vprintf(stream, "int64");
+		case IType::KIND_UINT64: return mn::vprintf(stream, "uint64");
+		case IType::KIND_FLOAT32: return mn::vprintf(stream, "float32");
+		case IType::KIND_FLOAT64: return mn::vprintf(stream, "float64");
+		case IType::KIND_STRING: return mn::vprintf(stream, "string");
+		case IType::KIND_PTR:
+			return mn::vprintf(stream, "*{}", type->ptr.base);
+		case IType::KIND_ARRAY:
+			return mn::vprintf(stream, "[{}]{}", type->array.count, type->array.base);
+		case IType::KIND_FUNC:
+		{
+			size_t res = mn::vprintf(stream, "func(");
+			for(size_t i = 0; i < type->func.args.count; ++i)
+			{
+				if(i != 0)
+					res += mn::vprintf(stream, ", ");
+				res += mn::vprintf(stream, ":{}", type->func.args[i]);
+			}
+			res += mn::vprintf(stream, "): {}", type->func.ret);
+			return res;
+		}
+		case IType::KIND_STRUCT:
+			return mn::vprintf(stream, "{}", type->aggregate.sym->name);
+		default:
+			return mn::vprintf(stream, "<UNKNOWN_TYPE>");
+		}
 	}
 
 

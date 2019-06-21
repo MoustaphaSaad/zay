@@ -296,6 +296,23 @@ namespace zay
 		);
 	}
 
+	inline static bool
+	type_is_integer(Type t)
+	{
+		return (
+			t == type_int ||
+			t == type_uint ||
+			t == type_int8 ||
+			t == type_uint8 ||
+			t == type_int16 ||
+			t == type_uint16 ||
+			t == type_int32 ||
+			t == type_uint32 ||
+			t == type_int64 ||
+			t == type_uint64
+		);
+	}
+
 	inline static Type
 	typer_expr_unary_resolve(Typer self, Expr expr)
 	{
@@ -350,35 +367,130 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_dot_resolve(Typer , Expr )
+	typer_expr_dot_resolve(Typer self, Expr expr)
 	{
-		//let's leave this for now since we didn't add structs
-		//let's compile because i'm bored
+		assert(expr->kind == IExpr::KIND_DOT);
+		Type type = typer_expr_resolve(self, expr->dot.base);
+		Type res = type_void;
+		if(type->kind == IType::KIND_STRUCT)
+		{
+			for(const Field_Sign& f: type->aggregate.fields)
+			{
+				if(f.name == expr->dot.member.str)
+				{
+					res = f.type;
+					break;
+				}
+			}
+			if(res == type_void)
+			{
+				src_err(self->src, err_tkn(expr->dot.member, strf("undefined struct field")));
+			}
+		}
+		return res;
+	}
+
+	inline static Type
+	typer_expr_indexed_resolve(Typer self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_INDEXED);
+		Type type = typer_expr_resolve(self, expr->indexed.base);
+		if(type->kind != IType::KIND_ARRAY)
+		{
+			src_err(
+				self->src,
+				err_expr(expr->indexed.base, strf("expression type '{}' is not an array", type))
+			);
+			return type_void;
+		}
+
+		if(type_is_integer(type) == false)
+		{
+			src_err(
+				self->src,
+				err_expr(expr->indexed.index, strf("index expression type '{}' is not an integer", type))
+			);
+		}
+		return type->array.base;
+	}
+
+	inline static Type
+	typer_expr_call_resolve(Typer self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_CALL);
+		Type res = typer_expr_resolve(self, expr->call.base);
+		if(res->kind != IType::KIND_FUNC)
+		{
+			src_err(self->src, err_expr(expr->call.base, strf("invalid call, expression is not a function")));
+			return type_void;
+		}
+
+		if(expr->call.args.count != res->func.args.count)
+		{
+			Str msg = strf(
+				"function expected {} arguments but {} were provided",
+				res->func.args.count,
+				expr->call.args.count
+			);
+			src_err(self->src, err_expr(expr, msg));
+			return type_void;
+		}
+
+		for(size_t i = 0; i < expr->call.args.count; ++i)
+		{
+			Type type = typer_expr_resolve(self, expr->call.args[i]);
+			if(type != res->func.args[i])
+			{
+				Str msg = strf("function argument {} type mismatch", i);
+				src_err(self->src, err_expr(expr->call.args[i], msg));
+			}
+		}
+		return res->func.ret;
+	}
+
+	inline static bool
+	type_is_number(Type t)
+	{
+		return (
+			t->kind == IType::KIND_INT ||
+			t->kind == IType::KIND_UINT ||
+			t->kind == IType::KIND_INT8 ||
+			t->kind == IType::KIND_UINT8 ||
+			t->kind == IType::KIND_INT16 ||
+			t->kind == IType::KIND_UINT16 ||
+			t->kind == IType::KIND_INT32 ||
+			t->kind == IType::KIND_UINT32 ||
+			t->kind == IType::KIND_INT64 ||
+			t->kind == IType::KIND_UINT64 ||
+			t->kind == IType::KIND_FLOAT32 ||
+			t->kind == IType::KIND_FLOAT64
+		);
+	}
+
+	inline static Type
+	typer_expr_cast_resolve(Typer self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_CAST);
+		Type from_type = typer_expr_resolve(self, expr->cast.base);
+		Type to_type = typer_type_sign_resolve(self, expr->cast.type);
+
+		if(type_is_number(from_type) && type_is_number(to_type))
+			return to_type;
+		else if(from_type->kind == IType::KIND_PTR && to_type->kind == IType::KIND_PTR)
+			return to_type;
+
+		src_err(
+			self->src,
+			err_expr(expr, strf("can't cast '{}' to '{}'", from_type, to_type))
+		);
 		return type_void;
 	}
 
 	inline static Type
-	typer_expr_indexed_resolve(Typer , Expr )
+	typer_expr_paren_resolve(Typer self, Expr expr)
 	{
-		return type_void;
-	}
-
-	inline static Type
-	typer_expr_call_resolve(Typer , Expr )
-	{
-		return type_void;
-	}
-
-	inline static Type
-	typer_expr_cast_resolve(Typer , Expr )
-	{
-		return type_void;
-	}
-
-	inline static Type
-	typer_expr_paren_resolve(Typer , Expr )
-	{
-		return type_void;
+		assert(expr->kind == IExpr::KIND_PAREN);
+		return typer_expr_resolve(self, expr->paren);
 	}
 
 	inline static Type
@@ -447,10 +559,10 @@ namespace zay
 
 	}
 
-	inline static void
+	inline static Type
 	typer_stmt_block_resolve(Typer , Stmt )
 	{
-
+		return type_void;
 	}
 
 	inline static void
