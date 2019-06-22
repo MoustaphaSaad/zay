@@ -274,7 +274,7 @@ namespace zay
 			return type_bool;
 		}
 
-		return type_void;
+		return lhs_type;
 	}
 
 	inline static bool
@@ -740,7 +740,16 @@ namespace zay
 			}
 			i += arg.ids.count;
 		}
-		typer_stmt_block_resolve(self, decl->func_decl.body);
+		Type ret = typer_stmt_block_resolve(self, decl->func_decl.body);
+		if(ret != sym->type->func.ret)
+		{
+			Str msg = strf(
+				"mismatched function return type, expected {} but found {}",
+				sym->type->func.ret,
+				ret
+			);
+			src_err(self->src,err_tkn(decl->name, msg));
+		}
 
 		typer_scope_leave(self);
 	}

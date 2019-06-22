@@ -395,18 +395,21 @@ TEST_CASE("[zay]: complex stmt")
 	CHECK(answer == expected);
 }
 
-void
+bool
 typecheck(const char* str)
 {
 	Src src = src_from_str(str);
 	CHECK(src_scan(src));
 	CHECK(src_parse(src));
-	src_typecheck(src);
+	bool res = src_typecheck(src);
 	src_free(src);
+	return res;
 }
 
-TEST_CASE("[zay]: typecheck debugging")
+TEST_CASE("[zay]: simple function")
 {
-	const char* code = R"CODE(func add(x, y: int): int { return x + y })CODE";
-	typecheck(code);
+	CHECK(typecheck("func add(x, y: int): int { return x + y }") == true);
+	CHECK(typecheck("func add(x, y: int): int { return a + y }") == false);
+	CHECK(typecheck("func add(x, y: int): float32 { return a + y }") == false);
+	CHECK(typecheck("func add(x, y: int): float32 { return x + y }") == false);
 }
