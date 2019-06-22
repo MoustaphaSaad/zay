@@ -37,7 +37,7 @@ namespace zay
 	{
 		for(Scope it = self; it != nullptr; it = it->parent)
 		{
-			if(Sym sym = scope_has(self, name))
+			if(Sym sym = scope_has(it, name))
 				return sym;
 		}
 		return nullptr;

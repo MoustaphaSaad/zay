@@ -372,14 +372,23 @@ namespace zay
 	}
 
 	inline static Type
+	type_unqualify(Type t)
+	{
+		if (t->kind == IType::KIND_PTR)
+			return t->ptr.base;
+		return t;
+	}
+
+	inline static Type
 	typer_expr_dot_resolve(Typer self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_DOT);
 		Type type = typer_expr_resolve(self, expr->dot.base);
+		Type unqualified_type = type_unqualify(type);
 		Type res = type_void;
-		if(type->kind == IType::KIND_STRUCT)
+		if(unqualified_type->kind == IType::KIND_STRUCT)
 		{
-			for(const Field_Sign& f: type->aggregate.fields)
+			for(const Field_Sign& f: unqualified_type->aggregate.fields)
 			{
 				if(f.name == expr->dot.member.str)
 				{
@@ -657,7 +666,19 @@ namespace zay
 		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
 		{
 			Type lhs_type = typer_expr_resolve(self, stmt->assign_stmt.lhs[i]);
+			if(lhs_type == type_void)
+			{
+				Str msg = strf("can't assign into a void type");
+				src_err(self->src, err_expr(stmt->assign_stmt.lhs[i], msg));
+			}
+
 			Type rhs_type = typer_expr_resolve(self, stmt->assign_stmt.rhs[i]);
+			if (rhs_type == type_void)
+			{
+				Str msg = strf("can't assign into a void type");
+				src_err(self->src, err_expr(stmt->assign_stmt.rhs[i], msg));
+			}
+
 			if(lhs_type != rhs_type)
 			{
 				Str msg = strf(

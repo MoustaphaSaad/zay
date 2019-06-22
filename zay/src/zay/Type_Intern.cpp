@@ -117,6 +117,9 @@ namespace zay
 		case IType::KIND_FUNC:
 			func_sign_free(self->func);
 			break;
+		case IType::KIND_STRUCT:
+			buf_free(self->aggregate.fields);
+			break;
 		default: assert(false && "unreachable"); break;
 		}
 		free(self);

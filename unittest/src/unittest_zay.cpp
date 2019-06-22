@@ -437,3 +437,82 @@ TEST_CASE("[zay]: simple variables")
 		var y: float32 = x: float32
 	)CODE") == true);
 }
+
+TEST_CASE("[zay]: pointers")
+{
+	CHECK(typecheck(R"CODE(
+		func foo(x: int): *int { return &x }
+		var x: *int = foo(143);
+		var y: int = *x
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		func foo(x: int): *int { return &x }
+		var x: *float32 = foo(143);
+		var y: float32 = *x
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		func foo(x: int): *int { return &x }
+		var x: *float32 = foo(143): *float32;
+		var y: float32 = *x
+	)CODE") == true);
+}
+
+TEST_CASE("[zay]: out of order functions")
+{
+	CHECK(typecheck(R"CODE(
+		func add3(x, y, z: int): int { return add2(x, add2(y, z)) }
+		func add2(x, y: int): int { return x + y }
+	)CODE") == true);
+}
+
+TEST_CASE("[zay]: circular functions")
+{
+	CHECK(typecheck(R"CODE(
+		func add3(x, y, z: int): int { return add2(x, add2(y, z)) }
+		func add2(x, y: int): int { return add3(x, y, 1) }
+	)CODE") == true);
+}
+
+TEST_CASE("[zay]: basic struct")
+{
+	CHECK(typecheck(R"CODE(
+		type Point struct { x, y: float32 }
+		func add(a, b: Point): Point {
+			var r: Point
+			r.x = a.x + b.x
+			r.y = a.y + b.y
+			return r
+		}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		type Point struct { x, y: float32 }
+		func add(a, b: Point): Point {
+			var r: Point
+			r.x = a.x + b.x
+			r.y = a.g + b.y
+			return r
+		}
+	)CODE") == false);
+}
+
+TEST_CASE("[zay]: basic struct")
+{
+	CHECK(typecheck(R"CODE(
+		type Point struct { x, y: float32 }
+		func add(a, b: *Point) {
+			a.x += b.x
+			a.y += b.y
+		}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		type Point struct { x, y: float32 }
+		func add(a, b: *Point) {
+			a.x += b.x
+			a.y += b.a
+		}
+	)CODE") == false);
+}
