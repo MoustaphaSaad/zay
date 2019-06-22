@@ -8,6 +8,27 @@
 
 namespace zay
 {
+	struct Scope_Settings
+	{
+		enum KIND
+		{
+			KIND_NONE,
+			KIND_FUNC,
+			KIND_LOOP
+		};
+
+		KIND kind;
+		bool break_continue_allowed;
+		union
+		{
+			struct
+			{
+				Type ret_type;
+				Sym func;
+			} func_scope;
+		};
+	};
+
 	typedef struct ITyper* Typer;
 	struct ITyper
 	{
@@ -15,6 +36,8 @@ namespace zay
 
 		mn::Buf<Scope> scope_stack;
 		Scope global_scope;
+
+		mn::Buf<Scope_Settings> settings;
 	};
 
 	ZAY_EXPORT Typer

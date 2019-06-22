@@ -516,3 +516,96 @@ TEST_CASE("[zay]: basic struct")
 		}
 	)CODE") == false);
 }
+
+TEST_CASE("[zay]: basic even odd")
+{
+	CHECK(typecheck(R"CODE(
+		func even(n: int): bool{
+			if n { return true } else { return false }
+		}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		func even(n: int): bool{
+			if n % 2 == 0 { return 1 } else { return false }
+		}
+		func odd(n: int): bool { return !even(n) }
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		func even(n: int): bool{
+			if n % 2 == 0 { return true } else { return false }
+		}
+		func odd(n: int): bool { return !even(n) }
+	)CODE") == true);
+}
+
+TEST_CASE("[zay]: basic sum")
+{
+	CHECK(typecheck(R"CODE(
+		func sum(n: int): int {
+			var res = 0
+			for var i = 0; i < n; ++i {
+				res += i
+			}
+			return res
+		}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		func sum(n: int): float64 {
+			var res = 0: float64
+			for var i = 0; i < n; ++i {
+				res += i
+			}
+			return res
+		}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		func sum(n: int): float64 {
+			var res = 0: float64
+			for var i = 0; i < n; ++i {
+				res += i: float64
+			}
+			return res
+		}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		func sum(n: int): float64 {
+			var res = 0: float64
+			break
+			for var i = 0; i < n; ++i {
+				res += i: float64
+			}
+			return res
+		}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		func sum(n: int): float64 {
+			var res = 0: float64
+			for var i = 0; i < n; ++i {
+				if i == 1000 { break } else { continue }
+				res += i: float64
+			}
+			return res
+		}
+	)CODE") == true);
+}
+
+TEST_CASE("[zay]: fib")
+{
+	CHECK(typecheck(R"CODE(
+		func fib(x: int): int {
+			if x == 0 { return 0 } else if x == 1 { return 1 } else { return fib(x - 1) + fib(x - 2) }
+		}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		func fib(x: int): int {
+			if x == 0 { return 0 } else if x == 1 { return 1 } else { return fib(x - 1) + fibonacci(x - 2) }
+		}
+	)CODE") == false);
+}

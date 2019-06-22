@@ -18,6 +18,94 @@ namespace zay
 	inline static Type
 	typer_stmt_resolve(Typer self, Stmt stmt);
 
+	inline static Type
+	typer_stmt_block_resolve(Typer self, Stmt stmt);
+
+
+	inline static void
+	typer_settings_push(Typer self, const Scope_Settings& s)
+	{
+		buf_push(self->settings, s);
+	}
+
+	inline static void
+	typer_settings_pop(Typer self)
+	{
+		buf_pop(self->settings);
+	}
+
+	inline static void
+	typer_scope_retcheck(Typer self, Expr expr, Type found)
+	{
+		if (self->settings.count == 0)
+		{
+			src_err(self->src, err_expr(expr, strf("unexpected return type '{}'", found)));
+			return;
+		}
+
+		const Scope_Settings& s = buf_top(self->settings);
+		if (s.kind != Scope_Settings::KIND_FUNC)
+		{
+			src_err(self->src, err_expr(expr, strf("unexpected return type '{}'", found)));
+			return;
+		}
+
+		if(s.func_scope.ret_type != found)
+		{
+			Str msg = strf(
+				"mismatched function return type, expected {} but found {}",
+				s.func_scope.ret_type,
+				found
+			);
+			src_err(self->src, err_expr(expr, msg));
+		}
+	}
+
+	inline static void
+	typer_scope_break_continue(Typer self, Stmt stmt)
+	{
+		const char* name = "<UNNAMED>";
+		switch(stmt->kind)
+		{
+		case IStmt::KIND_BREAK: name = "break"; break;
+		case IStmt::KIND_CONTINUE: name = "continue"; break;
+		default: assert(false && "unreachable"); break;
+		}
+
+		if (self->settings.count == 0)
+		{
+			src_err(self->src, err_stmt(stmt, strf("unexpected {} statement", name)));
+			return;
+		}
+
+		if(buf_top(self->settings).break_continue_allowed == false)
+		{
+			src_err(self->src, err_stmt(stmt, strf("unexpected {} statement", name)));
+			return;
+		}
+	}
+
+	inline static Scope_Settings
+	scope_settings_func(Sym sym)
+	{
+		assert(sym->kind == ISym::KIND_FUNC);
+		Scope_Settings self{};
+		self.kind = Scope_Settings::KIND_FUNC;
+		self.break_continue_allowed = false;
+		self.func_scope.func = sym;
+		self.func_scope.ret_type = sym->type->func.ret;
+		return self;
+	}
+
+	inline static Scope_Settings
+	scope_settings_loop()
+	{
+		Scope_Settings self{};
+		self.kind = Scope_Settings::KIND_LOOP;
+		self.break_continue_allowed = true;
+		return self;
+	}
+
 
 	inline static void
 	typer_scope_enter(Typer self, Scope scope)
@@ -368,7 +456,7 @@ namespace zay
 			}
 			
 		}
-		return type_void;
+		return type;
 	}
 
 	inline static Type
@@ -526,18 +614,18 @@ namespace zay
 
 
 	inline static Type
-	typer_stmt_break_resolve(Typer , Stmt stmt)
+	typer_stmt_break_resolve(Typer self, Stmt stmt)
 	{
 		assert(stmt->kind == IStmt::KIND_BREAK);
-		//check that break and continue is enabled
+		typer_scope_break_continue(self, stmt);
 		return type_void;
 	}
 
 	inline static Type
-	typer_stmt_continue_resolve(Typer , Stmt stmt)
+	typer_stmt_continue_resolve(Typer self, Stmt stmt)
 	{
 		assert(stmt->kind == IStmt::KIND_CONTINUE);
-		//check that break and continue is enabled
+		typer_scope_break_continue(self, stmt);
 		return type_void;
 	}
 
@@ -545,7 +633,9 @@ namespace zay
 	typer_stmt_return_resolve(Typer self, Stmt stmt)
 	{
 		assert(stmt->kind == IStmt::KIND_RETURN);
-		return typer_expr_resolve(self, stmt->return_stmt);
+		Type ret = typer_expr_resolve(self, stmt->return_stmt);
+		typer_scope_retcheck(self, stmt->return_stmt, ret);
+		return ret;
 	}
 
 	inline static Type
@@ -560,7 +650,7 @@ namespace zay
 				err_expr(stmt->if_stmt.if_cond, strf("if conditions type '{}' is not a boolean", type))
 			);
 		}
-		typer_stmt_resolve(self, stmt->if_stmt.if_body);
+		typer_stmt_block_resolve(self, stmt->if_stmt.if_body);
 
 		for(const Else_If& e: stmt->if_stmt.else_ifs)
 		{
@@ -572,11 +662,11 @@ namespace zay
 					err_expr(e.cond, strf("if conditions type '{}' is not a boolean", cond_type))
 				);
 			}
-			typer_stmt_resolve(self, e.body);
+			typer_stmt_block_resolve(self, e.body);
 		}
 
 		if(stmt->if_stmt.else_body)
-			typer_stmt_resolve(self, stmt->if_stmt.else_body);
+			typer_stmt_block_resolve(self, stmt->if_stmt.else_body);
 		return type_void;
 	}
 
@@ -599,7 +689,11 @@ namespace zay
 		}
 		if(stmt->for_stmt.post_stmt)
 			typer_stmt_resolve(self, stmt->for_stmt.post_stmt);
-		typer_stmt_resolve(self, stmt->for_stmt.loop_body);
+
+		typer_settings_push(self, scope_settings_loop());
+			typer_stmt_block_resolve(self, stmt->for_stmt.loop_body);
+		typer_settings_pop(self);
+
 		return type_void;
 	}
 
@@ -770,16 +864,10 @@ namespace zay
 			}
 			i += arg.ids.count;
 		}
-		Type ret = typer_stmt_block_resolve(self, decl->func_decl.body);
-		if(ret != sym->type->func.ret)
-		{
-			Str msg = strf(
-				"mismatched function return type, expected {} but found {}",
-				sym->type->func.ret,
-				ret
-			);
-			src_err(self->src,err_tkn(decl->name, msg));
-		}
+
+		typer_settings_push(self, scope_settings_func(sym));
+		typer_stmt_block_resolve(self, decl->func_decl.body);
+		typer_settings_pop(self);
 
 		typer_scope_leave(self);
 	}
@@ -885,6 +973,8 @@ namespace zay
 		self->global_scope = src_scope_new(self->src, nullptr, nullptr);
 
 		typer_scope_enter(self, self->global_scope);
+
+		self->settings = buf_new<Scope_Settings>();
 		return self;
 	}
 
@@ -892,6 +982,7 @@ namespace zay
 	typer_free(Typer self)
 	{
 		buf_free(self->scope_stack);
+		buf_free(self->settings);
 		free(self);
 	}
 

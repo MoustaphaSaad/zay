@@ -178,6 +178,7 @@ namespace zay
 		switch(type->kind)
 		{
 		case IType::KIND_VOID: return mn::vprintf(stream, "void");
+		case IType::KIND_BOOL: return mn::vprintf(stream, "bool");
 		case IType::KIND_INT: return mn::vprintf(stream, "int");
 		case IType::KIND_UINT: return mn::vprintf(stream, "uint");
 		case IType::KIND_INT8: return mn::vprintf(stream, "int8");
