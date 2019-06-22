@@ -43,14 +43,16 @@ namespace zay
 	}
 
 	Sym
-	sym_var(const Tkn& id)
+	sym_var(const Tkn& id, const Type_Sign& type, Expr expr)
 	{
 		Sym self = alloc<ISym>();
 		self->kind = ISym::KIND_VAR;
 		self->state = ISym::STATE_UNRESOLVED;
 		self->name = id.str;
 		self->type = nullptr;
-		self->var_sym = id;
+		self->var_sym.id = id;
+		self->var_sym.type = type;
+		self->var_sym.expr = expr;
 		return self;
 	}
 

@@ -402,7 +402,9 @@ typecheck(const char* str)
 	CHECK(src_scan(src));
 	CHECK(src_parse(src));
 	bool res = src_typecheck(src);
+	Str errs = src_errs_dump(src);
 	src_free(src);
+	str_free(errs);
 	return res;
 }
 
@@ -412,4 +414,26 @@ TEST_CASE("[zay]: simple function")
 	CHECK(typecheck("func add(x, y: int): int { return a + y }") == false);
 	CHECK(typecheck("func add(x, y: int): float32 { return a + y }") == false);
 	CHECK(typecheck("func add(x, y: int): float32 { return x + y }") == false);
+}
+
+TEST_CASE("[zay]: simple variables")
+{
+	CHECK(typecheck("var x: int") == true);
+	CHECK(typecheck("var x: int = 0") == true);
+	CHECK(typecheck("var x: int = 0.0") == false);
+
+	CHECK(typecheck(R"CODE(
+		var x = 0.0: float32
+		var y: float32 = x
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		var x = 0
+		var y: float32 = x
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		var x = 0.0
+		var y: float32 = x: float32
+	)CODE") == true);
 }

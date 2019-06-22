@@ -66,7 +66,7 @@ namespace zay
 		Stream out = stream_tmp();
 		for(const Err& e: self->errs)
 		{
-			Line l = self->lines[e.pos.line];
+			Line l = self->lines[e.pos.line - 1];
 			//we need to put ^^^ under the word the compiler means by the error
 			if(e.rng.begin && e.rng.end)
 			{

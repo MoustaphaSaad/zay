@@ -75,8 +75,13 @@ namespace zay
 				typer_sym(self, sym_enum(d));
 				break;
 			case IDecl::KIND_VAR:
-				for(const Tkn& id: d->var_decl.ids)
-					typer_sym(self, sym_var(id));
+				for (size_t i = 0; i < d->var_decl.ids.count; ++i)
+				{
+					Expr e = nullptr;
+					if (i < d->var_decl.exprs.count)
+						e = d->var_decl.exprs[i];
+					typer_sym(self, sym_var(d->var_decl.ids[i], d->var_decl.type, e));
+				}
 				break;
 			case IDecl::KIND_FUNC:
 				typer_sym(self, sym_func(d));
@@ -602,13 +607,17 @@ namespace zay
 
 		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
 		{
-			Sym s = sym_var(stmt->var_stmt.ids[i]);
+			Expr e = nullptr;
+			if (i < stmt->var_stmt.exprs.count)
+				e = stmt->var_stmt.exprs[i];
+
+			Sym s = sym_var(stmt->var_stmt.ids[i], stmt->var_stmt.type, e);
 
 			if(infer)
 			{
-				if(i < stmt->var_stmt.exprs.count)
+				if(e)
 				{
-					s->type = typer_expr_resolve(self, stmt->var_stmt.exprs[i]);
+					s->type = typer_expr_resolve(self, e);
 				}
 				else
 				{
@@ -620,14 +629,14 @@ namespace zay
 			}
 			else
 			{
-				if(i < stmt->var_stmt.exprs.count)
+				if(e)
 				{
-					Type expr_type = typer_expr_resolve(self, stmt->var_stmt.exprs[i]);
+					Type expr_type = typer_expr_resolve(self, e);
 					if(expr_type != type)
 					{
 						src_err(
 							self->src,
-							err_expr(stmt->var_stmt.exprs[i], strf("type mismatch expected '{}' but found '{}'", type, expr_type))
+							err_expr(e, strf("type mismatch expected '{}' but found '{}'", type, expr_type))
 						);
 					}
 				}
@@ -733,7 +742,7 @@ namespace zay
 			Type type = sym->type->func.args[i];
 			for(const Tkn& id: arg.ids)
 			{
-				Sym v = sym_var(id);
+				Sym v = sym_var(id, arg.type, nullptr);
 				v->type = type;
 				v->state = ISym::STATE_RESOLVED;
 				typer_sym(self, v);
@@ -752,6 +761,53 @@ namespace zay
 		}
 
 		typer_scope_leave(self);
+	}
+
+	inline static Type
+	typer_decl_var_resolve(Typer self, Sym sym)
+	{
+		assert(sym->kind == ISym::KIND_VAR);
+		bool infer = sym->var_sym.type.count == 0;
+
+		Type type = type_void;
+		if(infer == false)
+			type = typer_type_sign_resolve(self, sym->var_sym.type);
+
+		Expr e = sym->var_sym.expr;
+
+		if(infer)
+		{
+			if(e)
+			{
+				sym->type = typer_expr_resolve(self, e);
+			}
+			else
+			{
+				src_err(
+					self->src,
+					err_tkn(sym->var_sym.id, strf("no expression to infer type from"))
+				);
+			}
+		}
+		else
+		{
+			if(e)
+			{
+				Type expr_type = typer_expr_resolve(self, e);
+				if(expr_type != type)
+				{
+					src_err(
+						self->src,
+						err_expr(e, strf("type mismatch expected '{}' but found '{}'", type, expr_type))
+					);
+				}
+			}
+			sym->type = type;
+		}
+
+		typer_type_complete(self, sym);
+		sym->state = ISym::STATE_RESOLVED;
+		return sym->type;
 	}
 
 	inline static void
@@ -777,6 +833,9 @@ namespace zay
 			break;
 		case ISym::KIND_STRUCT:
 			sym->type = type_intern_incomplete(self->src->type_table, sym);
+			break;
+		case ISym::KIND_VAR:
+			typer_decl_var_resolve(self, sym);
 			break;
 
 		default:
