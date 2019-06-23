@@ -32,6 +32,14 @@ namespace zay
 	typedef struct ITyper* Typer;
 	struct ITyper
 	{
+		enum MODE
+		{
+			MODE_NONE,
+			MODE_EXE,
+			MODE_LIB
+		};
+
+		MODE mode;
 		Src src;
 
 		mn::Buf<Scope> scope_stack;
@@ -41,7 +49,7 @@ namespace zay
 	};
 
 	ZAY_EXPORT Typer
-	typer_new(Src src);
+	typer_new(Src src, ITyper::MODE mode);
 
 	ZAY_EXPORT void
 	typer_free(Typer self);
@@ -56,9 +64,9 @@ namespace zay
 	typer_check(Typer self);
 
 	inline static bool
-	src_typecheck(Src src)
+	src_typecheck(Src src, ITyper::MODE mode)
 	{
-		Typer self = typer_new(src);
+		Typer self = typer_new(src, mode);
 		typer_check(self);
 		typer_free(self);
 		return src_has_err(src) == false;

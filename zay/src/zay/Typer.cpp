@@ -965,9 +965,10 @@ namespace zay
 
 	//API
 	Typer
-	typer_new(Src src)
+	typer_new(Src src, ITyper::MODE mode)
 	{
 		Typer self = alloc<ITyper>();
+		self->mode = mode;
 		self->src = src;
 		self->scope_stack = buf_new<Scope>();
 		self->global_scope = src_scope_new(self->src, nullptr, nullptr);
@@ -991,7 +992,31 @@ namespace zay
 	{
 		typer_shallow_walk(self);
 
-		for(Sym sym: self->global_scope->syms)
-			typer_sym_resolve(self, sym);
+		if (self->mode == ITyper::MODE_EXE)
+		{
+			const char* main = str_intern(self->src->str_table, "main");
+			Sym main_sym = nullptr;
+			for (Sym sym : self->global_scope->syms)
+			{
+				if (sym->name == main)
+				{
+					main_sym = sym;
+					break;
+				}
+			}
+
+			if(main_sym == nullptr)
+			{
+				src_err(self->src, err_str(strf("program doesn't have a main function")));
+				return;
+			}
+
+			typer_sym_resolve(self, main_sym);
+		}
+		else
+		{
+			for (Sym sym : self->global_scope->syms)
+				typer_sym_resolve(self, sym);
+		}
 	}
 }

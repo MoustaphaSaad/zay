@@ -401,7 +401,7 @@ typecheck(const char* str)
 	Src src = src_from_str(str);
 	CHECK(src_scan(src));
 	CHECK(src_parse(src));
-	bool res = src_typecheck(src);
+	bool res = src_typecheck(src, ITyper::MODE_NONE);
 	Str errs = src_errs_dump(src);
 	src_free(src);
 	str_free(errs);
