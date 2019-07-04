@@ -609,3 +609,25 @@ TEST_CASE("[zay]: fib")
 		}
 	)CODE") == false);
 }
+
+TEST_CASE("[zay]: scopes")
+{
+	CHECK(typecheck(R"CODE(
+		func test(x: int) {
+			{
+				var x: float64
+				x = 3.14
+			}
+		}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+		func test(x: int) {
+			{
+				var x: float64
+				x = 3.14
+			}
+			x = 3.14
+		}
+	)CODE") == false);
+}

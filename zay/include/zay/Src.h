@@ -90,9 +90,9 @@ namespace zay
 	}
 
 	inline static Scope
-	src_scope_new(Src self, void* ast_node, Scope parent)
+	src_scope_new(Src self, void* ast_node, Scope parent, bool inside_loop, Type ret)
 	{
-		Scope scope = scope_new(parent);
+		Scope scope = scope_new(parent, inside_loop, ret);
 		buf_push(self->scopes, scope);
 		map_insert(self->scope_table, ast_node, parent);
 		return scope;

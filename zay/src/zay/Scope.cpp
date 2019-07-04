@@ -7,12 +7,14 @@ namespace zay
 	using namespace mn;
 
 	Scope
-	scope_new(Scope parent)
+	scope_new(Scope parent, bool inside_loop, Type ret)
 	{
 		Scope self = alloc<IScope>();
 		self->parent = parent;
 		self->syms = buf_new<Sym>();
 		self->table = map_new<const char*, Sym>();
+		self->inside_loop = inside_loop;
+		self->ret = ret;
 		return self;
 	}
 
@@ -49,5 +51,27 @@ namespace zay
 		buf_push(self->syms, sym);
 		map_insert(self->table, sym->name, sym);
 		return sym;
+	}
+
+	bool
+	scope_inside_loop(Scope self)
+	{
+		for(Scope it = self; it != nullptr; it = it->parent)
+		{
+			if (it->inside_loop)
+				return true;
+		}
+		return false;
+	}
+
+	Type
+	scope_ret(Scope self)
+	{
+		for(Scope it = self; it != nullptr; it = it->parent)
+		{
+			if (it->ret)
+				return it->ret;
+		}
+		return nullptr;
 	}
 }
