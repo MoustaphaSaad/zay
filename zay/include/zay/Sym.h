@@ -43,6 +43,7 @@ namespace zay
 			struct
 			{
 				Tkn id;
+				Decl decl;
 				Type_Sign type;
 				Expr expr;
 			} var_sym;
@@ -60,7 +61,7 @@ namespace zay
 	sym_enum(Decl d);
 
 	ZAY_EXPORT Sym
-	sym_var(const Tkn& id, const Type_Sign& type, Expr expr);
+	sym_var(const Tkn& id, Decl decl, const Type_Sign& type, Expr expr);
 
 	ZAY_EXPORT Sym
 	sym_func(Decl d);
@@ -85,6 +86,20 @@ namespace zay
 		case ISym::KIND_VAR: return self->var_sym.id;
 		case ISym::KIND_FUNC: return self->func_sym->name;
 		default: assert(false && "unreachable"); return Tkn{};
+		}
+	}
+
+	inline static Decl
+	sym_decl(Sym self)
+	{
+		switch(self->kind)
+		{
+		case ISym::KIND_STRUCT: return self->struct_sym;
+		case ISym::KIND_UNION: return self->union_sym;
+		case ISym::KIND_ENUM: return self->enum_sym;
+		case ISym::KIND_VAR: return self->var_sym.decl;
+		case ISym::KIND_FUNC: return self->func_sym;
+		default: assert(false && "unreachable"); return nullptr;
 		}
 	}
 }

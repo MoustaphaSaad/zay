@@ -82,7 +82,7 @@ namespace zay
 					Expr e = nullptr;
 					if (i < d->var_decl.exprs.count)
 						e = d->var_decl.exprs[i];
-					typer_sym(self, sym_var(d->var_decl.ids[i], d->var_decl.type, e));
+					typer_sym(self, sym_var(d->var_decl.ids[i], d, d->var_decl.type, e));
 				}
 				break;
 			case IDecl::KIND_FUNC:
@@ -649,7 +649,7 @@ namespace zay
 			if (i < stmt->var_stmt.exprs.count)
 				e = stmt->var_stmt.exprs[i];
 
-			Sym s = sym_var(stmt->var_stmt.ids[i], stmt->var_stmt.type, e);
+			Sym s = sym_var(stmt->var_stmt.ids[i], nullptr, stmt->var_stmt.type, e);
 
 			if(infer)
 			{
@@ -806,7 +806,7 @@ namespace zay
 			Type type = sym->type->func.args[i];
 			for(const Tkn& id: arg.ids)
 			{
-				Sym v = sym_var(id, arg.type, nullptr);
+				Sym v = sym_var(id, nullptr, arg.type, nullptr);
 				v->type = type;
 				v->state = ISym::STATE_RESOLVED;
 				typer_sym(self, v);
@@ -907,6 +907,8 @@ namespace zay
 		{
 			typer_type_complete(self, sym);
 		}
+		if(Decl d = sym_decl(sym))
+			buf_push(self->src->reachable_decls, d);
 	}
 
 

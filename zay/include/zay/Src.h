@@ -41,6 +41,8 @@ namespace zay
 		mn::Map<void*, Scope> scope_table;
 		// Type Interning table to hold all the types of this complication unit
 		Type_Intern type_table;
+		// Reachable symbols
+		mn::Buf<Decl> reachable_decls;
 	};
 	typedef ISrc* Src;
 
@@ -93,9 +95,17 @@ namespace zay
 	src_scope_new(Src self, void* ast_node, Scope parent, bool inside_loop, Type ret)
 	{
 		Scope scope = scope_new(parent, inside_loop, ret);
-		buf_push(self->scopes, scope);
-		map_insert(self->scope_table, ast_node, parent);
+		mn::buf_push(self->scopes, scope);
+		mn::map_insert(self->scope_table, ast_node, scope);
 		return scope;
+	}
+
+	inline static Scope
+	src_scope_of(Src self, void* ast_node)
+	{
+		if(auto it = mn::map_lookup(self->scope_table, ast_node))
+			return it->value;
+		return nullptr;
 	}
 
 	ZAY_EXPORT mn::Str

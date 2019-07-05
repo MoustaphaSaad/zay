@@ -5,6 +5,7 @@
 #include <zay/Parser.h>
 #include <zay/AST_Lisp.h>
 #include <zay/Typer.h>
+#include <zay/CGen.h>
 
 using namespace mn;
 using namespace zay;
@@ -630,4 +631,33 @@ TEST_CASE("[zay]: scopes")
 			x = 3.14
 		}
 	)CODE") == false);
+}
+
+inline static Str
+cgen(const char* str)
+{
+	Src src = src_from_str(str);
+	CHECK(src_scan(src));
+	CHECK(src_parse(src));
+	CHECK(src_typecheck(src, ITyper::MODE_NONE));
+	Str res = src_c(src, memory::tmp());
+	src_free(src);
+	return res;
+}
+
+TEST_CASE("[zay]: struct gen")
+{
+	Str answer = cgen(R"CODE(
+		type X struct {
+			x, y: int
+			z, w: float32
+		}
+	)CODE");
+	const char* expected = R"CODE(typedef struct X {
+	ZayInt x;
+	ZayInt y;
+	ZayFloat32 z;
+	ZayFloat32 w;
+} X;)CODE";
+	CHECK(answer == expected);
 }

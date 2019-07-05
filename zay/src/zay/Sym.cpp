@@ -43,7 +43,7 @@ namespace zay
 	}
 
 	Sym
-	sym_var(const Tkn& id, const Type_Sign& type, Expr expr)
+	sym_var(const Tkn& id, Decl decl, const Type_Sign& type, Expr expr)
 	{
 		Sym self = alloc<ISym>();
 		self->kind = ISym::KIND_VAR;
@@ -51,6 +51,7 @@ namespace zay
 		self->name = id.str;
 		self->type = nullptr;
 		self->var_sym.id = id;
+		self->var_sym.decl = decl;
 		self->var_sym.type = type;
 		self->var_sym.expr = expr;
 		return self;
