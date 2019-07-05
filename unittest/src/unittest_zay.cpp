@@ -661,3 +661,41 @@ TEST_CASE("[zay]: struct gen")
 } X;)CODE";
 	CHECK(answer == expected);
 }
+
+TEST_CASE("[zay]: func gen")
+{
+	Str answer = cgen(R"CODE(
+		func fib(x: int): int {
+			if x == 0 { return 0: int } else if x == 1 { return 1 } else { return fib(x - 1) + fib(x - 2) }
+		}
+	)CODE");
+	const char* expected = R"CODE(ZayInt fib(ZayInt x) {
+	if (x == 0) {
+		return (ZayInt)0;
+	} else if (x == 1) {
+		return 1;
+	} else {
+		return fib(x - 1) + fib(x - 2);
+	}
+})CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: func gen")
+{
+	Str answer = cgen(R"CODE(
+		func sum(n: int): int {
+			var res = 0
+			for var i = 0; i < n; ++i { res += i }
+			return res
+		}
+	)CODE");
+	const char* expected = R"CODE(ZayInt sum(ZayInt n) {
+	ZayInt res = 0;
+	for (ZayInt i = 0; i < n; ++i) {
+		res += i;
+	}
+	return res;
+})CODE";
+	CHECK(answer == expected);
+}

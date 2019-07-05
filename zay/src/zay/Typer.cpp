@@ -520,7 +520,9 @@ namespace zay
 		case IExpr::KIND_DOT: return typer_expr_dot_resolve(self, expr);
 		case IExpr::KIND_INDEXED: return typer_expr_indexed_resolve(self, expr);
 		case IExpr::KIND_CALL: return typer_expr_call_resolve(self, expr);
-		case IExpr::KIND_CAST: return typer_expr_cast_resolve(self, expr);
+		case IExpr::KIND_CAST:
+			expr->cast.to_type = typer_expr_cast_resolve(self, expr);
+			return expr->cast.to_type;
 		case IExpr::KIND_PAREN: return typer_expr_paren_resolve(self, expr);
 		default: assert(false && "unreachable"); return type_void;
 		}
@@ -581,7 +583,7 @@ namespace zay
 				err_expr(stmt->if_stmt.if_cond, strf("if conditions type '{}' is not a boolean", type))
 			);
 		}
-		typer_stmt_block_resolve(self, stmt->if_stmt.if_body);
+		typer_stmt_resolve(self, stmt->if_stmt.if_body);
 
 		for(const Else_If& e: stmt->if_stmt.else_ifs)
 		{
@@ -593,11 +595,11 @@ namespace zay
 					err_expr(e.cond, strf("if conditions type '{}' is not a boolean", cond_type))
 				);
 			}
-			typer_stmt_block_resolve(self, e.body);
+			typer_stmt_resolve(self, e.body);
 		}
 
 		if(stmt->if_stmt.else_body)
-			typer_stmt_block_resolve(self, stmt->if_stmt.else_body);
+			typer_stmt_resolve(self, stmt->if_stmt.else_body);
 		return type_void;
 	}
 

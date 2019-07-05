@@ -7,6 +7,8 @@
 
 namespace zay
 {
+	typedef struct IType* Type;
+
 	//Types
 	struct Type_Atom
 	{
@@ -127,6 +129,7 @@ namespace zay
 			{
 				Expr base;
 				Type_Sign type;
+				Type to_type;
 			} cast;
 
 			Expr paren;

@@ -171,6 +171,354 @@ namespace zay
 		}
 	}
 
+	inline static Str
+	cgen_write_field(CGen self, Type type, const char* name)
+	{
+		return cgen_write_field(self, type, str_lit(name));
+	}
+
+	//Exprs
+	inline static void
+	cgen_expr_gen(CGen self, Expr expr);
+
+	inline static void
+	cgen_expr_atom(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_ATOM);
+		vprintf(self->out, "{}", expr->atom.str);
+	}
+
+	inline static void
+	cgen_expr_binary(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_BINARY);
+		cgen_expr_gen(self, expr->binary.lhs);
+		vprintf(self->out, " {} ", expr->binary.op.str);
+		cgen_expr_gen(self, expr->binary.rhs);
+	}
+
+	inline static void
+	cgen_expr_unary(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_UNARY);
+		vprintf(self->out, "{}", expr->unary.op.str);
+		cgen_expr_gen(self, expr->unary.expr);
+	}
+
+	inline static void
+	cgen_expr_dot(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_DOT);
+		cgen_expr_gen(self, expr->dot.base);
+		vprintf(self->out, ".{}", expr->dot.member.str);
+	}
+
+	inline static void
+	cgen_expr_indexed(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_INDEXED);
+		cgen_expr_gen(self, expr->indexed.base);
+		vprintf(self->out, "[");
+		cgen_expr_gen(self, expr->indexed.index);
+		vprintf(self->out, "]");
+	}
+
+	inline static void
+	cgen_expr_call(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_CALL);
+		cgen_expr_gen(self, expr->call.base);
+		vprintf(self->out, "(");
+		for(size_t i = 0; i < expr->call.args.count; ++i)
+		{
+			if (i != 0)
+				vprintf(self->out, ", ");
+			cgen_expr_gen(self, expr->call.args[i]);
+		}
+		vprintf(self->out, ")");
+	}
+
+	inline static void
+	cgen_expr_cast(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_CAST);
+		vprintf(self->out, "({})", cgen_write_field(self, expr->cast.to_type, ""));
+		cgen_expr_gen(self, expr->cast.base);
+	}
+
+	inline static void
+	cgen_expr_paren(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_PAREN);
+		vprintf(self->out, "(");
+		cgen_expr_gen(self, expr->paren);
+		vprintf(self->out, ")");
+	}
+
+	inline static void
+	cgen_expr_gen(CGen self, Expr expr)
+	{
+		switch(expr->kind)
+		{
+		case IExpr::KIND_ATOM:
+			cgen_expr_atom(self, expr);
+			break;
+		case IExpr::KIND_BINARY:
+			cgen_expr_binary(self, expr);
+			break;
+		case IExpr::KIND_UNARY:
+			cgen_expr_unary(self, expr);
+			break;
+		case IExpr::KIND_DOT:
+			cgen_expr_dot(self, expr);
+			break;
+		case IExpr::KIND_INDEXED:
+			cgen_expr_indexed(self, expr);
+			break;
+		case IExpr::KIND_CALL:
+			cgen_expr_call(self, expr);
+			break;
+		case IExpr::KIND_CAST:
+			cgen_expr_cast(self, expr);
+			break;
+		case IExpr::KIND_PAREN:
+			cgen_expr_paren(self, expr);
+			break;
+		default:
+			assert(false && "unreachable");
+			break;
+		}
+	}
+
+
+	//Stmts
+	inline static void
+	cgen_stmt_gen(CGen self, Stmt stmt);
+
+	inline static void
+	cgen_stmt_block_gen(CGen self, Stmt stmt);
+
+	inline static void
+	cgen_stmt_return(CGen self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_RETURN);
+		if(stmt->return_stmt)
+		{
+			vprintf(self->out, "return ");
+			cgen_expr_gen(self, stmt->return_stmt);
+		}
+		else
+		{
+			vprintf(self->out, "return");
+		}
+	}
+
+	inline static void
+	cgen_stmt_if(CGen self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_IF);
+
+		vprintf(self->out, "if (");
+		cgen_expr_gen(self, stmt->if_stmt.if_cond);
+		vprintf(self->out, ") ");
+		cgen_stmt_gen(self, stmt->if_stmt.if_body);
+
+		for(const Else_If& e: stmt->if_stmt.else_ifs)
+		{
+			vprintf(self->out, " else if (");
+			cgen_expr_gen(self, e.cond);
+			vprintf(self->out, ") ");
+			cgen_stmt_gen(self, e.body);
+		}
+
+		if(stmt->if_stmt.else_body)
+		{
+			vprintf(self->out, " else ");
+			cgen_stmt_gen(self, stmt->if_stmt.else_body);
+		}
+	}
+
+	inline static void
+	cgen_stmt_for(CGen self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_FOR);
+
+		cgen_scope_enter(self, src_scope_of(self->src, stmt));
+
+		vprintf(self->out, "for (");
+		if (stmt->for_stmt.init_stmt)
+		{
+			cgen_stmt_gen(self, stmt->for_stmt.init_stmt);
+			vprintf(self->out, "; ");
+		}
+		else
+		{
+			vprintf(self->out, ";");
+		}
+
+		if (stmt->for_stmt.loop_cond)
+		{
+			cgen_expr_gen(self, stmt->for_stmt.loop_cond);
+			vprintf(self->out, "; ");
+		}
+		else
+		{
+			vprintf(self->out, ";");
+		}
+
+		if (stmt->for_stmt.post_stmt)
+			cgen_stmt_gen(self, stmt->for_stmt.post_stmt);
+
+		vprintf(self->out, ") ");
+
+		cgen_stmt_gen(self, stmt->for_stmt.loop_body);
+
+		cgen_scope_leave(self);
+	}
+
+	inline static void
+	cgen_stmt_var(CGen self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_VAR);
+
+		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
+		{
+			if(i != 0)
+			{
+				vprintf(self->out, ";");
+				cgen_newline(self);
+			}
+
+			Type t = cgen_sym(self, stmt->var_stmt.ids[i].str)->type;
+			vprintf(self->out, "{}", cgen_write_field(self, t, stmt->var_stmt.ids[i].str));
+
+			if(i < stmt->var_stmt.exprs.count)
+			{
+				vprintf(self->out, " = ");
+				cgen_expr_gen(self, stmt->var_stmt.exprs[i]);
+			}
+		}
+	}
+
+	inline static void
+	cgen_stmt_assign_gen(CGen self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_ASSIGN);
+		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
+		{
+			if (i != 0)
+			{
+				vprintf(self->out, ";");
+				cgen_newline(self);
+			}
+
+			cgen_expr_gen(self, stmt->assign_stmt.lhs[i]);
+			vprintf(self->out, " {} ", stmt->assign_stmt.op.str);
+			cgen_expr_gen(self, stmt->assign_stmt.rhs[i]);
+		}
+	}
+
+	inline static void
+	cgen_stmt_anonymous_block_gen(CGen self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_BLOCK);
+
+		cgen_scope_enter(self, src_scope_of(self->src, stmt));
+
+		vprintf(self->out, "{");
+
+		self->indent++;
+
+		for (Stmt s : stmt->block_stmt)
+		{
+			cgen_newline(self);
+			cgen_stmt_gen(self, s);
+			if (s->kind == IStmt::KIND_ASSIGN ||
+				s->kind == IStmt::KIND_BREAK ||
+				s->kind == IStmt::KIND_CONTINUE ||
+				s->kind == IStmt::KIND_RETURN ||
+				s->kind == IStmt::KIND_VAR)
+			{
+				vprintf(self->out, ";");
+			}
+		}
+
+		self->indent--;
+		cgen_newline(self);
+
+		vprintf(self->out, "}");
+
+		cgen_scope_leave(self);
+	}
+
+	inline static void
+	cgen_stmt_block_gen(CGen self, Stmt stmt)
+	{
+		assert(stmt->kind == IStmt::KIND_BLOCK);
+
+		vprintf(self->out, "{");
+
+		self->indent++;
+
+		for(Stmt s: stmt->block_stmt)
+		{
+			cgen_newline(self);
+			cgen_stmt_gen(self, s);
+			if (s->kind == IStmt::KIND_ASSIGN ||
+				s->kind == IStmt::KIND_BREAK ||
+				s->kind == IStmt::KIND_CONTINUE ||
+				s->kind == IStmt::KIND_RETURN ||
+				s->kind == IStmt::KIND_VAR)
+			{
+				vprintf(self->out, ";");
+			}
+		}
+
+		self->indent--;
+		cgen_newline(self);
+
+		vprintf(self->out, "}");
+	}
+
+	inline static void
+	cgen_stmt_gen(CGen self, Stmt stmt)
+	{
+		switch(stmt->kind)
+		{
+		case IStmt::KIND_BREAK:
+			vprintf(self->out, "break");
+			break;
+		case IStmt::KIND_CONTINUE:
+			vprintf(self->out, "continue");
+			break;
+		case IStmt::KIND_RETURN:
+			cgen_stmt_return(self, stmt);
+			break;
+		case IStmt::KIND_IF:
+			cgen_stmt_if(self, stmt);
+			break;
+		case IStmt::KIND_FOR:
+			cgen_stmt_for(self, stmt);
+			break;
+		case IStmt::KIND_VAR:
+			cgen_stmt_var(self, stmt);
+			break;
+		case IStmt::KIND_ASSIGN:
+			cgen_stmt_assign_gen(self, stmt);
+			break;
+		case IStmt::KIND_EXPR:
+			cgen_expr_gen(self, stmt->expr_stmt);
+			break;
+		case IStmt::KIND_BLOCK:
+			cgen_stmt_anonymous_block_gen(self, stmt);
+			break;
+		default:
+			assert(false && "unreachable");
+			break;
+		}
+	}
+
+	//Decls
 	inline static void
 	cgen_decl_struct_gen(CGen self, Decl decl)
 	{
@@ -183,15 +531,53 @@ namespace zay
 		for(Field_Sign& f: sym->type->aggregate.fields)
 		{
 			cgen_newline(self);
-			vprintf(self->out, "{}", cgen_write_field(self, f.type, str_lit(f.name)));
+			vprintf(self->out, "{}", cgen_write_field(self, f.type, f.name));
 			vprintf(self->out, ";");
 		}
-		memory::tmp()->free_all();
 
 		self->indent--;
 		cgen_newline(self);
 
 		vprintf(self->out, "} {};", decl->name.str);
+	}
+
+	inline static void
+	cgen_decl_func_gen(CGen self, Decl decl)
+	{
+		assert(decl->kind == IDecl::KIND_FUNC);
+		
+		Sym sym = cgen_sym(self, decl->name.str);
+		vprintf(
+			self->out,
+			"{} {}(",
+			cgen_write_field(self, sym->type->func.ret, ""),
+			sym->name
+		);
+
+		if(sym->type->func.args.count == 0)
+		{
+			vprintf(self->out, "void");
+		}
+		else
+		{
+			size_t i = 0;
+			for(const Arg& arg: decl->func_decl.args)
+			{
+				Type t = sym->type->func.args[i];
+				for(const Tkn& id: arg.ids)
+				{
+					if (i != 0)
+						vprintf(self->out, ", ");
+					vprintf(self->out, "{}", cgen_write_field(self, t, id.str));
+				}
+				i += arg.ids.count;
+			}
+		}
+		vprintf(self->out, ") ");
+
+		cgen_scope_enter(self, src_scope_of(self->src, decl));
+		cgen_stmt_block_gen(self, decl->func_decl.body);
+		cgen_scope_leave(self);
 	}
 
 	inline static void
@@ -201,6 +587,9 @@ namespace zay
 		{
 		case IDecl::KIND_STRUCT:
 			cgen_decl_struct_gen(self, decl);
+			break;
+		case IDecl::KIND_FUNC:
+			cgen_decl_func_gen(self, decl);
 			break;
 		default:
 			assert(false && "unreachable");
@@ -235,6 +624,9 @@ namespace zay
 	cgen_gen(CGen self)
 	{
 		for (Decl d : self->src->reachable_decls)
+		{
 			cgen_decl_gen(self, d);
+			memory::tmp()->free_all();
+		}
 	}
 }

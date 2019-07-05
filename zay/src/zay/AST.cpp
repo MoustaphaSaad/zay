@@ -73,6 +73,7 @@ namespace zay
 		self->kind = IExpr::KIND_CAST;
 		self->cast.base = expr;
 		self->cast.type = type;
+		self->cast.to_type = nullptr;
 		return self;
 	}
 
