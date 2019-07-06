@@ -714,6 +714,23 @@ TEST_CASE("[zay]: struct gen")
 	CHECK(answer == expected);
 }
 
+TEST_CASE("[zay]: union gen")
+{
+	Str answer = cgen(R"CODE(
+		type X union {
+			x, y: int
+			z, w: float32
+		}
+	)CODE");
+	const char* expected = R"CODE(typedef union X {
+	ZayInt x;
+	ZayInt y;
+	ZayFloat32 z;
+	ZayFloat32 w;
+} X;)CODE";
+	CHECK(answer == expected);
+}
+
 TEST_CASE("[zay]: fib func gen")
 {
 	Str answer = cgen(R"CODE(
