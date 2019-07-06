@@ -499,7 +499,7 @@ TEST_CASE("[zay]: basic struct")
 	)CODE") == false);
 }
 
-TEST_CASE("[zay]: basic struct")
+TEST_CASE("[zay]: basic struct pointer")
 {
 	CHECK(typecheck(R"CODE(
 		type Point struct { x, y: float32 }
@@ -514,6 +514,58 @@ TEST_CASE("[zay]: basic struct")
 		func add(a, b: *Point) {
 			a.x += b.x
 			a.y += b.a
+		}
+	)CODE") == false);
+}
+
+TEST_CASE("[zay]: circular structs")
+{
+	CHECK(typecheck(R"CODE(
+		type X struct {
+			x: int
+			y: X
+		}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		type X struct {
+			x: int
+			y: Y
+		}
+		type Y struct {
+			x: X
+		}
+	)CODE") == false);
+}
+
+TEST_CASE("[zay] simple union")
+{
+	CHECK(typecheck(R"CODE(
+		type Register union {
+			i8: int8 u8: uint8
+			i16: int16 u16: uint16
+			i32: int32 u32: uint32
+			i64: int64 u64: uint64
+		}
+	)CODE") == true);
+}
+
+TEST_CASE("[zay]: circular unions")
+{
+	CHECK(typecheck(R"CODE(
+		type X union {
+			x: int
+			y: X
+		}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+		type X union {
+			x: int
+			y: Y
+		}
+		type Y struct {
+			x: X
 		}
 	)CODE") == false);
 }
