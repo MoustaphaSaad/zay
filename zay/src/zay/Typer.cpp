@@ -449,6 +449,36 @@ namespace zay
 				src_err(self->src, err_tkn(expr->dot.member, strf("undefined struct field")));
 			}
 		}
+		else if (unqualified_type->kind == IType::KIND_UNION)
+		{
+			for (const Field_Sign& f : unqualified_type->aggregate.fields)
+			{
+				if (f.name == expr->dot.member.str)
+				{
+					res = f.type;
+					break;
+				}
+			}
+			if (res == type_void)
+			{
+				src_err(self->src, err_tkn(expr->dot.member, strf("undefined union field")));
+			}
+		}
+		else if (unqualified_type->kind == IType::KIND_ENUM)
+		{
+			for (const Enum_Value& v : unqualified_type->enum_type.values)
+			{
+				if (v.id.str == expr->dot.member.str)
+				{
+					res = unqualified_type;
+					break;
+				}
+			}
+			if (res == type_void)
+			{
+				src_err(self->src, err_tkn(expr->dot.member, strf("undefined enum field")));
+			}
+		}
 		return res;
 	}
 

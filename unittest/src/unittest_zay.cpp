@@ -819,3 +819,23 @@ TEST_CASE("[zay]: enum codegen")
 } Direction;)CODE";
 	CHECK(answer == expected);
 }
+
+TEST_CASE("[zay]: enum var codegen")
+{
+	Str answer = cgen(R"CODE(
+	type Direction enum {
+		Up = 1,
+		Down = -1,
+		Left,
+		Right
+	}
+	var d = Direction.Up
+	)CODE");
+	const char* expected = R"CODE(typedef enum Direction {
+	Up = 1, 
+	Down = -1, 
+	Left, 
+	Right
+} Direction;)CODE";
+	CHECK(answer == expected);
+}

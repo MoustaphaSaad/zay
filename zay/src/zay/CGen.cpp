@@ -162,6 +162,8 @@ namespace zay
 			else
 				return str_tmpf("ZayString");
 		case IType::KIND_STRUCT:
+		case IType::KIND_UNION:
+		case IType::KIND_ENUM:
 			if (name.count)
 				return str_tmpf("{} {}", type->aggregate.sym->name, name);
 			else
