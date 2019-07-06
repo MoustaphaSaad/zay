@@ -630,7 +630,7 @@ namespace zay
 	inline static void
 	cgen_sym_var_gen(CGen self, Sym sym)
 	{
-		assert(sym->kind == IDecl::KIND_VAR);
+		assert(sym->kind == ISym::KIND_VAR);
 		vprintf(self->out, "{}", cgen_write_field(self, sym->type, sym->name));
 		if(sym->var_sym.expr)
 		{

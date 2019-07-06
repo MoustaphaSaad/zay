@@ -452,5 +452,8 @@ namespace zay
 	ast_free(AST self);
 
 	inline static void
-	destruct(AST self);
+	destruct(AST self)
+	{
+		ast_free(self);
+	}
 }
