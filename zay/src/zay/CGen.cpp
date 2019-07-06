@@ -564,6 +564,31 @@ namespace zay
 	}
 
 	inline static void
+	cgen_decl_enum_gen(CGen self, Decl decl)
+	{
+		assert(decl->kind == IDecl::KIND_ENUM);
+		vprintf(self->out, "typedef enum {} {{", decl->name.str);
+
+		self->indent++;
+		for(size_t i = 0; i < decl->enum_decl.count; ++i)
+		{
+			if (i != 0)
+				vprintf(self->out, ", ");
+			cgen_newline(self);
+			vprintf(self->out, "{}", decl->enum_decl[i].id.str);
+			if(decl->enum_decl[i].expr)
+			{
+				vprintf(self->out, " = ");
+				cgen_expr_gen(self, decl->enum_decl[i].expr);
+			}
+		}
+
+		self->indent--;
+		cgen_newline(self);
+		vprintf(self->out, "} {};", decl->name.str);
+	}
+
+	inline static void
 	cgen_decl_func_gen(CGen self, Decl decl)
 	{
 		assert(decl->kind == IDecl::KIND_FUNC);
@@ -638,6 +663,9 @@ namespace zay
 		case IDecl::KIND_UNION:
 			cgen_decl_union_gen(self, decl);
 			break;
+		case IDecl::KIND_ENUM:
+			cgen_decl_enum_gen(self, decl);
+			break;
 		case IDecl::KIND_FUNC:
 			cgen_decl_func_gen(self, decl);
 			break;
@@ -675,6 +703,9 @@ namespace zay
 			break;
 		case ISym::KIND_UNION:
 			cgen_decl_union_gen(self, sym->union_sym);
+			break;
+		case ISym::KIND_ENUM:
+			cgen_decl_enum_gen(self, sym->enum_sym);
 			break;
 		case ISym::KIND_FUNC:
 			cgen_decl_func_gen(self, sym->func_sym);

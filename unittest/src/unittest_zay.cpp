@@ -800,3 +800,22 @@ TEST_CASE("[zay]: global var gen")
 ZayFloat64 y = 3.14;)CODE";
 	CHECK(answer == expected);
 }
+
+TEST_CASE("[zay]: enum codegen")
+{
+	Str answer = cgen(R"CODE(
+	type Direction enum {
+		Up = 1,
+		Down = -1,
+		Left,
+		Right
+	}
+	)CODE");
+	const char* expected = R"CODE(typedef enum Direction {
+	Up = 1, 
+	Down = -1, 
+	Left, 
+	Right
+} Direction;)CODE";
+	CHECK(answer == expected);
+}
