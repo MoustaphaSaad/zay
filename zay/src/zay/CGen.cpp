@@ -542,6 +542,28 @@ namespace zay
 	}
 
 	inline static void
+	cgen_decl_union_gen(CGen self, Decl decl)
+	{
+		assert(decl->kind == IDecl::KIND_UNION);
+		vprintf(self->out, "typedef union {} {{", decl->name.str);
+
+		self->indent++;
+
+		Sym sym = cgen_sym(self, decl->name.str);
+		for (Field_Sign& f : sym->type->aggregate.fields)
+		{
+			cgen_newline(self);
+			vprintf(self->out, "{}", cgen_write_field(self, f.type, f.name));
+			vprintf(self->out, ";");
+		}
+
+		self->indent--;
+		cgen_newline(self);
+
+		vprintf(self->out, "} {};", decl->name.str);
+	}
+
+	inline static void
 	cgen_decl_func_gen(CGen self, Decl decl)
 	{
 		assert(decl->kind == IDecl::KIND_FUNC);
@@ -613,6 +635,9 @@ namespace zay
 		case IDecl::KIND_STRUCT:
 			cgen_decl_struct_gen(self, decl);
 			break;
+		case IDecl::KIND_UNION:
+			cgen_decl_union_gen(self, decl);
+			break;
 		case IDecl::KIND_FUNC:
 			cgen_decl_func_gen(self, decl);
 			break;
@@ -647,6 +672,9 @@ namespace zay
 		{
 		case ISym::KIND_STRUCT:
 			cgen_decl_struct_gen(self, sym->struct_sym);
+			break;
+		case ISym::KIND_UNION:
+			cgen_decl_union_gen(self, sym->union_sym);
 			break;
 		case ISym::KIND_FUNC:
 			cgen_decl_func_gen(self, sym->func_sym);
