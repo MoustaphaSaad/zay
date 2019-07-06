@@ -24,7 +24,7 @@ namespace zay
 		self->scopes = buf_new<Scope>();
 		self->scope_table = map_new<void*, Scope>();
 		self->type_table = type_intern_new();
-		self->reachable_decls = buf_new<Decl>();
+		self->reachable_syms = buf_new<Sym>();
 		return self;
 	}
 
@@ -42,7 +42,7 @@ namespace zay
 		self->scopes = buf_new<Scope>();
 		self->scope_table = map_new<void*, Scope>();
 		self->type_table = type_intern_new();
-		self->reachable_decls = buf_new<Decl>();
+		self->reachable_syms = buf_new<Sym>();
 		return self;
 	}
 
@@ -59,7 +59,7 @@ namespace zay
 		destruct(self->scopes);
 		map_free(self->scope_table);
 		type_intern_free(self->type_table);
-		buf_free(self->reachable_decls);
+		buf_free(self->reachable_syms);
 		free(self);
 	}
 

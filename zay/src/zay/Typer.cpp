@@ -909,8 +909,7 @@ namespace zay
 		{
 			typer_type_complete(self, sym);
 		}
-		if(Decl d = sym_decl(sym))
-			buf_push(self->src->reachable_decls, d);
+		buf_push(self->src->reachable_syms, sym);
 	}
 
 
