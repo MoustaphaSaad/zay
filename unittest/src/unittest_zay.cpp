@@ -685,6 +685,28 @@ TEST_CASE("[zay]: scopes")
 	)CODE") == false);
 }
 
+TEST_CASE("[zay]: good enums")
+{
+	CHECK(typecheck(R"CODE(
+		type Node_Type enum {
+			None = -1,
+			Binary,
+			Unary
+		}
+	)CODE") == true);
+}
+
+TEST_CASE("[zay]: bad enums")
+{
+	CHECK(typecheck(R"CODE(
+		type Node_Type enum {
+			None = -3.14,
+			Binary,
+			Unary
+		}
+	)CODE") == false);
+}
+
 inline static Str
 cgen(const char* str)
 {

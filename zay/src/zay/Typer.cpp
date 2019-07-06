@@ -231,7 +231,29 @@ namespace zay
 						});
 				}
 			}
-			type_struct_complete(type, fields);
+			type_union_complete(type, fields);
+		}
+		else if(sym->kind == ISym::KIND_ENUM)
+		{
+			Decl decl = sym->enum_sym;
+			Buf<Enum_Value> values = buf_new<Enum_Value>();
+			for(size_t i = 0; i < decl->enum_decl.count; ++i)
+			{
+				Enum_Value v{ decl->enum_decl[i].id, decl->enum_decl[i].expr };
+				if (v.value)
+				{
+					Type value_type = typer_expr_resolve(self, v.value);
+					if(value_type != type_int)
+					{
+						src_err(
+							self->src,
+							err_expr(v.value, strf("enums should have int values but found '{}'", value_type))
+						);
+					}
+				}
+				buf_push(values, v);
+			}
+			type_enum_complete(type, values);
 		}
 		else 
 		{
@@ -911,10 +933,13 @@ namespace zay
 		switch(sym->kind)
 		{
 		case ISym::KIND_STRUCT:
-			sym->type = type_intern_incomplete(self->src->type_table, sym);
+			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete_aggregate(sym));
 			break;
 		case ISym::KIND_UNION:
-			sym->type = type_intern_incomplete(self->src->type_table, sym);
+			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete_aggregate(sym));
+			break;
+		case ISym::KIND_ENUM:
+			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete_enum(sym));
 			break;
 		case ISym::KIND_VAR:
 			typer_decl_var_resolve(self, sym);
@@ -932,6 +957,7 @@ namespace zay
 		{
 		case ISym::KIND_STRUCT:
 		case ISym::KIND_UNION:
+		case ISym::KIND_ENUM:
 			typer_type_complete(self, sym);
 			break;
 		case ISym::KIND_FUNC:

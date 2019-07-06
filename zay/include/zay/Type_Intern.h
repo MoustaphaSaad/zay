@@ -103,6 +103,12 @@ namespace zay
 		size_t offset;
 	};
 
+	struct Enum_Value
+	{
+		Tkn id;
+		Expr value;
+	};
+
 
 	struct IType
 	{
@@ -130,7 +136,9 @@ namespace zay
 			KIND_PTR,
 			KIND_ARRAY,
 			KIND_FUNC,
-			KIND_STRUCT
+			KIND_STRUCT,
+			KIND_UNION,
+			KIND_ENUM
 		};
 
 		KIND kind;
@@ -144,6 +152,11 @@ namespace zay
 				Sym sym;
 				mn::Buf<Field_Sign> fields;
 			} aggregate;
+			struct
+			{
+				Sym sym;
+				mn::Buf<Enum_Value> values;
+			} enum_type;
 		};
 		
 	};
@@ -158,10 +171,19 @@ namespace zay
 	type_func(const Func_Sign& sign);
 
 	ZAY_EXPORT Type
-	type_incomplete(Sym sym);
+	type_incomplete_aggregate(Sym sym);
+
+	ZAY_EXPORT Type
+	type_incomplete_enum(Sym sym);
 
 	ZAY_EXPORT void
 	type_struct_complete(Type self, const mn::Buf<Field_Sign>& fields);
+
+	ZAY_EXPORT void
+	type_union_complete(Type self, const mn::Buf<Field_Sign>& fields);
+
+	ZAY_EXPORT void
+	type_enum_complete(Type self, const mn::Buf<Enum_Value>& values);
 
 	ZAY_EXPORT void
 	type_free(Type self);
@@ -263,5 +285,5 @@ namespace zay
 	type_intern_func(Type_Intern self, Func_Sign& func);
 
 	ZAY_EXPORT Type
-	type_intern_incomplete(Type_Intern self, Sym sym);
+	type_intern_incomplete(Type_Intern self, Type type);
 }
