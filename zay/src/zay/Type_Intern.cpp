@@ -90,11 +90,20 @@ namespace zay
 	}
 
 	Type
-	type_incomplete(Sym sym)
+	type_incomplete_aggregate(Sym sym)
 	{
 		Type self = alloc<IType>();
 		self->kind = IType::KIND_INCOMPLETE;
 		self->aggregate.sym = sym;
+		return self;
+	}
+
+	Type
+	type_incomplete_enum(Sym sym)
+	{
+		Type self = alloc<IType>();
+		self->kind = IType::KIND_INCOMPLETE;
+		self->enum_type.sym = sym;
 		return self;
 	}
 
@@ -104,6 +113,22 @@ namespace zay
 		assert(self->kind == IType::KIND_COMPLETING);
 		self->kind = IType::KIND_STRUCT;
 		self->aggregate.fields = fields;
+	}
+
+	void
+	type_union_complete(Type self, const mn::Buf<Field_Sign>& fields)
+	{
+		assert(self->kind == IType::KIND_COMPLETING);
+		self->kind = IType::KIND_UNION;
+		self->aggregate.fields = fields;
+	}
+
+	void
+	type_enum_complete(Type self, const mn::Buf<Enum_Value>& values)
+	{
+		assert(self->kind == IType::KIND_COMPLETING);
+		self->kind = IType::KIND_ENUM;
+		self->enum_type.values = values;
 	}
 
 	void
@@ -118,7 +143,11 @@ namespace zay
 			func_sign_free(self->func);
 			break;
 		case IType::KIND_STRUCT:
+		case IType::KIND_UNION:
 			buf_free(self->aggregate.fields);
+			break;
+		case IType::KIND_ENUM:
+			buf_free(self->enum_type.values);
 			break;
 		default: assert(false && "unreachable"); break;
 		}
@@ -187,10 +216,8 @@ namespace zay
 	}
 
 	Type
-	type_intern_incomplete(Type_Intern self, Sym sym)
+	type_intern_incomplete(Type_Intern self, Type type)
 	{
-		Type res = type_incomplete(sym);
-		buf_push(self->types, res);
-		return res;
+		return *buf_push(self->types, type);
 	}
 }
