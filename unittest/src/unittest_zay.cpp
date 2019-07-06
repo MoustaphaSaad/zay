@@ -662,7 +662,7 @@ TEST_CASE("[zay]: struct gen")
 	CHECK(answer == expected);
 }
 
-TEST_CASE("[zay]: func gen")
+TEST_CASE("[zay]: fib func gen")
 {
 	Str answer = cgen(R"CODE(
 		func fib(x: int): int {
@@ -681,7 +681,7 @@ TEST_CASE("[zay]: func gen")
 	CHECK(answer == expected);
 }
 
-TEST_CASE("[zay]: func gen")
+TEST_CASE("[zay]: sum func gen")
 {
 	Str answer = cgen(R"CODE(
 		func sum(n: int): int {
@@ -697,5 +697,15 @@ TEST_CASE("[zay]: func gen")
 	}
 	return res;
 })CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: global var gen")
+{
+	Str answer = cgen(R"CODE(
+		var x, y = 0, 3.14
+	)CODE");
+	const char* expected = R"CODE(ZayInt x = 0;
+ZayFloat64 y = 3.14;)CODE";
 	CHECK(answer == expected);
 }

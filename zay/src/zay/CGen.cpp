@@ -581,6 +581,31 @@ namespace zay
 	}
 
 	inline static void
+	cgen_decl_var_gen(CGen self, Decl decl)
+	{
+		assert(decl->kind == IDecl::KIND_VAR);
+
+		for(size_t i = 0; i < decl->var_decl.ids.count; ++i)
+		{
+			if(i != 0)
+			{
+				vprintf(self->out, ";");
+				cgen_newline(self);
+			}
+
+			Sym s = cgen_sym(self, decl->var_decl.ids[i].str);
+			vprintf(self->out, "{}", cgen_write_field(self, s->type, s->name));
+			if(i < decl->var_decl.exprs.count)
+			{
+				vprintf(self->out, " = ");
+				cgen_expr_gen(self, decl->var_decl.exprs[i]);
+			}
+		}
+
+		vprintf(self->out, ";");
+	}
+
+	inline static void
 	cgen_decl_gen(CGen self, Decl decl)
 	{
 		switch(decl->kind)
@@ -590,6 +615,44 @@ namespace zay
 			break;
 		case IDecl::KIND_FUNC:
 			cgen_decl_func_gen(self, decl);
+			break;
+		case IDecl::KIND_VAR:
+			cgen_decl_var_gen(self, decl);
+			break;
+		default:
+			assert(false && "unreachable");
+			break;
+		}
+	}
+
+
+	//symbols
+	inline static void
+	cgen_sym_var_gen(CGen self, Sym sym)
+	{
+		assert(sym->kind == IDecl::KIND_VAR);
+		vprintf(self->out, "{}", cgen_write_field(self, sym->type, sym->name));
+		if(sym->var_sym.expr)
+		{
+			vprintf(self->out, " = ");
+			cgen_expr_gen(self, sym->var_sym.expr);
+		}
+		vprintf(self->out, ";");
+	}
+
+	inline static void
+	cgen_sym_gen(CGen self, Sym sym)
+	{
+		switch(sym->kind)
+		{
+		case ISym::KIND_STRUCT:
+			cgen_decl_struct_gen(self, sym->struct_sym);
+			break;
+		case ISym::KIND_FUNC:
+			cgen_decl_func_gen(self, sym->func_sym);
+			break;
+		case ISym::KIND_VAR:
+			cgen_sym_var_gen(self, sym);
 			break;
 		default:
 			assert(false && "unreachable");
@@ -623,9 +686,11 @@ namespace zay
 	void
 	cgen_gen(CGen self)
 	{
-		for (Decl d : self->src->reachable_decls)
+		for (size_t i = 0; i < self->src->reachable_syms.count; ++i)
 		{
-			cgen_decl_gen(self, d);
+			if (i != 0)
+				cgen_newline(self);
+			cgen_sym_gen(self, self->src->reachable_syms[i]);
 			memory::tmp()->free_all();
 		}
 	}
