@@ -209,6 +209,30 @@ namespace zay
 			}
 			type_struct_complete(type, fields);
 		}
+		else if(sym->kind == ISym::KIND_UNION)
+		{
+			Decl decl = sym->union_sym;
+			Buf<Field_Sign> fields = buf_new<Field_Sign>();
+			for (size_t i = 0; i < decl->union_decl.count; ++i)
+			{
+				Type field_type = typer_type_sign_resolve(self, decl->union_decl[i].type);
+				if (field_type->kind == IType::KIND_COMPLETING ||
+					field_type->kind == IType::KIND_INCOMPLETE)
+				{
+					typer_type_complete(self, field_type->aggregate.sym);
+				}
+
+				for (size_t j = 0; j < decl->union_decl[i].ids.count; ++j)
+				{
+					buf_push(fields, Field_Sign{
+						decl->union_decl[i].ids[j].str,
+						field_type,
+						0 //set the offset here to be 0 for now
+						});
+				}
+			}
+			type_struct_complete(type, fields);
+		}
 		else 
 		{
 			assert(false && "unreachable");
@@ -886,14 +910,17 @@ namespace zay
 		sym->state = ISym::STATE_RESOLVING;
 		switch(sym->kind)
 		{
-		case ISym::KIND_FUNC:
-			sym->type = typer_decl_func_resolve(self, sym);
-			break;
 		case ISym::KIND_STRUCT:
+			sym->type = type_intern_incomplete(self->src->type_table, sym);
+			break;
+		case ISym::KIND_UNION:
 			sym->type = type_intern_incomplete(self->src->type_table, sym);
 			break;
 		case ISym::KIND_VAR:
 			typer_decl_var_resolve(self, sym);
+			break;
+		case ISym::KIND_FUNC:
+			sym->type = typer_decl_func_resolve(self, sym);
 			break;
 
 		default:
@@ -901,13 +928,15 @@ namespace zay
 		}
 		sym->state = ISym::STATE_RESOLVED;
 
-		if(sym->kind == ISym::KIND_FUNC)
+		switch(sym->kind)
 		{
-			typer_body_func_resolve(self, sym);
-		}
-		else if(sym->kind == ISym::KIND_STRUCT)
-		{
+		case ISym::KIND_STRUCT:
+		case ISym::KIND_UNION:
 			typer_type_complete(self, sym);
+			break;
+		case ISym::KIND_FUNC:
+			typer_body_func_resolve(self, sym);
+			break;
 		}
 		buf_push(self->src->reachable_syms, sym);
 	}
