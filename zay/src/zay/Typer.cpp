@@ -937,6 +937,9 @@ namespace zay
 		case ISym::KIND_FUNC:
 			typer_body_func_resolve(self, sym);
 			break;
+		case ISym::KIND_VAR:
+			//do nothing
+			break;
 		default:
 			assert(false && "unreachable");
 			break;
