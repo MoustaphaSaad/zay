@@ -590,16 +590,30 @@ namespace zay
 	{
 		switch(expr->kind)
 		{
-		case IExpr::KIND_ATOM: return typer_expr_atom_resolve(self, expr);
-		case IExpr::KIND_BINARY: return typer_expr_binary_resolve(self, expr);
-		case IExpr::KIND_UNARY: return typer_expr_unary_resolve(self, expr);
-		case IExpr::KIND_DOT: return typer_expr_dot_resolve(self, expr);
-		case IExpr::KIND_INDEXED: return typer_expr_indexed_resolve(self, expr);
-		case IExpr::KIND_CALL: return typer_expr_call_resolve(self, expr);
+		case IExpr::KIND_ATOM:
+			expr->type = typer_expr_atom_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_BINARY:
+			expr->type = typer_expr_binary_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_UNARY:
+			expr->type = typer_expr_unary_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_DOT:
+			expr->type = typer_expr_dot_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_INDEXED:
+			expr->type = typer_expr_indexed_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_CALL:
+			expr->type = typer_expr_call_resolve(self, expr);
+			return expr->type;
 		case IExpr::KIND_CAST:
-			expr->cast.to_type = typer_expr_cast_resolve(self, expr);
-			return expr->cast.to_type;
-		case IExpr::KIND_PAREN: return typer_expr_paren_resolve(self, expr);
+			expr->type = typer_expr_cast_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_PAREN:
+			expr->type = typer_expr_paren_resolve(self, expr);
+			return expr->type;
 		default: assert(false && "unreachable"); return type_void;
 		}
 	}

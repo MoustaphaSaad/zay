@@ -212,7 +212,12 @@ namespace zay
 	{
 		assert(expr->kind == IExpr::KIND_DOT);
 		cgen_expr_gen(self, expr->dot.base);
-		vprintf(self->out, ".{}", expr->dot.member.str);
+		if(expr->dot.base->type->kind == IType::KIND_ENUM)
+			vprintf(self->out, "::{}", expr->dot.member.str);
+		else if(expr->dot.base->type->kind == IType::KIND_PTR)
+			vprintf(self->out, "->{}", expr->dot.member.str);
+		else
+			vprintf(self->out, ".{}", expr->dot.member.str);
 	}
 
 	inline static void
@@ -244,7 +249,7 @@ namespace zay
 	cgen_expr_cast(CGen self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_CAST);
-		vprintf(self->out, "({})", cgen_write_field(self, expr->cast.to_type, ""));
+		vprintf(self->out, "({})", cgen_write_field(self, expr->type, ""));
 		cgen_expr_gen(self, expr->cast.base);
 	}
 

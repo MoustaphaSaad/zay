@@ -836,6 +836,27 @@ TEST_CASE("[zay]: enum var codegen")
 	Down = -1, 
 	Left, 
 	Right
-} Direction;)CODE";
+} Direction;
+Direction d = Direction::Up;)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: struct pointer")
+{
+	Str answer = cgen(R"CODE(
+	type Point struct { x, y: float32 }
+	func add(a: *Point, b: Point) {
+		a.x += b.x
+		a.y += b.y
+	}
+	)CODE");
+	const char* expected = R"CODE(typedef struct Point {
+	ZayFloat32 x;
+	ZayFloat32 y;
+} Point;
+ZayVoid add(Point (*a), Point b) {
+	a->x += b.x;
+	a->y += b.y;
+})CODE";
 	CHECK(answer == expected);
 }
