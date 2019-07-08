@@ -449,6 +449,36 @@ namespace zay
 				src_err(self->src, err_tkn(expr->dot.member, strf("undefined struct field")));
 			}
 		}
+		else if (unqualified_type->kind == IType::KIND_UNION)
+		{
+			for (const Field_Sign& f : unqualified_type->aggregate.fields)
+			{
+				if (f.name == expr->dot.member.str)
+				{
+					res = f.type;
+					break;
+				}
+			}
+			if (res == type_void)
+			{
+				src_err(self->src, err_tkn(expr->dot.member, strf("undefined union field")));
+			}
+		}
+		else if (unqualified_type->kind == IType::KIND_ENUM)
+		{
+			for (const Enum_Value& v : unqualified_type->enum_type.values)
+			{
+				if (v.id.str == expr->dot.member.str)
+				{
+					res = unqualified_type;
+					break;
+				}
+			}
+			if (res == type_void)
+			{
+				src_err(self->src, err_tkn(expr->dot.member, strf("undefined enum field")));
+			}
+		}
 		return res;
 	}
 
@@ -560,16 +590,30 @@ namespace zay
 	{
 		switch(expr->kind)
 		{
-		case IExpr::KIND_ATOM: return typer_expr_atom_resolve(self, expr);
-		case IExpr::KIND_BINARY: return typer_expr_binary_resolve(self, expr);
-		case IExpr::KIND_UNARY: return typer_expr_unary_resolve(self, expr);
-		case IExpr::KIND_DOT: return typer_expr_dot_resolve(self, expr);
-		case IExpr::KIND_INDEXED: return typer_expr_indexed_resolve(self, expr);
-		case IExpr::KIND_CALL: return typer_expr_call_resolve(self, expr);
+		case IExpr::KIND_ATOM:
+			expr->type = typer_expr_atom_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_BINARY:
+			expr->type = typer_expr_binary_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_UNARY:
+			expr->type = typer_expr_unary_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_DOT:
+			expr->type = typer_expr_dot_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_INDEXED:
+			expr->type = typer_expr_indexed_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_CALL:
+			expr->type = typer_expr_call_resolve(self, expr);
+			return expr->type;
 		case IExpr::KIND_CAST:
-			expr->cast.to_type = typer_expr_cast_resolve(self, expr);
-			return expr->cast.to_type;
-		case IExpr::KIND_PAREN: return typer_expr_paren_resolve(self, expr);
+			expr->type = typer_expr_cast_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_PAREN:
+			expr->type = typer_expr_paren_resolve(self, expr);
+			return expr->type;
 		default: assert(false && "unreachable"); return type_void;
 		}
 	}

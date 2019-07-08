@@ -90,6 +90,7 @@ namespace zay
 		KIND kind;
 		Rng rng;
 		Pos pos;
+		Type type;
 		union
 		{
 			Tkn atom;
@@ -129,7 +130,6 @@ namespace zay
 			{
 				Expr base;
 				Type_Sign type;
-				Type to_type;
 			} cast;
 
 			Expr paren;

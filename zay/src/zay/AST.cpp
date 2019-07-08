@@ -1,4 +1,5 @@
 #include "zay/AST.h"
+#include "zay/Type_Intern.h"
 
 #include <mn/Memory.h>
 
@@ -12,6 +13,7 @@ namespace zay
 	expr_atom(const Tkn& t)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_ATOM;
 		self->atom = t;
 		return self;
@@ -21,6 +23,7 @@ namespace zay
 	expr_paren(Expr e)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_PAREN;
 		self->paren = e;
 		return self;
@@ -30,6 +33,7 @@ namespace zay
 	expr_call(Expr base, const mn::Buf<Expr>& args)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_CALL;
 		self->call.base = base;
 		self->call.args = args;
@@ -40,6 +44,7 @@ namespace zay
 	expr_indexed(Expr base, Expr index)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_INDEXED;
 		self->indexed.base = base;
 		self->indexed.index = index;
@@ -50,6 +55,7 @@ namespace zay
 	expr_dot(Expr base, const Tkn& t)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_DOT;
 		self->dot.base = base;
 		self->dot.member = t;
@@ -60,6 +66,7 @@ namespace zay
 	expr_unary(const Tkn& op, Expr expr)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_UNARY;
 		self->unary.op = op;
 		self->unary.expr = expr;
@@ -70,10 +77,10 @@ namespace zay
 	expr_cast(Expr expr, const Type_Sign& type)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_CAST;
 		self->cast.base = expr;
 		self->cast.type = type;
-		self->cast.to_type = nullptr;
 		return self;
 	}
 
@@ -81,6 +88,7 @@ namespace zay
 	expr_binary(Expr lhs, const Tkn& op, Expr rhs)
 	{
 		Expr self = alloc<IExpr>();
+		self->type = type_void;
 		self->kind = IExpr::KIND_BINARY;
 		self->binary.lhs = lhs;
 		self->binary.op = op;

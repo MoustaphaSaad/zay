@@ -800,3 +800,63 @@ TEST_CASE("[zay]: global var gen")
 ZayFloat64 y = 3.14;)CODE";
 	CHECK(answer == expected);
 }
+
+TEST_CASE("[zay]: enum codegen")
+{
+	Str answer = cgen(R"CODE(
+	type Direction enum {
+		Up = 1,
+		Down = -1,
+		Left,
+		Right
+	}
+	)CODE");
+	const char* expected = R"CODE(typedef enum Direction {
+	Up = 1, 
+	Down = -1, 
+	Left, 
+	Right
+} Direction;)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: enum var codegen")
+{
+	Str answer = cgen(R"CODE(
+	type Direction enum {
+		Up = 1,
+		Down = -1,
+		Left,
+		Right
+	}
+	var d = Direction.Up
+	)CODE");
+	const char* expected = R"CODE(typedef enum Direction {
+	Up = 1, 
+	Down = -1, 
+	Left, 
+	Right
+} Direction;
+Direction d = Direction::Up;)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: struct pointer")
+{
+	Str answer = cgen(R"CODE(
+	type Point struct { x, y: float32 }
+	func add(a: *Point, b: Point) {
+		a.x += b.x
+		a.y += b.y
+	}
+	)CODE");
+	const char* expected = R"CODE(typedef struct Point {
+	ZayFloat32 x;
+	ZayFloat32 y;
+} Point;
+ZayVoid add(Point (*a), Point b) {
+	a->x += b.x;
+	a->y += b.y;
+})CODE";
+	CHECK(answer == expected);
+}
