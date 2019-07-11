@@ -67,6 +67,7 @@ namespace zay
 	{
 		Type self = alloc<IType>();
 		self->kind = IType::KIND_FUNC;
+		self->sym = nullptr;
 		self->func = sign;
 		return self;
 	}
@@ -76,6 +77,7 @@ namespace zay
 	{
 		Type self = alloc<IType>();
 		self->kind = IType::KIND_PTR;
+		self->sym = nullptr;
 		self->ptr.base = base;
 		return self;
 	}
@@ -85,26 +87,26 @@ namespace zay
 	{
 		Type self = alloc<IType>();
 		self->kind = IType::KIND_ARRAY;
+		self->sym = nullptr;
 		self->array = sign;
 		return self;
 	}
 
 	Type
-	type_incomplete_aggregate(Sym sym)
+	type_incomplete(Sym sym)
 	{
 		Type self = alloc<IType>();
 		self->kind = IType::KIND_INCOMPLETE;
-		self->aggregate.sym = sym;
+		self->sym = sym;
 		return self;
 	}
 
-	Type
-	type_incomplete_enum(Sym sym)
+	void
+	type_alias_complete(Type self, Type alias)
 	{
-		Type self = alloc<IType>();
-		self->kind = IType::KIND_INCOMPLETE;
-		self->enum_type.sym = sym;
-		return self;
+		assert(self->kind == IType::KIND_COMPLETING);
+		self->kind = IType::KIND_ALIAS;
+		self->alias = alias;
 	}
 
 	void
@@ -112,7 +114,7 @@ namespace zay
 	{
 		assert(self->kind == IType::KIND_COMPLETING);
 		self->kind = IType::KIND_STRUCT;
-		self->aggregate.fields = fields;
+		self->fields = fields;
 	}
 
 	void
@@ -120,7 +122,7 @@ namespace zay
 	{
 		assert(self->kind == IType::KIND_COMPLETING);
 		self->kind = IType::KIND_UNION;
-		self->aggregate.fields = fields;
+		self->fields = fields;
 	}
 
 	void
@@ -128,7 +130,7 @@ namespace zay
 	{
 		assert(self->kind == IType::KIND_COMPLETING);
 		self->kind = IType::KIND_ENUM;
-		self->enum_type.values = values;
+		self->enum_values = values;
 	}
 
 	void
@@ -136,6 +138,23 @@ namespace zay
 	{
 		switch(self->kind)
 		{
+			//we don't free the builtin types
+		case IType::KIND_VOID:
+		case IType::KIND_BOOL:
+		case IType::KIND_INT:
+		case IType::KIND_UINT:
+		case IType::KIND_INT8:
+		case IType::KIND_UINT8:
+		case IType::KIND_INT16:
+		case IType::KIND_UINT16:
+		case IType::KIND_INT32:
+		case IType::KIND_UINT32:
+		case IType::KIND_INT64:
+		case IType::KIND_UINT64:
+		case IType::KIND_FLOAT32:
+		case IType::KIND_FLOAT64:
+		case IType::KIND_STRING:
+			return;
 		case IType::KIND_PTR:
 		case IType::KIND_ARRAY:
 			break;
@@ -144,10 +163,13 @@ namespace zay
 			break;
 		case IType::KIND_STRUCT:
 		case IType::KIND_UNION:
-			buf_free(self->aggregate.fields);
+			buf_free(self->fields);
 			break;
 		case IType::KIND_ENUM:
-			buf_free(self->enum_type.values);
+			buf_free(self->enum_values);
+			break;
+		case IType::KIND_ALIAS:
+			type_free(self->alias);
 			break;
 		default: assert(false && "unreachable"); break;
 		}

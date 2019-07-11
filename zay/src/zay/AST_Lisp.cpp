@@ -9,6 +9,9 @@ namespace zay
 	using namespace mn;
 
 	inline static void
+	ast_lisp_field(AST_Lisp& self, const Field& field);
+
+	inline static void
 	ast_lisp_indent(AST_Lisp& self)
 	{
 		for(size_t i = 0; i < self.level; ++i)
@@ -16,9 +19,9 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_type(AST_Lisp& self, const Type_Sign& type)
+	ast_lisp_type_sign(AST_Lisp& self, const Type_Sign& type)
 	{
-		vprintf(self.out, "(type ");
+		vprintf(self.out, "(type-sign ");
 		for(size_t i = 0; i < type.count; ++i)
 		{
 			switch(type[i].kind)
@@ -35,6 +38,54 @@ namespace zay
 				vprintf(self.out, "[{}]", type[i].count.str);
 				break;
 
+			case Type_Atom::KIND_STRUCT:
+				vprintf(self.out, "(struct\n");
+				self.level++;
+				for (const Field& field : type[i].struct_fields)
+				{
+					ast_lisp_indent(self);
+					ast_lisp_field(self, field);
+					vprintf(self.out, "\n");
+				}
+				self.level--;
+				ast_lisp_indent(self);
+				vprintf(self.out, ")");
+				break;
+
+			case Type_Atom::KIND_UNION:
+				vprintf(self.out, "(union\n");
+				self.level++;
+				for (const Field& field : type[i].union_fields)
+				{
+					ast_lisp_indent(self);
+					ast_lisp_field(self, field);
+					vprintf(self.out, "\n");
+				}
+				self.level--;
+				ast_lisp_indent(self);
+				vprintf(self.out, ")");
+				break;
+
+			case Type_Atom::KIND_ENUM:
+				vprintf(self.out, "(enum\n");
+				self.level++;
+				for (const Enum_Field& field : type[i].enum_fields)
+				{
+					ast_lisp_indent(self);
+					vprintf(self.out, "(field {}", field.id.str);
+					if (field.expr)
+					{
+						vprintf(self.out, " ");
+						ast_lisp_expr(self, field.expr);
+					}
+					vprintf(self.out, ")");
+					vprintf(self.out, "\n");
+				}
+				self.level--;
+				ast_lisp_indent(self);
+				vprintf(self.out, ")");
+				break;
+
 			default:
 				assert(false && "unreachable");
 				break;
@@ -46,7 +97,6 @@ namespace zay
 	inline static void
 	ast_lisp_field(AST_Lisp& self, const Field& field)
 	{
-		ast_lisp_indent(self);
 		vprintf(self.out, "(field ");
 
 		for(size_t i = 0; i < field.ids.count; ++i)
@@ -58,7 +108,7 @@ namespace zay
 
 		vprintf(self.out, ": ");
 
-		ast_lisp_type(self, field.type);
+		ast_lisp_type_sign(self, field.type);
 
 		vprintf(self.out, ")");
 	}
@@ -123,7 +173,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_variable(AST_Lisp& self, const Variable& v)
+	ast_lisp_variable(AST_Lisp& self, const Var& v)
 	{
 		ast_lisp_indent(self);
 		vprintf(self.out, "(var ");
@@ -141,7 +191,7 @@ namespace zay
 		{
 			vprintf(self.out, "\n");
 			ast_lisp_indent(self);
-			ast_lisp_type(self, v.type);
+			ast_lisp_type_sign(self, v.type);
 		}
 
 		for(size_t i = 0; i < v.exprs.count; ++i)
@@ -194,7 +244,7 @@ namespace zay
 			}
 
 			vprintf(self.out, ": ");
-			ast_lisp_type(self, a.type);
+			ast_lisp_type_sign(self, a.type);
 			vprintf(self.out, " ");
 		}
 
@@ -204,7 +254,7 @@ namespace zay
 			vprintf(self.out, "\n");
 			ast_lisp_indent(self);
 			vprintf(self.out, ": ");
-			ast_lisp_type(self, decl->func_decl.ret_type);
+			ast_lisp_type_sign(self, decl->func_decl.ret_type);
 		}
 
 		if(decl->func_decl.body)
@@ -220,6 +270,25 @@ namespace zay
 
 		vprintf(self.out, ")");
 	}
+
+	inline static void
+	ast_lisp_type_decl(AST_Lisp& self, Decl decl)
+	{
+		ast_lisp_indent(self);
+
+		vprintf(self.out, "(type-decl {}\n", decl->name.str);
+
+		self.level++;
+		ast_lisp_indent(self);
+
+		ast_lisp_type_sign(self, decl->type_decl);
+
+		vprintf(self.out, "\n");
+		self.level--;
+		ast_lisp_indent(self);
+		vprintf(self.out, ")");
+	}
+
 
 	inline static void
 	ast_lisp_atom(AST_Lisp& self, Expr expr)
@@ -286,7 +355,7 @@ namespace zay
 	{
 		vprintf(self.out, "(cast ");
 		ast_lisp_expr(self, expr->cast.base);
-		ast_lisp_type(self, expr->cast.type);
+		ast_lisp_type_sign(self, expr->cast.type);
 		vprintf(self.out, ")");
 	}
 
@@ -297,6 +366,8 @@ namespace zay
 		ast_lisp_expr(self, expr->paren);
 		vprintf(self.out, ")");
 	}
+
+
 
 	inline static void
 	ast_lisp_stmt_break(AST_Lisp& self, Stmt stmt)
@@ -540,6 +611,10 @@ namespace zay
 
 		case IDecl::KIND_FUNC:
 			ast_lisp_func(self, decl);
+			break;
+
+		case IDecl::KIND_TYPE:
+			ast_lisp_type_decl(self, decl);
 			break;
 
 		default: assert(false && "unreachable"); break;

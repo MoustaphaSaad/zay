@@ -7,6 +7,9 @@ namespace zay
 {
 	using namespace mn;
 
+	inline static Field
+	parser_field(Parser self);
+
 	inline static Tkn
 	parser_last_tkn(Parser self)
 	{
@@ -112,6 +115,40 @@ namespace zay
 				buf_push(type, type_atom_named(parser_eat(self)));
 				break;
 			}
+			else if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT ||
+					tkn.kind == Tkn::KIND_KEYWORD_UNION)
+			{
+				parser_eat(self);
+				parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
+				Buf<Field> fields = buf_new<Field>();
+				while (parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
+					buf_push(fields, parser_field(self));
+				parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
+				if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT)
+					buf_push(type, type_atom_struct(fields));
+				else if(tkn.kind == Tkn::KIND_KEYWORD_UNION)
+					buf_push(type, type_atom_union(fields));
+				break;
+			}
+			else if(tkn.kind == Tkn::KIND_KEYWORD_ENUM)
+			{
+				parser_eat(self);
+				parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
+				Buf<Enum_Field> fields = buf_new<Enum_Field>();
+				do
+				{
+					if(Tkn id = parser_eat_kind(self, Tkn::KIND_ID))
+					{
+						Expr expr = nullptr;
+						if (parser_eat_kind(self, Tkn::KIND_EQUAL))
+							expr = parser_expr(self);
+						buf_push(fields, Enum_Field{ id, expr });
+					}
+				} while (parser_eat_kind(self, Tkn::KIND_COMMA));
+				parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
+				buf_push(type, type_atom_enum(fields));
+				break;
+			}
 			else if(tkn.kind == Tkn::KIND_STAR)
 			{
 				parser_eat(self); //for the *
@@ -123,6 +160,10 @@ namespace zay
 				//this is an integer for now but really this should be an const expr
 				buf_push(type, type_atom_array(parser_eat_must(self, Tkn::KIND_INTEGER)));
 				parser_eat_must(self, Tkn::KIND_CLOSE_BRACKET);
+			}
+			else
+			{
+				break;
 			}
 		}
 		return type;
@@ -199,27 +240,16 @@ namespace zay
 	parser_decl_type(Parser self)
 	{
 		//only working with struct, and enums
-		Tkn tkn = parser_look(self, 2);
-		if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT || tkn.kind == Tkn::KIND_KEYWORD_UNION)
-		{
-			return parser_decl_aggregate(self);
-		}
-		else if(tkn.kind == Tkn::KIND_KEYWORD_ENUM)
-		{
-			return parser_decl_enum(self);
-		}
-		else
-		{
-			//let's ignore typedefs for now
-			return nullptr;
-		}
+		parser_eat_must(self, Tkn::KIND_KEYWORD_TYPE);
+		Tkn id = parser_eat_must(self, Tkn::KIND_ID);
+		return decl_type(id, parser_type(self));
 	}
 
-	inline static Variable
+	inline static Var
 	parser_variable(Parser self)
 	{
 		parser_eat_must(self, Tkn::KIND_KEYWORD_VAR);
-		Variable v = variable_new();
+		Var v = var_new();
 
 		do
 		{

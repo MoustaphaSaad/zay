@@ -17,6 +17,11 @@ set(HEADER_FILES
 	include/zay/Typer.h
 	include/zay/Type_Intern.h
 	include/zay/CGen.h
+	include/zay/Type_Sign.h
+	include/zay/Expr.h
+	include/zay/Var.h
+	include/zay/Stmt.h
+	include/zay/Decl.h
 )
 
 # list the source files
@@ -32,6 +37,10 @@ set(SOURCE_FILES
 	src/zay/Sym.cpp
 	src/zay/Type_Intern.cpp
 	src/zay/CGen.cpp
+	src/zay/Type_Sign.cpp
+	src/zay/Expr.cpp
+	src/zay/Stmt.cpp
+	src/zay/Decl.cpp
 )
 
 # add library target

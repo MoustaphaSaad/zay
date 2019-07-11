@@ -161,9 +161,11 @@ TEST_CASE("[zay]: parse basic struct")
 }
 )CODE";
 
-	const char* expected = R"EXPECTED((struct foo
-	(field x, y: (type  int))
-	(field z, w: (type  float32))
+	const char* expected = R"EXPECTED((type-decl foo
+	(type-sign (struct
+		(field x, y: (type-sign  int))
+		(field z, w: (type-sign  float32))
+	))
 )
 )EXPECTED";
 
@@ -181,11 +183,13 @@ TEST_CASE("[zay]: parse basic union")
 }
 )CODE";
 
-	const char* expected = R"EXPECTED((union foo
-	(field f64: (type  float64))
-	(field f32: (type [2] float32))
-	(field u8: (type [8] uint8))
-	(field ptr: (type [8]* uint8))
+	const char* expected = R"EXPECTED((type-decl foo
+	(type-sign (union
+		(field f64: (type-sign  float64))
+		(field f32: (type-sign [2] float32))
+		(field u8: (type-sign [8] uint8))
+		(field ptr: (type-sign [8]* uint8))
+	))
 )
 )EXPECTED";
 
@@ -230,21 +234,25 @@ func foo(a: *Point, b: int) {
 }
 )CODE";
 
-	const char* expected = R"EXPECTED((enum Direction
-	Up = (atom 1)
-	Down = (unary - (atom 1))
-	Left
-	Right
+	const char* expected = R"EXPECTED((type-decl Direction
+	(type-sign (enum
+		(field Up (atom 1))
+		(field Down (unary - (atom 1)))
+		(field Left)
+		(field Right)
+	))
 )
-(struct Point
-	(field x, y: (type  float32))
+(type-decl Point
+	(type-sign (struct
+		(field x, y: (type-sign  float32))
+	))
 )
 (func point_new
-	x, y: (type  float32) 
-	: (type  Point)
+	x, y: (type-sign  float32) 
+	: (type-sign  Point)
 	(block-stmt
 		(var self
-			(type  Point)
+			(type-sign  Point)
 		)
 		(= 
 			(dot (atom self).x)
@@ -258,15 +266,15 @@ func foo(a: *Point, b: int) {
 	)
 )
 (var origin
-	(type  Point)
+	(type-sign  Point)
 	(call (atom point_new) (atom 0), (atom 0))
 )
 (func add
-	a, b: (type  Point) 
-	: (type  Point)
+	a, b: (type-sign  Point) 
+	: (type-sign  Point)
 	(block-stmt
 		(var res
-			(type  Point)
+			(type-sign  Point)
 		)
 		(= 
 			(dot (atom res).x)
@@ -280,7 +288,7 @@ func foo(a: *Point, b: int) {
 	)
 )
 (func foo
-	a: (type * Point) b: (type  int) 
+	a: (type-sign * Point) b: (type-sign  int) 
 	(block-stmt
 		(*= 
 			(dot (atom a).x)
@@ -317,7 +325,7 @@ TEST_CASE("[zay]: parse add mul expression")
 TEST_CASE("[zay]: complex dereference returned pointer")
 {
 	const char* code = "*arr[v.x + b * c[123]].koko(z: float, w)";
-	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type  float)), (atom w)))";
+	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type-sign  float)), (atom w)))";
 	Str answer = parse_expr(code);
 	CHECK(answer == expected);
 }
@@ -325,7 +333,7 @@ TEST_CASE("[zay]: complex dereference returned pointer")
 TEST_CASE("[zay]: complex dereference indexed expression")
 {
 	const char* code = "(*arr[v.x + b * c[123]]).koko(z: float, w)";
-	const char* expected = "(call (dot (paren (unary * (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]))).koko) (cast (atom z)(type  float)), (atom w))";
+	const char* expected = "(call (dot (paren (unary * (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]))).koko) (cast (atom z)(type-sign  float)), (atom w))";
 	Str answer = parse_expr(code);
 	CHECK(answer == expected);
 }
@@ -334,7 +342,7 @@ TEST_CASE("[zay]: simple var")
 {
 	const char* code = R"CODE(var x, y, z: float = 1.0, 2.0, 3.0)CODE";
 	const char* expected = R"EXPECTED((var x, y, z
-	(type  float)
+	(type-sign  float)
 	(atom 1.0), (atom 2.0), (atom 3.0)
 ))EXPECTED";
 	Str answer = parse_stmt(code);
@@ -707,6 +715,17 @@ TEST_CASE("[zay]: bad enums")
 	)CODE") == false);
 }
 
+TEST_CASE("[zay]: strong type alias")
+{
+	CHECK(typecheck(R"CODE(
+	type X int
+	func getX(): int {
+		var x: X = 0
+		return x
+	}
+	)CODE") == false);
+}
+
 inline static Str
 cgen(const char* str)
 {
@@ -857,6 +876,69 @@ TEST_CASE("[zay]: struct pointer")
 ZayVoid add(Point (*a), Point b) {
 	a->x += b.x;
 	a->y += b.y;
+})CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: struct pointer type")
+{
+	Str answer = cgen(R"CODE(
+	type Point *struct { x, y: float32 }
+	)CODE");
+	const char* expected = R"CODE(typedef struct Point {
+	ZayFloat32 x;
+	ZayFloat32 y;
+} (*Point);)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: int alias")
+{
+	Str answer = cgen(R"CODE(
+	type X int
+	func add(a, b: X): X {
+		return a + b
+	}
+	)CODE");
+	const char* expected = R"CODE(typedef ZayInt X;
+ZayInt add(ZayInt a, ZayInt b) {
+	return a + b;
+})CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: anonymous struct in union")
+{
+	Str answer = cgen(R"CODE(
+	type vec3f union {
+		data: [3]float32
+		elements: struct {
+			x, y, z: float32
+		}
+	}
+	)CODE");
+	const char* expected = R"CODE(typedef struct __unnamed_struct_0 {
+	ZayFloat32 x;
+	ZayFloat32 y;
+	ZayFloat32 z;
+} __unnamed_struct_0;
+typedef union vec3f {
+	ZayFloat32 (data[1]);
+	__unnamed_struct_0 elements;
+} vec3f;)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: C interface")
+{
+	Str answer = cgen(R"CODE(
+	type Reader struct {
+		read: func(request_amount: uint): uint
+	}
+	)CODE");
+	const char* expected = R"CODE(typedef ZayInt X;
+ZayInt add(ZayInt a, ZayInt b) {
+	return a + b;
 })CODE";
 	CHECK(answer == expected);
 }

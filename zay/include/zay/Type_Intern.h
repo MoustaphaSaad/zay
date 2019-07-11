@@ -138,25 +138,20 @@ namespace zay
 			KIND_FUNC,
 			KIND_STRUCT,
 			KIND_UNION,
-			KIND_ENUM
+			KIND_ENUM,
+			KIND_ALIAS
 		};
 
 		KIND kind;
+		Sym sym;
 		union
 		{
 			struct { Type base; } ptr;
 			Array_Sign array;
 			Func_Sign func;
-			struct
-			{
-				Sym sym;
-				mn::Buf<Field_Sign> fields;
-			} aggregate;
-			struct
-			{
-				Sym sym;
-				mn::Buf<Enum_Value> values;
-			} enum_type;
+			mn::Buf<Field_Sign> fields;
+			mn::Buf<Enum_Value> enum_values;
+			Type alias;
 		};
 		
 	};
@@ -171,10 +166,10 @@ namespace zay
 	type_func(const Func_Sign& sign);
 
 	ZAY_EXPORT Type
-	type_incomplete_aggregate(Sym sym);
+	type_incomplete(Sym sym);
 
-	ZAY_EXPORT Type
-	type_incomplete_enum(Sym sym);
+	ZAY_EXPORT void
+	type_alias_complete(Type self, Type alias);
 
 	ZAY_EXPORT void
 	type_struct_complete(Type self, const mn::Buf<Field_Sign>& fields);
@@ -231,7 +226,7 @@ namespace zay
 			return res;
 		}
 		case IType::KIND_STRUCT:
-			return mn::vprintf(stream, "{}", type->aggregate.sym->name);
+			return mn::vprintf(stream, "{}", type->sym->name);
 		default:
 			return mn::vprintf(stream, "<UNKNOWN_TYPE>");
 		}

@@ -23,6 +23,8 @@ namespace zay
 
 		mn::Buf<Scope> scope_stack;
 		Scope global_scope;
+
+		size_t unnamed_id;
 	};
 
 	ZAY_EXPORT Typer

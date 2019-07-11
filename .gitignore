@@ -2,6 +2,7 @@
 zay/include/zay/Exports.h
 build
 .vscode
+.vs
 *.sublime-project
 *.sublime-workspace
 

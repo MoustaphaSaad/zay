@@ -22,6 +22,9 @@ namespace zay
 	typer_stmt_block_resolve(Typer self, Stmt stmt);
 
 	inline static void
+	typer_type_complete(Typer self, Sym sym);
+
+	inline static void
 	typer_scope_enter(Typer self, Scope scope)
 	{
 		buf_push(self->scope_stack, scope);
@@ -85,6 +88,9 @@ namespace zay
 					typer_sym(self, sym_var(d->var_decl.ids[i], d, d->var_decl.type, e));
 				}
 				break;
+			case IDecl::KIND_TYPE:
+				typer_sym(self, sym_type(d));
+				break;
 			case IDecl::KIND_FUNC:
 				typer_sym(self, sym_func(d));
 				break;
@@ -123,7 +129,7 @@ namespace zay
 	}
 
 	inline static Type
-	typer_type_sign_resolve(Typer self, const Type_Sign& sign)
+	typer_type_sign_resolve(Typer self, const Type_Sign& sign, Type incomplete_type)
 	{
 		Type res = type_void;
 
@@ -154,6 +160,13 @@ namespace zay
 						);
 					}
 				}
+
+				if (incomplete_type)
+				{
+					type_alias_complete(incomplete_type, res);
+					res = incomplete_type;
+				}
+
 				break;
 			case Type_Atom::KIND_PTR:
 				res = type_intern_ptr(self->src->type_table, res);
@@ -161,6 +174,124 @@ namespace zay
 			case Type_Atom::KIND_ARRAY:
 				res = type_intern_array(self->src->type_table, Array_Sign{res, atom.count});
 				break;
+			case Type_Atom::KIND_STRUCT:
+			{
+				//this is not a named type, so generate a name for it and put it in global scope
+				if(incomplete_type == nullptr)
+				{
+					Str name = str_tmpf("__unnamed_struct_{}", self->unnamed_id++);
+					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
+					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
+					buf_push(self->src->ast->decls, unnamed_decl);
+					Sym unnamed_sym = sym_type(unnamed_decl);
+					scope_add(self->global_scope, unnamed_sym);
+					typer_sym_resolve(self, unnamed_sym);
+
+					incomplete_type = type_intern_incomplete(self->src->type_table, type_incomplete(unnamed_sym));
+					incomplete_type->kind = IType::KIND_COMPLETING;
+				}
+				res = incomplete_type;
+
+				Buf<Field_Sign> fields = buf_new<Field_Sign>();
+				for(size_t j = 0; j < atom.struct_fields.count; ++j)
+				{
+					Type field_type = typer_type_sign_resolve(self, atom.struct_fields[j].type, nullptr);
+					if (field_type->kind == IType::KIND_COMPLETING ||
+						field_type->kind == IType::KIND_INCOMPLETE)
+					{
+						typer_type_complete(self, field_type->sym);
+					}
+
+					for(size_t k = 0; k < atom.struct_fields[j].ids.count; ++k)
+					{
+						buf_push(fields, Field_Sign{
+							atom.struct_fields[j].ids[k].str,
+							field_type,
+							0 //set the offset here to be 0 for now
+						});
+					}
+				}
+				type_struct_complete(res, fields);
+				break;
+			}
+			case Type_Atom::KIND_UNION:
+			{
+				//this is not a named type, so generate a name for it and put it in global scope
+				if(incomplete_type == nullptr)
+				{
+					Str name = str_tmpf("__unnamed_union_{}", self->unnamed_id++);
+					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
+					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
+					buf_push(self->src->ast->decls, unnamed_decl);
+					Sym unnamed_sym = sym_type(unnamed_decl);
+					scope_add(self->global_scope, unnamed_sym);
+					typer_sym_resolve(self, unnamed_sym);
+
+					incomplete_type = type_intern_incomplete(self->src->type_table, type_incomplete(unnamed_sym));
+					incomplete_type->kind = IType::KIND_COMPLETING;
+				}
+				res = incomplete_type;
+
+				Buf<Field_Sign> fields = buf_new<Field_Sign>();
+				for(size_t j = 0; j < atom.union_fields.count; ++j)
+				{
+					Type field_type = typer_type_sign_resolve(self, atom.union_fields[j].type, nullptr);
+					if (field_type->kind == IType::KIND_COMPLETING ||
+						field_type->kind == IType::KIND_INCOMPLETE)
+					{
+						typer_type_complete(self, field_type->sym);
+					}
+
+					for(size_t k = 0; k < atom.union_fields[j].ids.count; ++k)
+					{
+						buf_push(fields, Field_Sign{
+							atom.union_fields[j].ids[k].str,
+							field_type,
+							0 //set the offset here to be 0 for now
+						});
+					}
+				}
+				type_union_complete(res, fields);
+				break;
+			}
+			case Type_Atom::KIND_ENUM:
+			{
+				//this is not a named type, so generate a name for it and put it in global scope
+				if(incomplete_type == nullptr)
+				{
+					Str name = str_tmpf("__unnamed_enum_{}", self->unnamed_id++);
+					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
+					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
+					buf_push(self->src->ast->decls, unnamed_decl);
+					Sym unnamed_sym = sym_type(unnamed_decl);
+					scope_add(self->global_scope, unnamed_sym);
+					typer_sym_resolve(self, unnamed_sym);
+
+					incomplete_type = type_intern_incomplete(self->src->type_table, type_incomplete(unnamed_sym));
+					incomplete_type->kind = IType::KIND_COMPLETING;
+				}
+				res = incomplete_type;
+
+				Buf<Enum_Value> values = buf_new<Enum_Value>();
+				for(size_t j = 0; j < atom.enum_fields.count; ++j)
+				{
+					Enum_Value v{ atom.enum_fields[j].id, atom.enum_fields[j].expr };
+					if(v.value)
+					{
+						Type value_type = typer_expr_resolve(self, v.value);
+						if(value_type != type_int)
+						{
+							src_err(
+								self->src,
+								err_expr(v.value, strf("enums should have int values but found '{}'", value_type))
+							);
+						}
+					}
+					buf_push(values, v);
+				}
+				type_enum_complete(res, values);
+				break;
+			}
 			default:
 				assert(false && "unreachable");
 				break;
@@ -191,11 +322,11 @@ namespace zay
 			Buf<Field_Sign> fields = buf_new<Field_Sign>();
 			for(size_t i = 0; i < decl->struct_decl.count; ++i)
 			{
-				Type field_type = typer_type_sign_resolve(self, decl->struct_decl[i].type);
+				Type field_type = typer_type_sign_resolve(self, decl->struct_decl[i].type, nullptr);
 				if (field_type->kind == IType::KIND_COMPLETING ||
 					field_type->kind == IType::KIND_INCOMPLETE)
 				{
-					typer_type_complete(self, field_type->aggregate.sym);
+					typer_type_complete(self, field_type->sym);
 				}
 
 				for(size_t j = 0; j < decl->struct_decl[i].ids.count; ++j)
@@ -215,11 +346,11 @@ namespace zay
 			Buf<Field_Sign> fields = buf_new<Field_Sign>();
 			for (size_t i = 0; i < decl->union_decl.count; ++i)
 			{
-				Type field_type = typer_type_sign_resolve(self, decl->union_decl[i].type);
+				Type field_type = typer_type_sign_resolve(self, decl->union_decl[i].type, nullptr);
 				if (field_type->kind == IType::KIND_COMPLETING ||
 					field_type->kind == IType::KIND_INCOMPLETE)
 				{
-					typer_type_complete(self, field_type->aggregate.sym);
+					typer_type_complete(self, field_type->sym);
 				}
 
 				for (size_t j = 0; j < decl->union_decl[i].ids.count; ++j)
@@ -254,6 +385,11 @@ namespace zay
 				buf_push(values, v);
 			}
 			type_enum_complete(type, values);
+		}
+		else if(sym->kind == ISym::KIND_TYPE)
+		{
+			Decl decl = sym->type_sym;
+			sym->type = typer_type_sign_resolve(self, decl->type_decl, sym->type);
 		}
 		else 
 		{
@@ -436,7 +572,7 @@ namespace zay
 		Type res = type_void;
 		if(unqualified_type->kind == IType::KIND_STRUCT)
 		{
-			for(const Field_Sign& f: unqualified_type->aggregate.fields)
+			for(const Field_Sign& f: unqualified_type->fields)
 			{
 				if(f.name == expr->dot.member.str)
 				{
@@ -451,7 +587,7 @@ namespace zay
 		}
 		else if (unqualified_type->kind == IType::KIND_UNION)
 		{
-			for (const Field_Sign& f : unqualified_type->aggregate.fields)
+			for (const Field_Sign& f : unqualified_type->fields)
 			{
 				if (f.name == expr->dot.member.str)
 				{
@@ -466,7 +602,7 @@ namespace zay
 		}
 		else if (unqualified_type->kind == IType::KIND_ENUM)
 		{
-			for (const Enum_Value& v : unqualified_type->enum_type.values)
+			for (const Enum_Value& v : unqualified_type->enum_values)
 			{
 				if (v.id.str == expr->dot.member.str)
 				{
@@ -564,7 +700,7 @@ namespace zay
 	{
 		assert(expr->kind == IExpr::KIND_CAST);
 		Type from_type = typer_expr_resolve(self, expr->cast.base);
-		Type to_type = typer_type_sign_resolve(self, expr->cast.type);
+		Type to_type = typer_type_sign_resolve(self, expr->cast.type, nullptr);
 
 		if(type_is_number(from_type) && type_is_number(to_type))
 			return to_type;
@@ -733,7 +869,7 @@ namespace zay
 
 		Type type = type_void;
 		if(infer == false)
-			type = typer_type_sign_resolve(self, stmt->var_stmt.type);
+			type = typer_type_sign_resolve(self, stmt->var_stmt.type, nullptr);
 
 		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
 		{
@@ -873,11 +1009,11 @@ namespace zay
 
 		for(const Arg& arg: decl->func_decl.args)
 		{
-			Type type = typer_type_sign_resolve(self, arg.type);
+			Type type = typer_type_sign_resolve(self, arg.type, nullptr);
 			buf_pushn(sign.args, arg.ids.count, type);
 		}
 
-		sign.ret = typer_type_sign_resolve(self, decl->func_decl.ret_type);
+		sign.ret = typer_type_sign_resolve(self, decl->func_decl.ret_type, nullptr);
 		return type_intern_func(self->src->type_table, sign);
 	}
 
@@ -919,7 +1055,7 @@ namespace zay
 
 		Type type = type_void;
 		if(infer == false)
-			type = typer_type_sign_resolve(self, sym->var_sym.type);
+			type = typer_type_sign_resolve(self, sym->var_sym.type, nullptr);
 
 		Expr e = sym->var_sym.expr;
 
@@ -977,14 +1113,12 @@ namespace zay
 		switch(sym->kind)
 		{
 		case ISym::KIND_STRUCT:
-			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete_aggregate(sym));
-			break;
 		case ISym::KIND_UNION:
-			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete_aggregate(sym));
-			break;
 		case ISym::KIND_ENUM:
-			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete_enum(sym));
+		case ISym::KIND_TYPE:
+			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete(sym));
 			break;
+
 		case ISym::KIND_VAR:
 			typer_decl_var_resolve(self, sym);
 			break;
@@ -1002,6 +1136,7 @@ namespace zay
 		case ISym::KIND_STRUCT:
 		case ISym::KIND_UNION:
 		case ISym::KIND_ENUM:
+		case ISym::KIND_TYPE:
 			typer_type_complete(self, sym);
 			break;
 		case ISym::KIND_FUNC:
@@ -1027,6 +1162,7 @@ namespace zay
 		self->src = src;
 		self->scope_stack = buf_new<Scope>();
 		self->global_scope = src_scope_new(self->src, nullptr, nullptr, false, nullptr);
+		self->unnamed_id = 0;
 
 		typer_scope_enter(self, self->global_scope);
 		return self;
@@ -1048,11 +1184,11 @@ namespace zay
 		{
 			const char* main = str_intern(self->src->str_table, "main");
 			Sym main_sym = nullptr;
-			for (Sym sym : self->global_scope->syms)
+			for (size_t i = 0; i < self->global_scope->syms.count; ++i)
 			{
-				if (sym->name == main)
+				if (self->global_scope->syms[i]->name == main)
 				{
-					main_sym = sym;
+					main_sym = self->global_scope->syms[i];
 					break;
 				}
 			}
@@ -1067,8 +1203,8 @@ namespace zay
 		}
 		else
 		{
-			for (Sym sym : self->global_scope->syms)
-				typer_sym_resolve(self, sym);
+			for (size_t i = 0; i < self->global_scope->syms.count; ++i)
+				typer_sym_resolve(self, self->global_scope->syms[i]);
 		}
 	}
 }

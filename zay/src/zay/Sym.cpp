@@ -69,6 +69,18 @@ namespace zay
 		return self;
 	}
 
+	Sym
+	sym_type(Decl d)
+	{
+		Sym self = alloc<ISym>();
+		self->kind = ISym::KIND_TYPE;
+		self->state = ISym::STATE_UNRESOLVED;
+		self->name = d->name.str;
+		self->type = nullptr;
+		self->type_sym = d;
+		return self;
+	}
+
 	void
 	sym_free(Sym self)
 	{

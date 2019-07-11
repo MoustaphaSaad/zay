@@ -19,7 +19,8 @@ namespace zay
 			KIND_UNION,
 			KIND_ENUM,
 			KIND_VAR,
-			KIND_FUNC
+			KIND_FUNC,
+			KIND_TYPE
 		};
 
 		enum STATE
@@ -47,6 +48,7 @@ namespace zay
 				Type_Sign type;
 				Expr expr;
 			} var_sym;
+			Decl type_sym;
 		};
 	};
 
@@ -65,6 +67,9 @@ namespace zay
 
 	ZAY_EXPORT Sym
 	sym_func(Decl d);
+
+	ZAY_EXPORT Sym
+	sym_type(Decl d);
 
 	ZAY_EXPORT void
 	sym_free(Sym self);
@@ -85,6 +90,7 @@ namespace zay
 		case ISym::KIND_ENUM: return self->enum_sym->name;
 		case ISym::KIND_VAR: return self->var_sym.id;
 		case ISym::KIND_FUNC: return self->func_sym->name;
+		case ISym::KIND_TYPE: return self->type_sym->name;
 		default: assert(false && "unreachable"); return Tkn{};
 		}
 	}
@@ -99,6 +105,7 @@ namespace zay
 		case ISym::KIND_ENUM: return self->enum_sym;
 		case ISym::KIND_VAR: return self->var_sym.decl;
 		case ISym::KIND_FUNC: return self->func_sym;
+		case ISym::KIND_TYPE: return self->type_sym;
 		default: assert(false && "unreachable"); return nullptr;
 		}
 	}

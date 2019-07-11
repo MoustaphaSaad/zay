@@ -25,6 +25,15 @@ namespace zay
 
 		inline operator bool() const { return kind != KIND_NONE; }
 	};
+
+	inline static Tkn
+	tkn_anonymous_id(const char* str)
+	{
+		Tkn self{};
+		self.kind = Tkn::KIND_ID;
+		self.str = str;
+		return self;
+	}
 }
 
 #undef TOKEN_LISTING
