@@ -719,82 +719,14 @@ namespace zay
 		}
 	}
 
-	//Decls
+
+	//symbols
 	inline static void
-	cgen_decl_struct_gen(CGen self, Decl decl)
+	cgen_sym_func_gen(CGen self, Sym sym)
 	{
-		assert(decl->kind == IDecl::KIND_STRUCT);
-		vprintf(self->out, "typedef struct {} {{", decl->name.str);
-
-		self->indent++;
-
-		Sym sym = cgen_sym(self, decl->name.str);
-		for(Field_Sign& f: sym->type->fields)
-		{
-			cgen_newline(self);
-			vprintf(self->out, "{}", cgen_write_field(self, f.type, f.name));
-			vprintf(self->out, ";");
-		}
-
-		self->indent--;
-		cgen_newline(self);
-
-		vprintf(self->out, "} {};", decl->name.str);
-	}
-
-	inline static void
-	cgen_decl_union_gen(CGen self, Decl decl)
-	{
-		assert(decl->kind == IDecl::KIND_UNION);
-		vprintf(self->out, "typedef union {} {{", decl->name.str);
-
-		self->indent++;
-
-		Sym sym = cgen_sym(self, decl->name.str);
-		for (Field_Sign& f : sym->type->fields)
-		{
-			cgen_newline(self);
-			vprintf(self->out, "{}", cgen_write_field(self, f.type, f.name));
-			vprintf(self->out, ";");
-		}
-
-		self->indent--;
-		cgen_newline(self);
-
-		vprintf(self->out, "} {};", decl->name.str);
-	}
-
-	inline static void
-	cgen_decl_enum_gen(CGen self, Decl decl)
-	{
-		assert(decl->kind == IDecl::KIND_ENUM);
-		vprintf(self->out, "typedef enum {} {{", decl->name.str);
-
-		self->indent++;
-		for(size_t i = 0; i < decl->enum_decl.count; ++i)
-		{
-			if (i != 0)
-				vprintf(self->out, ", ");
-			cgen_newline(self);
-			vprintf(self->out, "{}", decl->enum_decl[i].id.str);
-			if(decl->enum_decl[i].expr)
-			{
-				vprintf(self->out, " = ");
-				cgen_expr_gen(self, decl->enum_decl[i].expr);
-			}
-		}
-
-		self->indent--;
-		cgen_newline(self);
-		vprintf(self->out, "} {};", decl->name.str);
-	}
-
-	inline static void
-	cgen_decl_func_gen(CGen self, Decl decl)
-	{
-		assert(decl->kind == IDecl::KIND_FUNC);
+		assert(sym->kind == ISym::KIND_FUNC);
+		Decl decl = sym->func_sym;
 		
-		Sym sym = cgen_sym(self, decl->name.str);
 		vprintf(
 			self->out,
 			"{} {}(",
@@ -829,59 +761,6 @@ namespace zay
 	}
 
 	inline static void
-	cgen_decl_var_gen(CGen self, Decl decl)
-	{
-		assert(decl->kind == IDecl::KIND_VAR);
-
-		for(size_t i = 0; i < decl->var_decl.ids.count; ++i)
-		{
-			if(i != 0)
-			{
-				vprintf(self->out, ";");
-				cgen_newline(self);
-			}
-
-			Sym s = cgen_sym(self, decl->var_decl.ids[i].str);
-			vprintf(self->out, "{}", cgen_write_field(self, s->type, s->name));
-			if(i < decl->var_decl.exprs.count)
-			{
-				vprintf(self->out, " = ");
-				cgen_expr_gen(self, decl->var_decl.exprs[i]);
-			}
-		}
-
-		vprintf(self->out, ";");
-	}
-
-	inline static void
-	cgen_decl_gen(CGen self, Decl decl)
-	{
-		switch(decl->kind)
-		{
-		case IDecl::KIND_STRUCT:
-			cgen_decl_struct_gen(self, decl);
-			break;
-		case IDecl::KIND_UNION:
-			cgen_decl_union_gen(self, decl);
-			break;
-		case IDecl::KIND_ENUM:
-			cgen_decl_enum_gen(self, decl);
-			break;
-		case IDecl::KIND_FUNC:
-			cgen_decl_func_gen(self, decl);
-			break;
-		case IDecl::KIND_VAR:
-			cgen_decl_var_gen(self, decl);
-			break;
-		default:
-			assert(false && "unreachable");
-			break;
-		}
-	}
-
-
-	//symbols
-	inline static void
 	cgen_sym_var_gen(CGen self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_VAR);
@@ -908,17 +787,8 @@ namespace zay
 	{
 		switch(sym->kind)
 		{
-		case ISym::KIND_STRUCT:
-			cgen_decl_struct_gen(self, sym->struct_sym);
-			break;
-		case ISym::KIND_UNION:
-			cgen_decl_union_gen(self, sym->union_sym);
-			break;
-		case ISym::KIND_ENUM:
-			cgen_decl_enum_gen(self, sym->enum_sym);
-			break;
 		case ISym::KIND_FUNC:
-			cgen_decl_func_gen(self, sym->func_sym);
+			cgen_sym_func_gen(self, sym);
 			break;
 		case ISym::KIND_VAR:
 			cgen_sym_var_gen(self, sym);

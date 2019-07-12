@@ -13,48 +13,6 @@ namespace zay
 	//Declarations
 	typedef struct IDecl* Decl;
 
-	//Struct, Union Fields
-	struct Field
-	{
-		mn::Buf<Tkn> ids;
-		Type_Sign type;
-	};
-
-	inline static Field
-	field_new()
-	{
-		Field self{};
-		self.ids = mn::buf_new<Tkn>();
-		self.type = type_sign_new();
-		return self;
-	}
-
-	inline static void
-	field_free(Field& self)
-	{
-		mn::buf_free(self.ids);
-		type_sign_free(self.type);
-	}
-
-	inline static void
-	destruct(Field& self)
-	{
-		field_free(self);
-	}
-
-	inline static Field
-	clone(const Field& self)
-	{
-		return Field{ clone(self.ids), clone(self.type) };
-	}
-
-	//Enum Field
-	struct Enum_Field
-	{
-		Tkn id;
-		Expr expr;
-	};
-
 	//Function Arguments
 	struct Arg
 	{
@@ -89,9 +47,6 @@ namespace zay
 		enum KIND
 		{
 			KIND_NONE,
-			KIND_STRUCT,
-			KIND_UNION,
-			KIND_ENUM,
 			KIND_VAR,
 			KIND_FUNC,
 			KIND_TYPE
@@ -104,13 +59,6 @@ namespace zay
 		Pos pos;
 		union
 		{
-			mn::Buf<Field> struct_decl;
-
-			//let's not care about unions right now
-			mn::Buf<Field> union_decl;
-
-			mn::Buf<Enum_Field> enum_decl;
-
 			Var var_decl;
 
 			struct
@@ -123,15 +71,6 @@ namespace zay
 			Type_Sign type_decl;
 		};
 	};
-
-	ZAY_EXPORT Decl
-	decl_struct(const Tkn& name, const mn::Buf<Field>& fields);
-
-	ZAY_EXPORT Decl
-	decl_union(const Tkn& name, const mn::Buf<Field>& fields);
-
-	ZAY_EXPORT Decl
-	decl_enum(const Tkn& name, const mn::Buf<Enum_Field>& fields);
 
 	ZAY_EXPORT Decl
 	decl_var(const Var& v);

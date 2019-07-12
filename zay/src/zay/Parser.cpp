@@ -186,57 +186,6 @@ namespace zay
 	}
 
 	inline static Decl
-	parser_decl_aggregate(Parser self)
-	{
-		parser_eat_must(self, Tkn::KIND_KEYWORD_TYPE);
-		Tkn name = parser_eat_must(self, Tkn::KIND_ID);
-		Tkn type = parser_eat(self);
-		if(type.kind != Tkn::KIND_KEYWORD_STRUCT && type.kind != Tkn::KIND_KEYWORD_UNION)
-		{
-			src_err(
-				self->src,
-				err_tkn(type, strf("expected a type but found '{}'", type.str))
-			);
-		}
-
-		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
-		Buf<Field> fields = buf_new<Field>();
-		while(parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
-			buf_push(fields, parser_field(self));
-		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
-
-		if(type.kind == Tkn::KIND_KEYWORD_STRUCT)
-			return decl_struct(name, fields);
-		else if(type.kind == Tkn::KIND_KEYWORD_UNION)
-			return decl_union(name, fields);
-		return nullptr;
-	}
-
-	inline static Decl
-	parser_decl_enum(Parser self)
-	{
-		parser_eat_must(self, Tkn::KIND_KEYWORD_TYPE);
-		Tkn name = parser_eat_must(self, Tkn::KIND_ID);
-		parser_eat_must(self, Tkn::KIND_KEYWORD_ENUM);
-
-		Buf<Enum_Field> enum_fields = buf_new<Enum_Field>();
-		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
-		do
-		{
-			if(Tkn id = parser_eat_kind(self, Tkn::KIND_ID))
-			{
-				Expr expr = nullptr;
-				if(parser_eat_kind(self, Tkn::KIND_EQUAL))
-					expr = parser_expr(self);
-				buf_push(enum_fields, Enum_Field{id, expr});
-			}
-		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
-		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
-
-		return decl_enum(name, enum_fields);
-	}
-
-	inline static Decl
 	parser_decl_type(Parser self)
 	{
 		//only working with struct, and enums

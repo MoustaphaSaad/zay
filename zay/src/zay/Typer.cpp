@@ -70,15 +70,6 @@ namespace zay
 		{
 			switch(d->kind)
 			{
-			case IDecl::KIND_STRUCT:
-				typer_sym(self, sym_struct(d));
-				break;
-			case IDecl::KIND_UNION:
-				typer_sym(self, sym_union(d));
-				break;
-			case IDecl::KIND_ENUM:
-				typer_sym(self, sym_enum(d));
-				break;
 			case IDecl::KIND_VAR:
 				for (size_t i = 0; i < d->var_decl.ids.count; ++i)
 				{
@@ -172,8 +163,13 @@ namespace zay
 				res = type_intern_ptr(self->src->type_table, res);
 				break;
 			case Type_Atom::KIND_ARRAY:
-				res = type_intern_array(self->src->type_table, Array_Sign{res, atom.count});
+			{
+				size_t array_count = 0;
+				if (atom.count.kind == Tkn::KIND_INTEGER)
+					reads(atom.count.str, array_count);
+				res = type_intern_array(self->src->type_table, Array_Sign{ res, array_count });
 				break;
+			}
 			case Type_Atom::KIND_STRUCT:
 			{
 				//this is not a named type, so generate a name for it and put it in global scope
@@ -316,77 +312,7 @@ namespace zay
 		}
 
 		type->kind = IType::KIND_COMPLETING;
-		if(sym->kind == ISym::KIND_STRUCT)
-		{
-			Decl decl = sym->struct_sym;
-			Buf<Field_Sign> fields = buf_new<Field_Sign>();
-			for(size_t i = 0; i < decl->struct_decl.count; ++i)
-			{
-				Type field_type = typer_type_sign_resolve(self, decl->struct_decl[i].type, nullptr);
-				if (field_type->kind == IType::KIND_COMPLETING ||
-					field_type->kind == IType::KIND_INCOMPLETE)
-				{
-					typer_type_complete(self, field_type->sym);
-				}
-
-				for(size_t j = 0; j < decl->struct_decl[i].ids.count; ++j)
-				{
-					buf_push(fields, Field_Sign{
-						decl->struct_decl[i].ids[j].str,
-						field_type,
-						0 //set the offset here to be 0 for now
-					});
-				}
-			}
-			type_struct_complete(type, fields);
-		}
-		else if(sym->kind == ISym::KIND_UNION)
-		{
-			Decl decl = sym->union_sym;
-			Buf<Field_Sign> fields = buf_new<Field_Sign>();
-			for (size_t i = 0; i < decl->union_decl.count; ++i)
-			{
-				Type field_type = typer_type_sign_resolve(self, decl->union_decl[i].type, nullptr);
-				if (field_type->kind == IType::KIND_COMPLETING ||
-					field_type->kind == IType::KIND_INCOMPLETE)
-				{
-					typer_type_complete(self, field_type->sym);
-				}
-
-				for (size_t j = 0; j < decl->union_decl[i].ids.count; ++j)
-				{
-					buf_push(fields, Field_Sign{
-						decl->union_decl[i].ids[j].str,
-						field_type,
-						0 //set the offset here to be 0 for now
-						});
-				}
-			}
-			type_union_complete(type, fields);
-		}
-		else if(sym->kind == ISym::KIND_ENUM)
-		{
-			Decl decl = sym->enum_sym;
-			Buf<Enum_Value> values = buf_new<Enum_Value>();
-			for(size_t i = 0; i < decl->enum_decl.count; ++i)
-			{
-				Enum_Value v{ decl->enum_decl[i].id, decl->enum_decl[i].expr };
-				if (v.value)
-				{
-					Type value_type = typer_expr_resolve(self, v.value);
-					if(value_type != type_int)
-					{
-						src_err(
-							self->src,
-							err_expr(v.value, strf("enums should have int values but found '{}'", value_type))
-						);
-					}
-				}
-				buf_push(values, v);
-			}
-			type_enum_complete(type, values);
-		}
-		else if(sym->kind == ISym::KIND_TYPE)
+		if(sym->kind == ISym::KIND_TYPE)
 		{
 			Decl decl = sym->type_sym;
 			sym->type = typer_type_sign_resolve(self, decl->type_decl, sym->type);

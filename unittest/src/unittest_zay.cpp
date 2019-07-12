@@ -923,15 +923,31 @@ TEST_CASE("[zay]: anonymous struct in union")
 	ZayFloat32 z;
 } __unnamed_struct_0;
 typedef union vec3f {
-	ZayFloat32 (data[1]);
+	ZayFloat32 (data[3]);
 	__unnamed_struct_0 elements;
 } vec3f;)CODE";
 	CHECK(answer == expected);
 }
 
-TEST_CASE("[zay]: C interface")
+TEST_CASE("[zay]: array types")
 {
 	Str answer = cgen(R"CODE(
+	type vec3 [3]float32
+	type vec4 [4]float32
+	type mat4 [4]vec4
+	type mat3x4 [3]vec4
+	)CODE");
+	const char* expected = R"CODE(typedef ZayFloat32 (vec3[3]);
+typedef ZayFloat32 (vec4[4]);
+typedef ZayFloat32 ((mat4[4])[4]);
+typedef ZayFloat32 ((mat3x4[3])[4]);)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: C interface")
+{
+	//i haven't yet done function types
+	/*Str answer = cgen(R"CODE(
 	type Reader struct {
 		read: func(request_amount: uint): uint
 	}
@@ -940,5 +956,5 @@ TEST_CASE("[zay]: C interface")
 ZayInt add(ZayInt a, ZayInt b) {
 	return a + b;
 })CODE";
-	CHECK(answer == expected);
+	CHECK(answer == expected);*/
 }

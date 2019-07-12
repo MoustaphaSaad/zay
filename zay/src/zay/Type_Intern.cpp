@@ -157,6 +157,7 @@ namespace zay
 			return;
 		case IType::KIND_PTR:
 		case IType::KIND_ARRAY:
+		case IType::KIND_ALIAS:
 			break;
 		case IType::KIND_FUNC:
 			func_sign_free(self->func);
@@ -167,9 +168,6 @@ namespace zay
 			break;
 		case IType::KIND_ENUM:
 			buf_free(self->enum_values);
-			break;
-		case IType::KIND_ALIAS:
-			type_free(self->alias);
 			break;
 		default: assert(false && "unreachable"); break;
 		}

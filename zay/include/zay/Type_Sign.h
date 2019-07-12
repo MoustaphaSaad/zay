@@ -78,4 +78,48 @@ namespace zay
 	{
 		mn::destruct(self);
 	}
+
+
+	//Struct, Union Fields
+	struct Field
+	{
+		mn::Buf<Tkn> ids;
+		Type_Sign type;
+	};
+
+	inline static Field
+	field_new()
+	{
+		Field self{};
+		self.ids = mn::buf_new<Tkn>();
+		self.type = type_sign_new();
+		return self;
+	}
+
+	inline static void
+	field_free(Field& self)
+	{
+		mn::buf_free(self.ids);
+		type_sign_free(self.type);
+	}
+
+	inline static void
+	destruct(Field& self)
+	{
+		field_free(self);
+	}
+
+	inline static Field
+	clone(const Field& self)
+	{
+		return Field{ clone(self.ids), clone(self.type) };
+	}
+
+	//Enum Field
+	typedef struct IExpr* Expr;
+	struct Enum_Field
+	{
+		Tkn id;
+		Expr expr;
+	};
 }

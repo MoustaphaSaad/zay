@@ -114,65 +114,6 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_aggregate(AST_Lisp& self, Decl decl)
-	{
-		ast_lisp_indent(self);
-
-		const char* type;
-		switch(decl->kind)
-		{
-		case IDecl::KIND_STRUCT: type = "struct"; break;
-		case IDecl::KIND_UNION: type = "union"; break;
-		default: assert(false && "unreachable"); type = "<UNIDENTIFIED>"; break;
-		}
-
-		vprintf(self.out, "({}", type);
-
-		const char* name = "<UNNAMED>";
-		if(decl->name)
-			name = decl->name.str;
-		vprintf(self.out, " {}\n", name);
-
-		self.level++;
-
-		for(size_t i = 0; i < decl->struct_decl.count; ++i)
-		{
-			ast_lisp_field(self, decl->struct_decl[i]);
-			vprintf(self.out, "\n");
-		}
-
-		self.level--;
-
-		ast_lisp_indent(self);
-		vprintf(self.out, ")");
-	}
-
-	inline static void
-	ast_lisp_enum(AST_Lisp& self, Decl decl)
-	{
-		ast_lisp_indent(self);
-
-		vprintf(self.out, "(enum {}\n", decl->name.str);
-
-		self.level++;
-		for(size_t i = 0; i < decl->enum_decl.count; ++i)
-		{
-			ast_lisp_indent(self);
-			vprintf(self.out, "{}", decl->enum_decl[i].id.str);
-			if(decl->enum_decl[i].expr)
-			{
-				vprintf(self.out , " = ");
-				ast_lisp_expr(self, decl->enum_decl[i].expr);
-			}
-			vprintf(self.out, "\n");
-		}
-		self.level--;
-
-		ast_lisp_indent(self);
-		vprintf(self.out, ")");
-	}
-
-	inline static void
 	ast_lisp_variable(AST_Lisp& self, const Var& v)
 	{
 		ast_lisp_indent(self);
@@ -596,15 +537,6 @@ namespace zay
 	{
 		switch(decl->kind)
 		{
-		case IDecl::KIND_STRUCT:
-		case IDecl::KIND_UNION:
-			ast_lisp_aggregate(self, decl);
-			break;
-
-		case IDecl::KIND_ENUM:
-			ast_lisp_enum(self, decl);
-			break;
-
 		case IDecl::KIND_VAR:
 			ast_lisp_var(self, decl);
 			break;

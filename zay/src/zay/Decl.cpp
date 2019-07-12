@@ -7,36 +7,6 @@ namespace zay
 	using namespace mn;
 
 	Decl
-	decl_struct(const Tkn& name, const mn::Buf<Field>& fields)
-	{
-		Decl self = alloc<IDecl>();
-		self->kind = IDecl::KIND_STRUCT;
-		self->name = name;
-		self->struct_decl = fields;
-		return self;
-	}
-
-	Decl
-	decl_union(const Tkn& name, const mn::Buf<Field>& fields)
-	{
-		Decl self = alloc<IDecl>();
-		self->kind = IDecl::KIND_UNION;
-		self->name = name;
-		self->union_decl = fields;
-		return self;
-	}
-
-	Decl
-	decl_enum(const Tkn& name, const mn::Buf<Enum_Field>& fields)
-	{
-		Decl self = alloc<IDecl>();
-		self->kind = IDecl::KIND_ENUM;
-		self->name = name;
-		self->enum_decl = fields;
-		return self;
-	}
-
-	Decl
 	decl_var(const Var& v)
 	{
 		Decl self = alloc<IDecl>();
@@ -75,14 +45,6 @@ namespace zay
 	{
 		switch(self->kind)
 		{
-		case IDecl::KIND_STRUCT: destruct(self->struct_decl); break;
-		case IDecl::KIND_UNION: destruct(self->union_decl); break;
-		case IDecl::KIND_ENUM:
-			for(const Enum_Field& e: self->enum_decl)
-				if(e.expr)
-					expr_free(e.expr);
-			buf_free(self->enum_decl);
-			break;
 		case IDecl::KIND_VAR:
 			var_free(self->var_decl);
 			break;
