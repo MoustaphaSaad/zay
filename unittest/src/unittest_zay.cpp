@@ -947,14 +947,29 @@ typedef ZayFloat32 ((mat3x4[3])[4]);)CODE";
 TEST_CASE("[zay]: C interface")
 {
 	//i haven't yet done function types
-	/*Str answer = cgen(R"CODE(
+	Str answer = cgen(R"CODE(
 	type Reader struct {
 		read: func(request_amount: uint): uint
 	}
 	)CODE");
-	const char* expected = R"CODE(typedef ZayInt X;
-ZayInt add(ZayInt a, ZayInt b) {
-	return a + b;
-})CODE";
-	CHECK(answer == expected);*/
+	const char* expected = R"CODE(typedef struct Reader {
+	ZayUint (*read)(ZayUint);
+} Reader;)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: func types")
+{
+	//i haven't yet done function types
+	Str answer = cgen("type read func(:uint): uint");
+	const char* expected = "typedef ZayUint (*read)(ZayUint);";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: array of func types")
+{
+	//i haven't yet done function types
+	Str answer = cgen("type read [5]func(:uint): uint");
+	const char* expected = "typedef ZayUint (*(read[5]))(ZayUint);";
+	CHECK(answer == expected);
 }

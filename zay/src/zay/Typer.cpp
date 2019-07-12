@@ -288,6 +288,15 @@ namespace zay
 				type_enum_complete(res, values);
 				break;
 			}
+			case Type_Atom::KIND_FUNC:
+			{
+				Func_Sign func_sign = func_sign_new();
+				for(const Type_Sign& arg: atom.func.args)
+					buf_push(func_sign.args, typer_type_sign_resolve(self, arg, nullptr));
+				func_sign.ret = typer_type_sign_resolve(self, atom.func.ret, nullptr);
+				res = type_intern_func(self->src->type_table, func_sign);
+				break;
+			}
 			default:
 				assert(false && "unreachable");
 				break;

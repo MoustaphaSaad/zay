@@ -58,6 +58,16 @@ namespace zay
 		return self;
 	}
 
+	Type_Atom
+	type_atom_func(const Buf<Type_Sign>& args, const Type_Sign& ret)
+	{
+		Type_Atom self{};
+		self.kind = Type_Atom::KIND_FUNC;
+		self.func.args = args;
+		self.func.ret = ret;
+		return self;
+	}
+
 	void
 	type_atom_free(Type_Atom& self)
 	{
@@ -75,6 +85,11 @@ namespace zay
 				if(f.expr)
 					expr_free(f.expr);
 			buf_free(self.enum_fields);
+		}
+		else if(self.kind == Type_Atom::KIND_FUNC)
+		{
+			destruct(self.func.args);
+			destruct(self.func.ret);
 		}
 	}
 

@@ -82,8 +82,8 @@ namespace zay
 				for(size_t i = 0; i < type->func.args.count; ++i)
 				{
 					if (i != 0)
-						strf(res, ", ");
-					strf(res, "{}", cgen_write_field(self, type->func.args[i], str_lit("")));
+						res = strf(res, ", ");
+					res = strf(res, "{}", cgen_write_field(self, type->func.args[i], str_lit("")));
 				}
 			}
 			res = strf(res, ")");
@@ -211,8 +211,8 @@ namespace zay
 				for(size_t i = 0; i < type->func.args.count; ++i)
 				{
 					if (i != 0)
-						strf(res, ", ");
-					strf(res, "{}", cgen_write_field(self, type->func.args[i], str_lit("")));
+						res = strf(res, ", ");
+					res = strf(res, "{}", cgen_write_field(self, type->func.args[i], str_lit("")));
 				}
 			}
 			res = strf(res, ")");

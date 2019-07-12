@@ -10,6 +10,9 @@ namespace zay
 	struct Field;
 	struct Enum_Field;
 
+	struct Type_Atom;
+	typedef mn::Buf<Type_Atom> Type_Sign;
+
 	//Types
 	struct Type_Atom
 	{
@@ -21,7 +24,8 @@ namespace zay
 			KIND_ARRAY,
 			KIND_STRUCT,
 			KIND_UNION,
-			KIND_ENUM
+			KIND_ENUM,
+			KIND_FUNC
 		};
 
 		KIND kind;
@@ -32,6 +36,10 @@ namespace zay
 			mn::Buf<Field> struct_fields;
 			mn::Buf<Field> union_fields;
 			mn::Buf<Enum_Field> enum_fields;
+			struct {
+				mn::Buf<Type_Sign> args;
+				Type_Sign ret;
+			} func;
 		};
 	};
 
@@ -53,6 +61,9 @@ namespace zay
 	ZAY_EXPORT Type_Atom
 	type_atom_enum(const mn::Buf<Enum_Field>& fields);
 
+	ZAY_EXPORT Type_Atom
+	type_atom_func(const mn::Buf<Type_Sign>& args, const Type_Sign& ret);
+
 	ZAY_EXPORT void
 	type_atom_free(Type_Atom& self);
 
@@ -65,7 +76,7 @@ namespace zay
 	ZAY_EXPORT Type_Atom
 	clone(const Type_Atom& self);
 
-	typedef mn::Buf<Type_Atom> Type_Sign;
+
 
 	inline static Type_Sign
 	type_sign_new()

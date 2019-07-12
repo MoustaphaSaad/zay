@@ -138,6 +138,9 @@ namespace zay
 	{
 		switch(self->kind)
 		{
+		case IType::KIND_INCOMPLETE:
+		case IType::KIND_COMPLETING:
+			break;
 			//we don't free the builtin types
 		case IType::KIND_VOID:
 		case IType::KIND_BOOL:

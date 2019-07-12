@@ -149,6 +149,38 @@ namespace zay
 				buf_push(type, type_atom_enum(fields));
 				break;
 			}
+			else if(tkn.kind == Tkn::KIND_KEYWORD_FUNC)
+			{
+				parser_eat(self);
+				parser_eat_must(self, Tkn::KIND_OPEN_PAREN);
+				Buf<Type_Sign> args = buf_new<Type_Sign>();
+				do
+				{
+					Tkn arg_tkn = parser_look(self);
+					if (arg_tkn.kind == Tkn::KIND_COLON)
+					{
+						parser_eat(self);
+						buf_push(args, parser_type(self));
+					}
+					else if(arg_tkn.kind == Tkn::KIND_ID)
+					{
+						size_t tkn_count = 0;
+						while (parser_eat_kind(self, Tkn::KIND_ID))
+							tkn_count++;
+						parser_eat_must(self, Tkn::KIND_COLON);
+						Type_Sign arg_type = parser_type(self);
+						for (size_t i = 0; i < tkn_count; ++i)
+							buf_push(args, clone(arg_type));
+						type_sign_free(arg_type);
+					}
+				} while (parser_eat_kind(self, Tkn::KIND_COMMA));
+				parser_eat_must(self, Tkn::KIND_CLOSE_PAREN);
+				Type_Sign ret = type_sign_new();
+				if (parser_eat_kind(self, Tkn::KIND_COLON))
+					ret = parser_type(self);
+				buf_push(type, type_atom_func(args, ret));
+				break;
+			}
 			else if(tkn.kind == Tkn::KIND_STAR)
 			{
 				parser_eat(self); //for the *
