@@ -631,11 +631,22 @@ namespace zay
 	}
 
 	inline static Type
+	type_unwrap(Type type)
+	{
+		if (type->kind == IType::KIND_ALIAS)
+			return type->alias;
+		return type;
+	}
+
+	inline static Type
 	typer_expr_cast_resolve(Typer self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_CAST);
 		Type from_type = typer_expr_resolve(self, expr->cast.base);
 		Type to_type = typer_type_sign_resolve(self, expr->cast.type, nullptr);
+
+		from_type = type_unwrap(from_type);
+		to_type = type_unwrap(to_type);
 
 		if(type_is_number(from_type) && type_is_number(to_type))
 			return to_type;
@@ -833,7 +844,7 @@ namespace zay
 				if(e)
 				{
 					Type expr_type = typer_expr_resolve(self, e);
-					if(expr_type != type)
+					if(type_unwrap(expr_type) != type_unwrap(type))
 					{
 						src_err(
 							self->src,

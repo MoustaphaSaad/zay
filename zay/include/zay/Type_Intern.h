@@ -226,6 +226,9 @@ namespace zay
 			return res;
 		}
 		case IType::KIND_STRUCT:
+		case IType::KIND_UNION:
+		case IType::KIND_ENUM:
+		case IType::KIND_ALIAS:
 			return mn::vprintf(stream, "{}", type->sym->name);
 		default:
 			return mn::vprintf(stream, "<UNKNOWN_TYPE>");

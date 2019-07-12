@@ -726,6 +726,25 @@ TEST_CASE("[zay]: strong type alias")
 	)CODE") == false);
 }
 
+TEST_CASE("[zay]: strong type alias casting")
+{
+	CHECK(typecheck(R"CODE(
+	type X int
+	func getX(): int {
+		var x: X = 0: X
+		return x: int
+	}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+	type X float32
+	func getX(): int {
+		var x: X = 0: X
+		return x: int
+	}
+	)CODE") == true);
+}
+
 inline static Str
 cgen(const char* str)
 {
@@ -955,6 +974,26 @@ TEST_CASE("[zay]: C interface")
 	const char* expected = R"CODE(typedef struct Reader {
 	ZayUint (*read)(ZayUint);
 } Reader;)CODE";
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: func pointers")
+{
+	//i haven't yet done function types
+	Str answer = cgen(R"CODE(
+	type OP func(a, b: int): int
+	func exec(a, b: int, op: OP): int { return op(a, b) }
+	func add(a, b: int): int { return a + b }
+	var res = exec(1, 2, add)
+	)CODE");
+	const char* expected = R"CODE(typedef ZayInt (*OP)(ZayInt, ZayInt);
+ZayInt exec(ZayInt a, ZayInt b, ZayInt (*op)(ZayInt, ZayInt)) {
+	return op(a, b);
+}
+ZayInt add(ZayInt a, ZayInt b) {
+	return a + b;
+}
+ZayInt res = exec(1, 2, add);)CODE";
 	CHECK(answer == expected);
 }
 

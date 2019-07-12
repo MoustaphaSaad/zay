@@ -165,8 +165,11 @@ namespace zay
 					else if(arg_tkn.kind == Tkn::KIND_ID)
 					{
 						size_t tkn_count = 0;
-						while (parser_eat_kind(self, Tkn::KIND_ID))
-							tkn_count++;
+						do
+						{
+							if (parser_eat_kind(self, Tkn::KIND_ID))
+								tkn_count++;
+						} while (parser_eat_kind(self, Tkn::KIND_COMMA));
 						parser_eat_must(self, Tkn::KIND_COLON);
 						Type_Sign arg_type = parser_type(self);
 						for (size_t i = 0; i < tkn_count; ++i)
