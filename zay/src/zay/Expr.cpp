@@ -143,6 +143,7 @@ namespace zay
 				expr_free(f.left);
 				expr_free(f.right);
 			}
+			buf_free(self->complit.fields);
 			break;
 		default: assert(false && "unreachable"); break;
 		}

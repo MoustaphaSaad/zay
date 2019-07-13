@@ -414,7 +414,68 @@ TEST_CASE("[zay]: composite literal")
 		func foo(a: Vec3f) { if a {} }
 		func foo2(a: Vec3f) { if a == Vec3f{} {x: 0} }
 	)CODE";
-	const char* expected = R"CODE()CODE";
+	const char* expected = R"CODE((type-decl Vec3f
+	(type-sign (struct
+		(field x, y, z: (type-sign  float32))
+	))
+)
+(var origin
+	(unary & (complit (type-sign  Vec3f)
+		(atom x) (atom 0)
+		(atom y) (atom 0)
+		(atom z) (atom 0)
+	))
+)
+(var origin2
+	(complit (type-sign  Vec3f)
+	)
+)
+(func IsOrigin
+	a: (type-sign  Vec3f) 
+	: (type-sign  bool)
+	(block-stmt
+		(if (binary == (atom a) (complit (type-sign  Vec3f)
+			(atom x) (atom 0)
+			(atom y) (atom 0)
+			(atom z) (atom 0)
+		))
+			(block-stmt
+				(return (atom true))
+			)
+			(block-stmt
+				(return (atom false))
+			)
+		)
+	)
+)
+(func foo
+	a: (type-sign  Vec3f) 
+	(block-stmt
+		(if (atom a)
+			(block-stmt
+			)
+
+		)
+	)
+)
+(func foo2
+	a: (type-sign  Vec3f) 
+	(block-stmt
+		(if (binary == (atom a) (complit (type-sign  Vec3f)
+		))
+			(block-stmt
+				(expr-stmt
+					(cast (atom x)(type-sign ))
+				)
+				(expr-stmt
+					(atom 0)
+				)
+			)
+
+		)
+	)
+)
+)CODE";
 	Str answer = parse(code);
 	CHECK(answer == expected);
 }

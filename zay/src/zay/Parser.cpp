@@ -434,7 +434,7 @@ namespace zay
 		}
 		else if(tkn.kind == Tkn::KIND_ID)
 		{
-			if (parser_is_type(self, tkn))
+			if (parser_is_type(self, tkn) && parser_look(self, 1).kind == Tkn::KIND_OPEN_CURLY)
 				expr = parser_expr_complit(self);
 			else
 				expr = expr_atom(parser_eat(self));
