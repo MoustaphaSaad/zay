@@ -15,6 +15,7 @@ namespace zay
 		Src src;
 		mn::Buf<Tkn> tkns;
 		size_t ix;
+		mn::Buf<Tkn> typenames;
 	};
 	typedef IParser* Parser;
 

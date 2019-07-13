@@ -324,8 +324,8 @@ TEST_CASE("[zay]: parse add mul expression")
 
 TEST_CASE("[zay]: complex dereference returned pointer")
 {
-	const char* code = "*arr[v.x + b * c[123]].koko(z: float, w)";
-	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type-sign  float)), (atom w)))";
+	const char* code = "*arr[v.x + b * c[123]].koko(z: float32, w)";
+	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type-sign  float32)), (atom w)))";
 	Str answer = parse_expr(code);
 	CHECK(answer == expected);
 }
@@ -401,6 +401,21 @@ TEST_CASE("[zay]: complex stmt")
 	(return (atom false))
 ))EXPECTED";
 	Str answer = parse_stmt(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: composite literal")
+{
+	const char* code = R"CODE(
+		type Vec3f struct { x, y, z: float32 }
+		var origin = &Vec3f{x: 0, y: 0, z: 0}
+		var origin2 = Vec3f{}
+		func IsOrigin(a: Vec3f): bool { if a == Vec3f{x: 0, y: 0, z: 0} { return true } else { return false } }
+		func foo(a: Vec3f) { if a {} }
+		func foo2(a: Vec3f) { if a == Vec3f{} {x: 0} }
+	)CODE";
+	const char* expected = R"CODE()CODE";
+	Str answer = parse(code);
 	CHECK(answer == expected);
 }
 

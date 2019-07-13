@@ -14,6 +14,9 @@ namespace zay
 
 	//Expressions
 	typedef struct IExpr* Expr;
+
+	struct Complit_Field { Expr left, right; };
+
 	struct IExpr
 	{
 		enum KIND
@@ -26,7 +29,8 @@ namespace zay
 			KIND_INDEXED,
 			KIND_CALL,
 			KIND_CAST,
-			KIND_PAREN
+			KIND_PAREN,
+			KIND_COMPLIT
 		};
 
 		KIND kind;
@@ -75,6 +79,12 @@ namespace zay
 			} cast;
 
 			Expr paren;
+
+			struct
+			{
+				Type_Sign type;
+				mn::Buf<Complit_Field> fields;
+			} complit;
 		};
 	};
 
@@ -101,6 +111,9 @@ namespace zay
 
 	ZAY_EXPORT Expr
 	expr_binary(Expr lhs, const Tkn& op, Expr rhs);
+
+	ZAY_EXPORT Expr
+	expr_complit(const Type_Sign& type, const mn::Buf<Complit_Field>& fields);
 
 	ZAY_EXPORT void
 	expr_free(Expr self);
