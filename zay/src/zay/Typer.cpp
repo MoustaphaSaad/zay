@@ -668,6 +668,49 @@ namespace zay
 	}
 
 	inline static Type
+	typer_expr_complit_resolve(Typer self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_COMPLIT);
+		Type type = typer_type_sign_resolve(self, expr->complit.type, nullptr);
+		for(size_t i = 0; i < expr->complit.fields.count; ++i)
+		{
+			Complit_Field field = expr->complit.fields[i];
+			Type left_type = nullptr;
+			if(field.kind == Complit_Field::KIND_MEMBER)
+			{
+				if (type->kind == IType::KIND_STRUCT ||
+					type->kind == IType::KIND_UNION)
+				{
+					for(size_t j = 0; j < type->fields.count; ++j)
+					{
+						if(field.left->atom.str == type->fields[j].name)
+						{
+							left_type = type->fields[j].type;
+							break;
+						}
+					}
+				}
+				if (left_type == nullptr)
+				{
+					src_err(
+						self->src,
+						err_expr(field.left, strf("'{}' type doesn't have this field", type))
+					);
+				}
+			}
+
+			Type right_type = typer_expr_resolve(self, field.right);
+
+			if(left_type != right_type)
+			{
+				Str msg = strf("type mismatch, type '{}' expected but type '{}' was provided", left_type, right_type);
+				src_err(self->src, err_expr(field.right, msg));
+			}
+		}
+		return type;
+	}
+
+	inline static Type
 	typer_expr_resolve(Typer self, Expr expr)
 	{
 		switch(expr->kind)
@@ -695,6 +738,9 @@ namespace zay
 			return expr->type;
 		case IExpr::KIND_PAREN:
 			expr->type = typer_expr_paren_resolve(self, expr);
+			return expr->type;
+		case IExpr::KIND_COMPLIT:
+			expr->type = typer_expr_complit_resolve(self, expr);
 			return expr->type;
 		default: assert(false && "unreachable"); return type_void;
 		}

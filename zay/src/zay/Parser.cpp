@@ -404,10 +404,28 @@ namespace zay
 		bool comma = true;
 		while(comma && parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
 		{
-			Expr left = parser_expr_base(self);
+			Complit_Field field{};
+			Tkn tkn = parser_look(self);
+			if (tkn.kind == Tkn::KIND_ID)
+			{
+				field.kind = Complit_Field::KIND_MEMBER;
+				field.left = expr_atom(parser_eat(self));
+			}
+			else if(tkn.kind == Tkn::KIND_OPEN_BRACKET)
+			{
+				parser_eat_must(self, Tkn::KIND_OPEN_BRACKET);
+				field.kind = Complit_Field::KIND_ARRAY;
+				field.left = parser_expr(self);
+				parser_eat_must(self, Tkn::KIND_CLOSE_BRACKET);
+			}
+			else
+			{
+				src_err(self->src, err_tkn(tkn, strf("'{}' unknown field in composite literal", tkn.str)));
+				break;
+			}
 			parser_eat_must(self, Tkn::KIND_COLON);
-			Expr right = parser_expr(self);
-			buf_push(fields, Complit_Field{ left, right });
+			field.right = parser_expr(self);
+			buf_push(fields, field);
 			comma = parser_eat_kind(self, Tkn::KIND_COMMA);
 		}
 		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);

@@ -1073,18 +1073,32 @@ ZayInt res = exec(1, 2, add);)CODE";
 	CHECK(answer == expected);
 }
 
-TEST_CASE("[zay]: func types")
+TEST_CASE("[zay]: composite literal")
 {
-	//i haven't yet done function types
-	Str answer = cgen("type read func(:uint): uint");
-	const char* expected = "typedef ZayUint (*read)(ZayUint);";
-	CHECK(answer == expected);
-}
-
-TEST_CASE("[zay]: array of func types")
-{
-	//i haven't yet done function types
-	Str answer = cgen("type read [5]func(:uint): uint");
-	const char* expected = "typedef ZayUint (*(read[5]))(ZayUint);";
+	Str answer = cgen(R"CODE(
+		type Vec3f struct {x, y, z: float32}
+		var origin = Vec3f{}
+		type Color struct {r, g, b, a: float32}
+		var red = Color{r: 1: float32}
+		var color_ptr = &Color{g: 1:float32}
+	)CODE");
+	const char* expected = R"CODE(typedef struct Vec3f {
+	ZayFloat32 x;
+	ZayFloat32 y;
+	ZayFloat32 z;
+} Vec3f;
+Vec3f origin = {};
+typedef struct Color {
+	ZayFloat32 r;
+	ZayFloat32 g;
+	ZayFloat32 b;
+	ZayFloat32 a;
+} Color;
+Color red = {
+	.r = (ZayFloat32)1
+};
+Color (*color_ptr) = &{
+	.g = (ZayFloat32)1
+};)CODE";
 	CHECK(answer == expected);
 }

@@ -15,7 +15,18 @@ namespace zay
 	//Expressions
 	typedef struct IExpr* Expr;
 
-	struct Complit_Field { Expr left, right; };
+	struct Complit_Field {
+		enum KIND
+		{
+			KIND_NONE,
+			KIND_MEMBER,
+			KIND_ARRAY
+		};
+
+		KIND kind;
+		Expr left;
+		Expr right;
+	};
 
 	struct IExpr
 	{
