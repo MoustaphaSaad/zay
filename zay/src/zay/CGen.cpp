@@ -460,6 +460,7 @@ namespace zay
 	cgen_expr_complit(CGen self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_COMPLIT);
+		vprintf(self->out, "({})", cgen_write_field(self, expr->type, ""));
 		vprintf(self->out, "{");
 		self->indent++;
 		for (size_t i = 0; i < expr->complit.fields.count; ++i)
