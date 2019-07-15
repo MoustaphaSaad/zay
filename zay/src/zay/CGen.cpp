@@ -460,7 +460,8 @@ namespace zay
 	cgen_expr_complit(CGen self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_COMPLIT);
-		vprintf(self->out, "({})", cgen_write_field(self, expr->type, ""));
+		if(expr->type->kind != IType::KIND_ARRAY)
+			vprintf(self->out, "({})", cgen_write_field(self, expr->type, ""));
 		vprintf(self->out, "{");
 		self->indent++;
 		for (size_t i = 0; i < expr->complit.fields.count; ++i)
@@ -468,8 +469,17 @@ namespace zay
 			if(i != 0)
 				vprintf(self->out, ",");
 			cgen_newline(self);
-			vprintf(self->out, ".");
-			cgen_expr_gen(self, expr->complit.fields[i].left);
+			if (expr->complit.fields[i].kind == Complit_Field::KIND_MEMBER)
+			{
+				vprintf(self->out, ".");
+				cgen_expr_gen(self, expr->complit.fields[i].left);
+			}
+			else if(expr->complit.fields[i].kind == Complit_Field::KIND_ARRAY)
+			{
+				vprintf(self->out, "[");
+				cgen_expr_gen(self, expr->complit.fields[i].left);
+				vprintf(self->out, "]");
+			}
 			vprintf(self->out, " = ");
 			cgen_expr_gen(self, expr->complit.fields[i].right);
 		}

@@ -472,6 +472,29 @@ namespace zay
 			parser_eat_must(self, Tkn::KIND_CLOSE_PAREN);
 			expr = expr_paren(expr);
 		}
+		else if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT ||
+				tkn.kind == Tkn::KIND_KEYWORD_UNION ||
+				tkn.kind == Tkn::KIND_KEYWORD_ENUM ||
+				tkn.kind == Tkn::KIND_KEYWORD_FUNC ||
+				tkn.kind == Tkn::KIND_STAR ||
+				tkn.kind == Tkn::KIND_OPEN_BRACKET ||
+				tkn.kind == Tkn::KIND_KEYWORD_BOOL ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT8 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT8 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT16 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT16 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT64 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT64 ||
+				tkn.kind == Tkn::KIND_KEYWORD_FLOAT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_FLOAT64 ||
+				tkn.kind == Tkn::KIND_STRING)
+		{
+			expr = parser_expr_complit(self);
+		}
 
 		if(expr)
 		{

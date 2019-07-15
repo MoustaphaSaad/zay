@@ -675,7 +675,7 @@ namespace zay
 		for(size_t i = 0; i < expr->complit.fields.count; ++i)
 		{
 			Complit_Field field = expr->complit.fields[i];
-			Type left_type = nullptr;
+			Type left_type = type_void;
 			if(field.kind == Complit_Field::KIND_MEMBER)
 			{
 				if (type->kind == IType::KIND_STRUCT ||
@@ -690,11 +690,25 @@ namespace zay
 						}
 					}
 				}
-				if (left_type == nullptr)
+				if (left_type == type_void)
 				{
 					src_err(
 						self->src,
 						err_expr(field.left, strf("'{}' type doesn't have this field", type))
+					);
+				}
+			}
+			else if(field.kind == Complit_Field::KIND_ARRAY)
+			{
+				if(type->kind == IType::KIND_ARRAY)
+				{
+					left_type = type->array.base;
+				}
+				else
+				{
+					src_err(
+						self->src,
+						err_expr(field.left, strf("'{}' type is not an array", type))
 					);
 				}
 			}

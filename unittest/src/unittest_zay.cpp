@@ -1081,24 +1081,43 @@ TEST_CASE("[zay]: composite literal")
 		type Color struct {r, g, b, a: float32}
 		var red = Color{r: 1: float32}
 		var color_ptr = &Color{g: 1:float32}
+		var vertices = [3]Vec3f{
+			[0]: Vec3f{x: -1:float32, y: -1: float32},
+			[1]: Vec3f{x:  0:float32, y:  1: float32},
+			[2]: Vec3f{x:  1:float32, y: -1: float32},
+		}
 	)CODE");
 	const char* expected = R"CODE(typedef struct Vec3f {
 	ZayFloat32 x;
 	ZayFloat32 y;
 	ZayFloat32 z;
 } Vec3f;
-Vec3f origin = {};
+Vec3f origin = (Vec3f){};
 typedef struct Color {
 	ZayFloat32 r;
 	ZayFloat32 g;
 	ZayFloat32 b;
 	ZayFloat32 a;
 } Color;
-Color red = {
+Color red = (Color){
 	.r = (ZayFloat32)1
 };
-Color (*color_ptr) = &{
+Color (*color_ptr) = &(Color){
 	.g = (ZayFloat32)1
+};
+Vec3f (vertices[3]) = {
+	[0] = (Vec3f){
+		.x = (ZayFloat32)-1,
+		.y = (ZayFloat32)-1
+	},
+	[1] = (Vec3f){
+		.x = (ZayFloat32)0,
+		.y = (ZayFloat32)1
+	},
+	[2] = (Vec3f){
+		.x = (ZayFloat32)1,
+		.y = (ZayFloat32)-1
+	}
 };)CODE";
 	CHECK(answer == expected);
 }
