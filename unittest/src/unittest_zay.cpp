@@ -324,8 +324,8 @@ TEST_CASE("[zay]: parse add mul expression")
 
 TEST_CASE("[zay]: complex dereference returned pointer")
 {
-	const char* code = "*arr[v.x + b * c[123]].koko(z: float, w)";
-	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type-sign  float)), (atom w)))";
+	const char* code = "*arr[v.x + b * c[123]].koko(z: float32, w)";
+	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type-sign  float32)), (atom w)))";
 	Str answer = parse_expr(code);
 	CHECK(answer == expected);
 }
@@ -401,6 +401,82 @@ TEST_CASE("[zay]: complex stmt")
 	(return (atom false))
 ))EXPECTED";
 	Str answer = parse_stmt(code);
+	CHECK(answer == expected);
+}
+
+TEST_CASE("[zay]: composite literal")
+{
+	const char* code = R"CODE(
+		type Vec3f struct { x, y, z: float32 }
+		var origin = &Vec3f{x: 0, y: 0, z: 0}
+		var origin2 = Vec3f{}
+		func IsOrigin(a: Vec3f): bool { if a == Vec3f{x: 0, y: 0, z: 0} { return true } else { return false } }
+		func foo(a: Vec3f) { if a {} }
+		func foo2(a: Vec3f) { if a == Vec3f{} {x: 0} }
+	)CODE";
+	const char* expected = R"CODE((type-decl Vec3f
+	(type-sign (struct
+		(field x, y, z: (type-sign  float32))
+	))
+)
+(var origin
+	(unary & (complit (type-sign  Vec3f)
+		(atom x) (atom 0)
+		(atom y) (atom 0)
+		(atom z) (atom 0)
+	))
+)
+(var origin2
+	(complit (type-sign  Vec3f)
+	)
+)
+(func IsOrigin
+	a: (type-sign  Vec3f) 
+	: (type-sign  bool)
+	(block-stmt
+		(if (binary == (atom a) (complit (type-sign  Vec3f)
+			(atom x) (atom 0)
+			(atom y) (atom 0)
+			(atom z) (atom 0)
+		))
+			(block-stmt
+				(return (atom true))
+			)
+			(block-stmt
+				(return (atom false))
+			)
+		)
+	)
+)
+(func foo
+	a: (type-sign  Vec3f) 
+	(block-stmt
+		(if (atom a)
+			(block-stmt
+			)
+
+		)
+	)
+)
+(func foo2
+	a: (type-sign  Vec3f) 
+	(block-stmt
+		(if (binary == (atom a) (complit (type-sign  Vec3f)
+		))
+			(block-stmt
+				(expr-stmt
+					(cast (atom x)(type-sign ))
+				)
+				(expr-stmt
+					(atom 0)
+				)
+			)
+
+		)
+	)
+)
+)CODE";
+	Str answer = parse(code);
 	CHECK(answer == expected);
 }
 
@@ -997,18 +1073,72 @@ ZayInt res = exec(1, 2, add);)CODE";
 	CHECK(answer == expected);
 }
 
-TEST_CASE("[zay]: func types")
+TEST_CASE("[zay]: composite literal")
 {
-	//i haven't yet done function types
-	Str answer = cgen("type read func(:uint): uint");
-	const char* expected = "typedef ZayUint (*read)(ZayUint);";
+	Str answer = cgen(R"CODE(
+		type Vec3f struct {x, y, z: float32}
+		var origin = Vec3f{}
+		type Color struct {r, g, b, a: float32}
+		var red = Color{r: 1: float32}
+		var color_ptr = &Color{g: 1:float32}
+		var vertices = [3]Vec3f{
+			[0]: Vec3f{x: -1:float32, y: -1: float32},
+			[1]: Vec3f{x:  0:float32, y:  1: float32},
+			[2]: Vec3f{x:  1:float32, y: -1: float32},
+		}
+	)CODE");
+	const char* expected = R"CODE(typedef struct Vec3f {
+	ZayFloat32 x;
+	ZayFloat32 y;
+	ZayFloat32 z;
+} Vec3f;
+Vec3f origin = (Vec3f){};
+typedef struct Color {
+	ZayFloat32 r;
+	ZayFloat32 g;
+	ZayFloat32 b;
+	ZayFloat32 a;
+} Color;
+Color red = (Color){
+	.r = (ZayFloat32)1
+};
+Color (*color_ptr) = &(Color){
+	.g = (ZayFloat32)1
+};
+Vec3f (vertices[3]) = {
+	[0] = (Vec3f){
+		.x = (ZayFloat32)-1,
+		.y = (ZayFloat32)-1
+	},
+	[1] = (Vec3f){
+		.x = (ZayFloat32)0,
+		.y = (ZayFloat32)1
+	},
+	[2] = (Vec3f){
+		.x = (ZayFloat32)1,
+		.y = (ZayFloat32)-1
+	}
+};)CODE";
 	CHECK(answer == expected);
 }
 
-TEST_CASE("[zay]: array of func types")
+TEST_CASE("[zay]: anonymous composite literal")
 {
-	//i haven't yet done function types
-	Str answer = cgen("type read [5]func(:uint): uint");
-	const char* expected = "typedef ZayUint (*(read[5]))(ZayUint);";
+	Str answer = cgen(R"CODE(
+		var color = struct { r, g, b, a: float32 } {
+			g: 1: float32,
+			a: 1: float32
+		}
+	)CODE");
+	const char* expected = R"CODE(typedef struct __unnamed_struct_0 {
+	ZayFloat32 r;
+	ZayFloat32 g;
+	ZayFloat32 b;
+	ZayFloat32 a;
+} __unnamed_struct_0;
+__unnamed_struct_0 color = (__unnamed_struct_0){
+	.g = (ZayFloat32)1,
+	.a = (ZayFloat32)1
+};)CODE";
 	CHECK(answer == expected);
 }

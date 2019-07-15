@@ -308,6 +308,27 @@ namespace zay
 		vprintf(self.out, ")");
 	}
 
+	inline static void
+	ast_lisp_complit(AST_Lisp& self, Expr expr)
+	{
+		vprintf(self.out, "(complit ");
+		ast_lisp_type_sign(self, expr->complit.type);
+		vprintf(self.out, "\n");
+		self.level++;
+		for(const Complit_Field& f: expr->complit.fields)
+		{
+			ast_lisp_indent(self);
+			ast_lisp_expr(self, f.left);
+			vprintf(self.out, " ");
+			ast_lisp_expr(self, f.right);
+			vprintf(self.out, "\n");
+		}
+		
+		self.level--;
+		ast_lisp_indent(self);
+		vprintf(self.out, ")");
+	}
+
 
 
 	inline static void
@@ -357,7 +378,8 @@ namespace zay
 		}
 
 		vprintf(self.out, "\n");
-		ast_lisp_stmt(self, stmt->if_stmt.else_body);
+		if(stmt->if_stmt.else_body)
+			ast_lisp_stmt(self, stmt->if_stmt.else_body);
 
 		self.level--;
 
@@ -510,6 +532,7 @@ namespace zay
 		case IExpr::KIND_CALL: ast_lisp_call(self, expr); break;
 		case IExpr::KIND_CAST: ast_lisp_cast(self, expr); break;
 		case IExpr::KIND_PAREN: ast_lisp_paren(self, expr); break;
+		case IExpr::KIND_COMPLIT: ast_lisp_complit(self, expr); break;
 		default: assert(false && "unreachable"); break;
 		}
 	}

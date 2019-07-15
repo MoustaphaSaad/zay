@@ -94,6 +94,17 @@ namespace zay
 		return self;
 	}
 
+	Expr
+	expr_complit(const Type_Sign& type, const mn::Buf<Complit_Field>& fields)
+	{
+		Expr self = alloc<IExpr>();
+		self->type = type_void;
+		self->kind = IExpr::KIND_COMPLIT;
+		self->complit.type = type;
+		self->complit.fields = fields;
+		return self;
+	}
+
 	void
 	expr_free(Expr self)
 	{
@@ -124,6 +135,15 @@ namespace zay
 			break;
 		case IExpr::KIND_PAREN:
 			expr_free(self->paren);
+			break;
+		case IExpr::KIND_COMPLIT:
+			type_sign_free(self->complit.type);
+			for (const Complit_Field& f : self->complit.fields)
+			{
+				expr_free(f.left);
+				expr_free(f.right);
+			}
+			buf_free(self->complit.fields);
 			break;
 		default: assert(false && "unreachable"); break;
 		}

@@ -2,6 +2,7 @@
 
 #include <mn/Memory.h>
 #include <mn/IO.h>
+#include <mn/Defer.h>
 
 namespace zay
 {
@@ -9,6 +10,9 @@ namespace zay
 
 	inline static Field
 	parser_field(Parser self);
+
+	inline static Expr
+	parser_expr_base(Parser self);
 
 	inline static Tkn
 	parser_last_tkn(Parser self)
@@ -82,11 +86,9 @@ namespace zay
 	}
 
 	inline static bool
-	is_type(const Tkn& t)
+	parser_is_type(Parser self, const Tkn& t)
 	{
-		return (
-			t.kind == Tkn::KIND_ID ||
-			t.kind == Tkn::KIND_KEYWORD_BOOL ||
+		if (t.kind == Tkn::KIND_KEYWORD_BOOL ||
 			t.kind == Tkn::KIND_KEYWORD_INT ||
 			t.kind == Tkn::KIND_KEYWORD_UINT ||
 			t.kind == Tkn::KIND_KEYWORD_INT8 ||
@@ -99,8 +101,17 @@ namespace zay
 			t.kind == Tkn::KIND_KEYWORD_UINT64 ||
 			t.kind == Tkn::KIND_KEYWORD_FLOAT32 ||
 			t.kind == Tkn::KIND_KEYWORD_FLOAT64 ||
-			t.kind == Tkn::KIND_STRING
-		);
+			t.kind == Tkn::KIND_STRING)
+		{
+			return true;
+		}
+		else if(t.kind == Tkn::KIND_ID)
+		{
+			for (size_t i = 0; i < self->typenames.count; ++i)
+				if (self->typenames[i].str == t.str)
+					return true;
+		}
+		return false;
 	}
 
 	inline static Type_Sign
@@ -110,8 +121,30 @@ namespace zay
 		while(true)
 		{
 			Tkn tkn = parser_look(self);
-			if(is_type(tkn))
+			if (tkn.kind == Tkn::KIND_KEYWORD_BOOL ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT8 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT8 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT16 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT16 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT64 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT64 ||
+				tkn.kind == Tkn::KIND_KEYWORD_FLOAT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_FLOAT64 ||
+				tkn.kind == Tkn::KIND_STRING ||
+				tkn.kind == Tkn::KIND_ID)
 			{
+				if (parser_is_type(self, tkn) == false)
+				{
+					src_err(
+						self->src,
+						err_tkn(tkn, strf("'{}' is not a type", tkn.str))
+					);
+				}
+
 				buf_push(type, type_atom_named(parser_eat(self)));
 				break;
 			}
@@ -362,6 +395,45 @@ namespace zay
 	}
 
 	inline static Expr
+	parser_expr_complit(Parser self)
+	{
+		Type_Sign type = parser_type(self);
+
+		Buf<Complit_Field> fields = buf_new<Complit_Field>();
+		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
+		bool comma = true;
+		while(comma && parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
+		{
+			Complit_Field field{};
+			Tkn tkn = parser_look(self);
+			if (tkn.kind == Tkn::KIND_ID)
+			{
+				field.kind = Complit_Field::KIND_MEMBER;
+				field.left = expr_atom(parser_eat(self));
+			}
+			else if(tkn.kind == Tkn::KIND_OPEN_BRACKET)
+			{
+				parser_eat_must(self, Tkn::KIND_OPEN_BRACKET);
+				field.kind = Complit_Field::KIND_ARRAY;
+				field.left = parser_expr(self);
+				parser_eat_must(self, Tkn::KIND_CLOSE_BRACKET);
+			}
+			else
+			{
+				src_err(self->src, err_tkn(tkn, strf("'{}' unknown field in composite literal", tkn.str)));
+				break;
+			}
+			parser_eat_must(self, Tkn::KIND_COLON);
+			field.right = parser_expr(self);
+			buf_push(fields, field);
+			comma = parser_eat_kind(self, Tkn::KIND_COMMA);
+		}
+		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
+
+		return expr_complit(type, fields);
+	}
+
+	inline static Expr
 	parser_expr_atom(Parser self)
 	{
 		Tkn tkn = parser_look(self);
@@ -380,7 +452,10 @@ namespace zay
 		}
 		else if(tkn.kind == Tkn::KIND_ID)
 		{
-			expr = expr_atom(parser_eat(self));
+			if (parser_is_type(self, tkn) && parser_look(self, 1).kind == Tkn::KIND_OPEN_CURLY)
+				expr = parser_expr_complit(self);
+			else
+				expr = expr_atom(parser_eat(self));
 		}
 		else if(tkn.kind == Tkn::KIND_KEYWORD_FALSE)
 		{
@@ -396,6 +471,29 @@ namespace zay
 			expr = parser_expr(self);
 			parser_eat_must(self, Tkn::KIND_CLOSE_PAREN);
 			expr = expr_paren(expr);
+		}
+		else if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT ||
+				tkn.kind == Tkn::KIND_KEYWORD_UNION ||
+				tkn.kind == Tkn::KIND_KEYWORD_ENUM ||
+				tkn.kind == Tkn::KIND_KEYWORD_FUNC ||
+				tkn.kind == Tkn::KIND_STAR ||
+				tkn.kind == Tkn::KIND_OPEN_BRACKET ||
+				tkn.kind == Tkn::KIND_KEYWORD_BOOL ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT8 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT8 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT16 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT16 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_INT64 ||
+				tkn.kind == Tkn::KIND_KEYWORD_UINT64 ||
+				tkn.kind == Tkn::KIND_KEYWORD_FLOAT32 ||
+				tkn.kind == Tkn::KIND_KEYWORD_FLOAT64 ||
+				tkn.kind == Tkn::KIND_STRING)
+		{
+			expr = parser_expr_complit(self);
 		}
 
 		if(expr)
@@ -753,10 +851,17 @@ namespace zay
 		self->src = src;
 		self->tkns = clone(src->tkns);
 		self->ix = 0;
+		self->typenames = buf_new<Tkn>();
 		//ignore the comments and other unwanted tokens for parsing
-		buf_remove_if(self->tkns, [](const Tkn& t){
+		buf_remove_if(self->tkns, [](const Tkn& t) {
 			return t.kind == Tkn::KIND_COMMENT;
 		});
+		for (size_t i = 0; i < self->tkns.count; ++i)
+		{
+			if (self->tkns[i].kind == Tkn::KIND_KEYWORD_TYPE && i < self->tkns.count)
+				buf_push(self->typenames, self->tkns[i + 1]);
+		}
+
 		return self;
 	}
 
@@ -764,6 +869,7 @@ namespace zay
 	parser_free(Parser self)
 	{
 		buf_free(self->tkns);
+		buf_free(self->typenames);
 		free(self);
 	}
 

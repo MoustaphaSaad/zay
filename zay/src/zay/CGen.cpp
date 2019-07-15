@@ -457,6 +457,39 @@ namespace zay
 	}
 
 	inline static void
+	cgen_expr_complit(CGen self, Expr expr)
+	{
+		assert(expr->kind == IExpr::KIND_COMPLIT);
+		if(expr->type->kind != IType::KIND_ARRAY)
+			vprintf(self->out, "({})", cgen_write_field(self, expr->type, ""));
+		vprintf(self->out, "{");
+		self->indent++;
+		for (size_t i = 0; i < expr->complit.fields.count; ++i)
+		{
+			if(i != 0)
+				vprintf(self->out, ",");
+			cgen_newline(self);
+			if (expr->complit.fields[i].kind == Complit_Field::KIND_MEMBER)
+			{
+				vprintf(self->out, ".");
+				cgen_expr_gen(self, expr->complit.fields[i].left);
+			}
+			else if(expr->complit.fields[i].kind == Complit_Field::KIND_ARRAY)
+			{
+				vprintf(self->out, "[");
+				cgen_expr_gen(self, expr->complit.fields[i].left);
+				vprintf(self->out, "]");
+			}
+			vprintf(self->out, " = ");
+			cgen_expr_gen(self, expr->complit.fields[i].right);
+		}
+		self->indent--;
+		if(expr->complit.fields.count > 0)
+			cgen_newline(self);
+		vprintf(self->out, "}");
+	}
+
+	inline static void
 	cgen_expr_gen(CGen self, Expr expr)
 	{
 		switch(expr->kind)
@@ -484,6 +517,9 @@ namespace zay
 			break;
 		case IExpr::KIND_PAREN:
 			cgen_expr_paren(self, expr);
+			break;
+		case IExpr::KIND_COMPLIT:
+			cgen_expr_complit(self, expr);
 			break;
 		default:
 			assert(false && "unreachable");
