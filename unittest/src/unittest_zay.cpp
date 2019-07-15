@@ -844,8 +844,8 @@ TEST_CASE("[zay]: struct gen")
 	const char* expected = R"CODE(typedef struct X {
 	ZayInt x;
 	ZayInt y;
-	ZayFloat32 z;
-	ZayFloat32 w;
+	float z;
+	float w;
 } X;)CODE";
 	CHECK(answer == expected);
 }
@@ -861,8 +861,8 @@ TEST_CASE("[zay]: union gen")
 	const char* expected = R"CODE(typedef union X {
 	ZayInt x;
 	ZayInt y;
-	ZayFloat32 z;
-	ZayFloat32 w;
+	float z;
+	float w;
 } X;)CODE";
 	CHECK(answer == expected);
 }
@@ -911,7 +911,7 @@ TEST_CASE("[zay]: global var gen")
 		var x, y = 0, 3.14
 	)CODE");
 	const char* expected = R"CODE(ZayInt x = 0;
-ZayFloat64 y = 3.14;)CODE";
+double y = 3.14;)CODE";
 	CHECK(answer == expected);
 }
 
@@ -965,10 +965,10 @@ TEST_CASE("[zay]: struct pointer")
 	}
 	)CODE");
 	const char* expected = R"CODE(typedef struct Point {
-	ZayFloat32 x;
-	ZayFloat32 y;
+	float x;
+	float y;
 } Point;
-ZayVoid add(Point (*a), Point b) {
+void add(Point (*a), Point b) {
 	a->x += b.x;
 	a->y += b.y;
 })CODE";
@@ -981,8 +981,8 @@ TEST_CASE("[zay]: struct pointer type")
 	type Point *struct { x, y: float32 }
 	)CODE");
 	const char* expected = R"CODE(typedef struct Point {
-	ZayFloat32 x;
-	ZayFloat32 y;
+	float x;
+	float y;
 } (*Point);)CODE";
 	CHECK(answer == expected);
 }
@@ -1013,12 +1013,12 @@ TEST_CASE("[zay]: anonymous struct in union")
 	}
 	)CODE");
 	const char* expected = R"CODE(typedef struct __unnamed_struct_0 {
-	ZayFloat32 x;
-	ZayFloat32 y;
-	ZayFloat32 z;
+	float x;
+	float y;
+	float z;
 } __unnamed_struct_0;
 typedef union vec3f {
-	ZayFloat32 (data[3]);
+	float (data[3]);
 	__unnamed_struct_0 elements;
 } vec3f;)CODE";
 	CHECK(answer == expected);
@@ -1032,10 +1032,10 @@ TEST_CASE("[zay]: array types")
 	type mat4 [4]vec4
 	type mat3x4 [3]vec4
 	)CODE");
-	const char* expected = R"CODE(typedef ZayFloat32 (vec3[3]);
-typedef ZayFloat32 (vec4[4]);
-typedef ZayFloat32 ((mat4[4])[4]);
-typedef ZayFloat32 ((mat3x4[3])[4]);)CODE";
+	const char* expected = R"CODE(typedef float (vec3[3]);
+typedef float (vec4[4]);
+typedef float ((mat4[4])[4]);
+typedef float ((mat3x4[3])[4]);)CODE";
 	CHECK(answer == expected);
 }
 
@@ -1088,35 +1088,35 @@ TEST_CASE("[zay]: composite literal")
 		}
 	)CODE");
 	const char* expected = R"CODE(typedef struct Vec3f {
-	ZayFloat32 x;
-	ZayFloat32 y;
-	ZayFloat32 z;
+	float x;
+	float y;
+	float z;
 } Vec3f;
 Vec3f origin = (Vec3f){};
 typedef struct Color {
-	ZayFloat32 r;
-	ZayFloat32 g;
-	ZayFloat32 b;
-	ZayFloat32 a;
+	float r;
+	float g;
+	float b;
+	float a;
 } Color;
 Color red = (Color){
-	.r = (ZayFloat32)1
+	.r = (float)1
 };
 Color (*color_ptr) = &(Color){
-	.g = (ZayFloat32)1
+	.g = (float)1
 };
 Vec3f (vertices[3]) = {
 	[0] = (Vec3f){
-		.x = (ZayFloat32)-1,
-		.y = (ZayFloat32)-1
+		.x = (float)-1,
+		.y = (float)-1
 	},
 	[1] = (Vec3f){
-		.x = (ZayFloat32)0,
-		.y = (ZayFloat32)1
+		.x = (float)0,
+		.y = (float)1
 	},
 	[2] = (Vec3f){
-		.x = (ZayFloat32)1,
-		.y = (ZayFloat32)-1
+		.x = (float)1,
+		.y = (float)-1
 	}
 };)CODE";
 	CHECK(answer == expected);
@@ -1131,14 +1131,14 @@ TEST_CASE("[zay]: anonymous composite literal")
 		}
 	)CODE");
 	const char* expected = R"CODE(typedef struct __unnamed_struct_0 {
-	ZayFloat32 r;
-	ZayFloat32 g;
-	ZayFloat32 b;
-	ZayFloat32 a;
+	float r;
+	float g;
+	float b;
+	float a;
 } __unnamed_struct_0;
 __unnamed_struct_0 color = (__unnamed_struct_0){
-	.g = (ZayFloat32)1,
-	.a = (ZayFloat32)1
+	.g = (float)1,
+	.a = (float)1
 };)CODE";
 	CHECK(answer == expected);
 }

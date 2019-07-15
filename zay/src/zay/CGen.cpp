@@ -91,14 +91,14 @@ namespace zay
 		}
 		case IType::KIND_VOID:
 			if (name.count)
-				return str_tmpf("ZayVoid {}", name);
+				return str_tmpf("void {}", name);
 			else
-				return str_tmpf("ZayVoid");
+				return str_tmpf("void");
 		case IType::KIND_BOOL:
 			if (name.count)
-				return str_tmpf("ZayBool {}", name);
+				return str_tmpf("bool {}", name);
 			else
-				return str_tmpf("ZayBool");
+				return str_tmpf("bool");
 		case IType::KIND_INT:
 			if (name.count)
 				return str_tmpf("ZayInt {}", name);
@@ -111,54 +111,54 @@ namespace zay
 				return str_tmpf("ZayUint");
 		case IType::KIND_INT8:
 			if (name.count)
-				return str_tmpf("ZayInt8 {}", name);
+				return str_tmpf("int8_t {}", name);
 			else
-				return str_tmpf("ZayInt8");
+				return str_tmpf("int8_t");
 		case IType::KIND_UINT8:
 			if (name.count)
-				return str_tmpf("ZayUint8 {}", name);
+				return str_tmpf("uint8_t {}", name);
 			else
-				return str_tmpf("ZayUint8");
+				return str_tmpf("uint8_t");
 		case IType::KIND_INT16:
 			if (name.count)
-				return str_tmpf("ZayInt16 {}", name);
+				return str_tmpf("int16_t {}", name);
 			else
-				return str_tmpf("ZayInt16");
+				return str_tmpf("int16_t");
 		case IType::KIND_UINT16:
 			if (name.count)
-				return str_tmpf("ZayUint16 {}", name);
+				return str_tmpf("uint16_t {}", name);
 			else
-				return str_tmpf("ZayUint16");
+				return str_tmpf("uint16_t");
 		case IType::KIND_INT32:
 			if (name.count)
-				return str_tmpf("ZayInt32 {}", name);
+				return str_tmpf("int32_t {}", name);
 			else
-				return str_tmpf("ZayInt32");
+				return str_tmpf("int32_t");
 		case IType::KIND_UINT32:
 			if (name.count)
-				return str_tmpf("ZayUint32 {}", name);
+				return str_tmpf("uint32_t {}", name);
 			else
-				return str_tmpf("ZayUint32");
+				return str_tmpf("uint32_t");
 		case IType::KIND_INT64:
 			if (name.count)
-				return str_tmpf("ZayInt64 {}", name);
+				return str_tmpf("int64_t {}", name);
 			else
-				return str_tmpf("ZayInt64");
+				return str_tmpf("int64_t");
 		case IType::KIND_UINT64:
 			if (name.count)
-				return str_tmpf("ZayUint64 {}", name);
+				return str_tmpf("uint64_t {}", name);
 			else
-				return str_tmpf("ZayUint64");
+				return str_tmpf("uint64_t");
 		case IType::KIND_FLOAT32:
 			if (name.count)
-				return str_tmpf("ZayFloat32 {}", name);
+				return str_tmpf("float {}", name);
 			else
-				return str_tmpf("ZayFloat32");
+				return str_tmpf("float");
 		case IType::KIND_FLOAT64:
 			if (name.count)
-				return str_tmpf("ZayFloat64 {}", name);
+				return str_tmpf("double {}", name);
 			else
-				return str_tmpf("ZayFloat64");
+				return str_tmpf("double");
 		case IType::KIND_STRING:
 			if (name.count)
 				return str_tmpf("ZayString {}", name);
@@ -221,15 +221,15 @@ namespace zay
 		}
 		case IType::KIND_VOID:
 			if (name.count)
-				vprintf(self->out, "ZayVoid {}", name);
+				vprintf(self->out, "void {}", name);
 			else
-				vprintf(self->out, "ZayVoid");
+				vprintf(self->out, "void");
 			break;
 		case IType::KIND_BOOL:
 			if (name.count)
-				vprintf(self->out, "ZayBool {}", name);
+				vprintf(self->out, "bool {}", name);
 			else
-				vprintf(self->out, "ZayBool");
+				vprintf(self->out, "bool");
 			break;
 		case IType::KIND_INT:
 			if (name.count)
@@ -245,63 +245,63 @@ namespace zay
 			break;
 		case IType::KIND_INT8:
 			if (name.count)
-				vprintf(self->out, "ZayInt8 {}", name);
+				vprintf(self->out, "int8_t {}", name);
 			else
-				vprintf(self->out, "ZayInt8");
+				vprintf(self->out, "int8_t");
 			break;
 		case IType::KIND_UINT8:
 			if (name.count)
-				vprintf(self->out, "ZayUint8 {}", name);
+				vprintf(self->out, "uint8_t {}", name);
 			else
-				vprintf(self->out, "ZayUint8");
+				vprintf(self->out, "uint8_t");
 			break;
 		case IType::KIND_INT16:
 			if (name.count)
-				vprintf(self->out, "ZayInt16 {}", name);
+				vprintf(self->out, "int16_t {}", name);
 			else
-				vprintf(self->out, "ZayInt16");
+				vprintf(self->out, "int16_t");
 			break;
 		case IType::KIND_UINT16:
 			if (name.count)
-				vprintf(self->out, "ZayUint16 {}", name);
+				vprintf(self->out, "uint16_t {}", name);
 			else
-				vprintf(self->out, "ZayUint16");
+				vprintf(self->out, "uint16_t");
 			break;
 		case IType::KIND_INT32:
 			if (name.count)
-				vprintf(self->out, "ZayInt32 {}", name);
+				vprintf(self->out, "int32_t {}", name);
 			else
-				vprintf(self->out, "ZayInt32");
+				vprintf(self->out, "int32_t");
 			break;
 		case IType::KIND_UINT32:
 			if (name.count)
-				vprintf(self->out, "ZayUint32 {}", name);
+				vprintf(self->out, "uint32_t {}", name);
 			else
-				vprintf(self->out, "ZayUint32");
+				vprintf(self->out, "uint32_t");
 			break;
 		case IType::KIND_INT64:
 			if (name.count)
-				vprintf(self->out, "ZayInt64 {}", name);
+				vprintf(self->out, "int64_t {}", name);
 			else
-				vprintf(self->out, "ZayInt64");
+				vprintf(self->out, "int64_t");
 			break;
 		case IType::KIND_UINT64:
 			if (name.count)
-				vprintf(self->out, "ZayUint64 {}", name);
+				vprintf(self->out, "uint64_t {}", name);
 			else
-				vprintf(self->out, "ZayUint64");
+				vprintf(self->out, "uint64_t");
 			break;
 		case IType::KIND_FLOAT32:
 			if (name.count)
-				vprintf(self->out, "ZayFloat32 {}", name);
+				vprintf(self->out, "float {}", name);
 			else
-				vprintf(self->out, "ZayFloat32");
+				vprintf(self->out, "float");
 			break;
 		case IType::KIND_FLOAT64:
 			if (name.count)
-				vprintf(self->out, "ZayFloat64 {}", name);
+				vprintf(self->out, "double {}", name);
 			else
-				vprintf(self->out, "ZayFloat64");
+				vprintf(self->out, "double");
 			break;
 		case IType::KIND_STRING:
 			if (name.count)
