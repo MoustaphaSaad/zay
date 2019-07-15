@@ -1121,3 +1121,24 @@ Vec3f (vertices[3]) = {
 };)CODE";
 	CHECK(answer == expected);
 }
+
+TEST_CASE("[zay]: anonymous composite literal")
+{
+	Str answer = cgen(R"CODE(
+		var color = struct { r, g, b, a: float32 } {
+			g: 1: float32,
+			a: 1: float32
+		}
+	)CODE");
+	const char* expected = R"CODE(typedef struct __unnamed_struct_0 {
+	ZayFloat32 r;
+	ZayFloat32 g;
+	ZayFloat32 b;
+	ZayFloat32 a;
+} __unnamed_struct_0;
+__unnamed_struct_0 color = (__unnamed_struct_0){
+	.g = (ZayFloat32)1,
+	.a = (ZayFloat32)1
+};)CODE";
+	CHECK(answer == expected);
+}
