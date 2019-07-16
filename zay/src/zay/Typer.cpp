@@ -134,7 +134,7 @@ namespace zay
 				res = token_to_type(atom.named);
 				//if we discovered that it's not, then this is user defined type
 				//and we should find it in the symbol table
-				if(res == type_void)
+				if(type_is_same(res, type_void))
 				{
 					if(Sym sym = typer_sym_by_name(self, atom.named.str))
 					{
@@ -275,7 +275,7 @@ namespace zay
 					if(v.value)
 					{
 						Type value_type = typer_expr_resolve(self, v.value);
-						if(value_type != type_int)
+						if(type_is_integer(value_type) == false)
 						{
 							src_err(
 								self->src,
@@ -340,8 +340,8 @@ namespace zay
 		assert(expr->kind == IExpr::KIND_ATOM);
 		switch(expr->atom.kind)
 		{
-		case Tkn::KIND_INTEGER: return type_int;
-		case Tkn::KIND_FLOAT: return type_float64;
+		case Tkn::KIND_INTEGER: return type_lit_int;
+		case Tkn::KIND_FLOAT: return type_lit_float64;
 		case Tkn::KIND_KEYWORD_STRING: return type_string;
 		case Tkn::KIND_KEYWORD_FALSE:
 		case Tkn::KIND_KEYWORD_TRUE:
@@ -366,12 +366,12 @@ namespace zay
 		Type lhs_type = typer_expr_resolve(self, expr->binary.lhs);
 		Type rhs_type = typer_expr_resolve(self, expr->binary.rhs);
 
-		if(lhs_type != rhs_type)
+		if(type_is_same(lhs_type, rhs_type) == false)
 			src_err(self->src, err_expr(expr, strf("type mismatch in binary expression")));
 
 		if(expr->binary.op.kind == Tkn::KIND_LOGIC_AND || expr->binary.op.kind == Tkn::KIND_LOGIC_OR)
 		{
-			if(lhs_type != type_bool)
+			if(type_is_same(lhs_type, type_bool) == false)
 			{
 				src_err(
 					self->src,
@@ -379,7 +379,7 @@ namespace zay
 				);
 			}
 
-			if(rhs_type != type_bool)
+			if(type_is_same(rhs_type, type_bool) == false)
 			{
 				src_err(
 					self->src,
@@ -399,42 +399,6 @@ namespace zay
 		}
 
 		return lhs_type;
-	}
-
-	inline static bool
-	type_is_numeric(Type t)
-	{
-		return (
-			t == type_int ||
-			t == type_uint ||
-			t == type_int8 ||
-			t == type_uint8 ||
-			t == type_int16 ||
-			t == type_uint16 ||
-			t == type_int32 ||
-			t == type_uint32 ||
-			t == type_int64 ||
-			t == type_uint64 ||
-			t == type_float32 ||
-			t == type_float64
-		);
-	}
-
-	inline static bool
-	type_is_integer(Type t)
-	{
-		return (
-			t == type_int ||
-			t == type_uint ||
-			t == type_int8 ||
-			t == type_uint8 ||
-			t == type_int16 ||
-			t == type_uint16 ||
-			t == type_int32 ||
-			t == type_uint32 ||
-			t == type_int64 ||
-			t == type_uint64
-		);
 	}
 
 	inline static Type
@@ -460,7 +424,7 @@ namespace zay
 		}
 		else if(expr->unary.op.kind == Tkn::KIND_LOGIC_NOT)
 		{
-			if(type != type_bool)
+			if(type_is_same(type, type_bool) == false)
 			{
 				src_err(
 					self->src,
@@ -515,7 +479,7 @@ namespace zay
 					break;
 				}
 			}
-			if(res == type_void)
+			if(type_is_same(res, type_void))
 			{
 				src_err(self->src, err_tkn(expr->dot.member, strf("undefined struct field")));
 			}
@@ -530,7 +494,7 @@ namespace zay
 					break;
 				}
 			}
-			if (res == type_void)
+			if (type_is_same(res, type_void))
 			{
 				src_err(self->src, err_tkn(expr->dot.member, strf("undefined union field")));
 			}
@@ -545,7 +509,7 @@ namespace zay
 					break;
 				}
 			}
-			if (res == type_void)
+			if (type_is_same(res, type_void))
 			{
 				src_err(self->src, err_tkn(expr->dot.member, strf("undefined enum field")));
 			}
@@ -602,40 +566,13 @@ namespace zay
 		for(size_t i = 0; i < expr->call.args.count; ++i)
 		{
 			Type type = typer_expr_resolve(self, expr->call.args[i]);
-			if(type != res->func.args[i])
+			if(type_is_same(type, res->func.args[i]) == false)
 			{
 				Str msg = strf("function argument {} type mismatch", i);
 				src_err(self->src, err_expr(expr->call.args[i], msg));
 			}
 		}
 		return res->func.ret;
-	}
-
-	inline static bool
-	type_is_number(Type t)
-	{
-		return (
-			t->kind == IType::KIND_INT ||
-			t->kind == IType::KIND_UINT ||
-			t->kind == IType::KIND_INT8 ||
-			t->kind == IType::KIND_UINT8 ||
-			t->kind == IType::KIND_INT16 ||
-			t->kind == IType::KIND_UINT16 ||
-			t->kind == IType::KIND_INT32 ||
-			t->kind == IType::KIND_UINT32 ||
-			t->kind == IType::KIND_INT64 ||
-			t->kind == IType::KIND_UINT64 ||
-			t->kind == IType::KIND_FLOAT32 ||
-			t->kind == IType::KIND_FLOAT64
-		);
-	}
-
-	inline static Type
-	type_unwrap(Type type)
-	{
-		if (type->kind == IType::KIND_ALIAS)
-			return type->alias;
-		return type;
 	}
 
 	inline static Type
@@ -648,7 +585,7 @@ namespace zay
 		from_type = type_unwrap(from_type);
 		to_type = type_unwrap(to_type);
 
-		if(type_is_number(from_type) && type_is_number(to_type))
+		if(type_is_numeric(from_type) && type_is_numeric(to_type))
 			return to_type;
 		else if(from_type->kind == IType::KIND_PTR && to_type->kind == IType::KIND_PTR)
 			return to_type;
@@ -690,7 +627,7 @@ namespace zay
 						}
 					}
 				}
-				if (left_type == type_void)
+				if (type_is_same(left_type, type_void))
 				{
 					src_err(
 						self->src,
@@ -715,7 +652,7 @@ namespace zay
 
 			Type right_type = typer_expr_resolve(self, field.right);
 
-			if(left_type != right_type)
+			if(type_is_same(left_type, right_type) == false)
 			{
 				Str msg = strf("type mismatch, type '{}' expected but type '{}' was provided", left_type, right_type);
 				src_err(self->src, err_expr(field.right, msg));
@@ -793,7 +730,7 @@ namespace zay
 			return ret;
 		}
 
-		if (expected != ret)
+		if (type_is_same(expected, ret) == false)
 		{
 			src_err(
 				self->src,
@@ -808,7 +745,7 @@ namespace zay
 	{
 		assert(stmt->kind == IStmt::KIND_IF);
 		Type type = typer_expr_resolve(self, stmt->if_stmt.if_cond);
-		if(type != type_bool)
+		if(type_is_same(type, type_bool) == false)
 		{
 			src_err(
 				self->src,
@@ -820,7 +757,7 @@ namespace zay
 		for(const Else_If& e: stmt->if_stmt.else_ifs)
 		{
 			Type cond_type = typer_expr_resolve(self, e.cond);
-			if(cond_type != type_bool)
+			if(type_is_same(cond_type, type_bool) == false)
 			{
 				src_err(
 					self->src,
@@ -848,7 +785,7 @@ namespace zay
 		if(stmt->for_stmt.loop_cond)
 		{
 			Type cond_type = typer_expr_resolve(self, stmt->for_stmt.loop_cond);
-			if(cond_type != type_bool)
+			if(type_is_same(cond_type, type_bool) == false)
 			{
 				src_err(
 					self->src,
@@ -904,7 +841,7 @@ namespace zay
 				if(e)
 				{
 					Type expr_type = typer_expr_resolve(self, e);
-					if(type_unwrap(expr_type) != type_unwrap(type))
+					if(type_is_same(type_unwrap(expr_type), type_unwrap(type)) == false)
 					{
 						src_err(
 							self->src,
@@ -929,20 +866,20 @@ namespace zay
 		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
 		{
 			Type lhs_type = typer_expr_resolve(self, stmt->assign_stmt.lhs[i]);
-			if(lhs_type == type_void)
+			if(type_is_same(lhs_type, type_void))
 			{
 				Str msg = strf("can't assign into a void type");
 				src_err(self->src, err_expr(stmt->assign_stmt.lhs[i], msg));
 			}
 
 			Type rhs_type = typer_expr_resolve(self, stmt->assign_stmt.rhs[i]);
-			if (rhs_type == type_void)
+			if (type_is_same(rhs_type, type_void))
 			{
 				Str msg = strf("can't assign into a void type");
 				src_err(self->src, err_expr(stmt->assign_stmt.rhs[i], msg));
 			}
 
-			if(lhs_type != rhs_type)
+			if(type_is_same(lhs_type, rhs_type) == false)
 			{
 				Str msg = strf(
 					"type mismatch in assignment statement, expected '{}' but found '{}'",
@@ -1084,7 +1021,7 @@ namespace zay
 			if(e)
 			{
 				Type expr_type = typer_expr_resolve(self, e);
-				if(expr_type != type)
+				if(type_is_same(expr_type, type) == false)
 				{
 					src_err(
 						self->src,

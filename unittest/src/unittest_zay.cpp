@@ -1079,12 +1079,12 @@ TEST_CASE("[zay]: composite literal")
 		type Vec3f struct {x, y, z: float32}
 		var origin = Vec3f{}
 		type Color struct {r, g, b, a: float32}
-		var red = Color{r: 1: float32}
-		var color_ptr = &Color{g: 1:float32}
+		var red = Color{r: 1.0}
+		var color_ptr = &Color{g: 1.0}
 		var vertices = [3]Vec3f{
-			[0]: Vec3f{x: -1:float32, y: -1: float32},
-			[1]: Vec3f{x:  0:float32, y:  1: float32},
-			[2]: Vec3f{x:  1:float32, y: -1: float32},
+			[0]: Vec3f{x: -1.0, y: -1.0},
+			[1]: Vec3f{x:  0.0, y:  1.0},
+			[2]: Vec3f{x:  1.0, y: -1.0},
 		}
 	)CODE");
 	const char* expected = R"CODE(typedef struct Vec3f {
@@ -1100,23 +1100,23 @@ typedef struct Color {
 	float a;
 } Color;
 Color red = (Color){
-	.r = (float)1
+	.r = 1.0
 };
 Color (*color_ptr) = &(Color){
-	.g = (float)1
+	.g = 1.0
 };
 Vec3f (vertices[3]) = {
 	[0] = (Vec3f){
-		.x = (float)-1,
-		.y = (float)-1
+		.x = -1.0,
+		.y = -1.0
 	},
 	[1] = (Vec3f){
-		.x = (float)0,
-		.y = (float)1
+		.x = 0.0,
+		.y = 1.0
 	},
 	[2] = (Vec3f){
-		.x = (float)1,
-		.y = (float)-1
+		.x = 1.0,
+		.y = -1.0
 	}
 };)CODE";
 	CHECK(answer == expected);
@@ -1126,8 +1126,8 @@ TEST_CASE("[zay]: anonymous composite literal")
 {
 	Str answer = cgen(R"CODE(
 		var color = struct { r, g, b, a: float32 } {
-			g: 1: float32,
-			a: 1: float32
+			g: 1.0,
+			a: 1.0
 		}
 	)CODE");
 	const char* expected = R"CODE(typedef struct __unnamed_struct_0 {
@@ -1137,8 +1137,8 @@ TEST_CASE("[zay]: anonymous composite literal")
 	float a;
 } __unnamed_struct_0;
 __unnamed_struct_0 color = (__unnamed_struct_0){
-	.g = (float)1,
-	.a = (float)1
+	.g = 1.0,
+	.a = 1.0
 };)CODE";
 	CHECK(answer == expected);
 }

@@ -251,6 +251,85 @@ namespace zay
 	ZAY_EXPORT extern Type type_float32;
 	ZAY_EXPORT extern Type type_float64;
 	ZAY_EXPORT extern Type type_string;
+	ZAY_EXPORT extern Type type_lit_int;
+	ZAY_EXPORT extern Type type_lit_float64;
+
+	inline static Type
+	type_unwrap(Type type)
+	{
+		if (type->kind == IType::KIND_ALIAS)
+			return type->alias;
+		return type;
+	}
+
+	inline static bool
+	type_is_numeric(Type t)
+	{
+		return (
+			t == type_int ||
+			t == type_uint ||
+			t == type_int8 ||
+			t == type_uint8 ||
+			t == type_int16 ||
+			t == type_uint16 ||
+			t == type_int32 ||
+			t == type_uint32 ||
+			t == type_int64 ||
+			t == type_uint64 ||
+			t == type_float32 ||
+			t == type_float64 ||
+			t == type_lit_int ||
+			t == type_lit_float64
+		);
+	}
+
+	inline static bool
+	type_is_integer(Type t)
+	{
+		return (
+			t == type_int ||
+			t == type_uint ||
+			t == type_int8 ||
+			t == type_uint8 ||
+			t == type_int16 ||
+			t == type_uint16 ||
+			t == type_int32 ||
+			t == type_uint32 ||
+			t == type_int64 ||
+			t == type_uint64 ||
+			t == type_lit_int
+		);
+	}
+
+	inline static bool
+	type_is_float(Type t)
+	{
+		return t == type_float32 || t == type_float64 || t == type_lit_float64;
+	}
+
+	inline static bool
+	type_is_lit(Type t)
+	{
+		return t == type_lit_float64 || t == type_lit_int;
+	}
+
+	inline static bool
+	type_is_same(Type lhs, Type rhs)
+	{
+		if (lhs == rhs)
+		{
+			return true;
+		}
+		else if (lhs == type_lit_float64 && type_is_float(rhs) || rhs == type_lit_float64 && type_is_float(lhs))
+		{
+			return true;
+		}
+		else if(lhs == type_lit_int && type_is_integer(rhs) || rhs == type_lit_int && type_is_integer(lhs))
+		{
+			return true;
+		}
+		return false;
+	}
 
 	typedef struct IType_Intern* Type_Intern;
 	struct IType_Intern

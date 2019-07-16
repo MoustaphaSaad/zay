@@ -61,6 +61,12 @@ namespace zay
 	static IType _type_string = builtin(IType::KIND_STRING);
 	Type type_string = &_type_string;
 
+	static IType _type_lit_int = builtin(IType::KIND_INT);
+	Type type_lit_int = &_type_lit_int;
+
+	static IType _type_lit_float64 = builtin(IType::KIND_FLOAT64);
+	Type type_lit_float64 = &_type_lit_float64;
+
 	//API
 	Type
 	type_func(const Func_Sign& sign)
