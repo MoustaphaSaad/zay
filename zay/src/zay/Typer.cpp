@@ -942,6 +942,35 @@ namespace zay
 	}
 
 
+	//terminate functions
+	inline static bool
+	typer_is_terminating(Typer self, Stmt stmt)
+	{
+		switch(stmt->kind)
+		{
+		case IStmt::KIND_BLOCK:
+			if (stmt->block_stmt.count == 0)
+				return false;
+			return typer_is_terminating(self, buf_top(stmt->block_stmt));
+		case IStmt::KIND_RETURN:
+			return true;
+		case IStmt::KIND_FOR:
+			return typer_is_terminating(self, stmt->for_stmt.loop_body);
+		case IStmt::KIND_IF:
+		{
+			bool res = typer_is_terminating(self, stmt->if_stmt.if_body);
+			for (const Else_If& f : stmt->if_stmt.else_ifs)
+				res &= typer_is_terminating(self, f.body);
+			if (stmt->if_stmt.else_body)
+				res &= typer_is_terminating(self, stmt->if_stmt.else_body);
+			return res;
+		}
+		default:
+			return false;
+		}
+	}
+
+
 	inline static Type
 	typer_decl_func_resolve(Typer self, Sym sym)
 	{
@@ -986,6 +1015,15 @@ namespace zay
 		}
 
 		typer_stmt_block_resolve(self, decl->func_decl.body);
+
+		if (type_is_same(sym->type->func.ret, type_void) == false &&
+			typer_is_terminating(self, decl->func_decl.body) == false)
+		{
+			src_err(
+				self->src,
+				err_decl(decl, strf("missing return at the end of the function"))
+			);
+		}
 
 		typer_scope_leave(self);
 	}

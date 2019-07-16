@@ -821,6 +821,52 @@ TEST_CASE("[zay]: strong type alias casting")
 	)CODE") == true);
 }
 
+TEST_CASE("[zay]: missing return")
+{
+	CHECK(typecheck(R"CODE(
+	func add(a, b: int): int {
+	}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+	func add(a, b: int): int {
+		if a < b {} else { return a - b }
+	}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+	func add(a, b: int): int {
+		if a < b { return a + b } else if a > b {} else { return a - b }
+	}
+	)CODE") == false);
+
+	CHECK(typecheck(R"CODE(
+	func add(a, b: int): int {
+		if a < b { a *= -1 } else { return a - b }
+		return a + b
+	}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+	func add(a, b: int): int {
+		for var i = 0; i < a; ++i {
+			return a + i + b
+		}
+	}
+	)CODE") == true);
+
+	CHECK(typecheck(R"CODE(
+	func add(a, b: int): int {
+		for var i = 0; i < a; ++i {
+			if a < b {
+				return a + i + b
+			} else {
+			}
+		}
+	}
+	)CODE") == false);
+}
+
 inline static Str
 cgen(const char* str)
 {
