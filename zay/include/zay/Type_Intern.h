@@ -320,11 +320,11 @@ namespace zay
 		{
 			return true;
 		}
-		else if (lhs == type_lit_float64 && type_is_float(rhs) || rhs == type_lit_float64 && type_is_float(lhs))
+		else if ((lhs == type_lit_float64 && type_is_float(rhs)) || (rhs == type_lit_float64 && type_is_float(lhs)))
 		{
 			return true;
 		}
-		else if(lhs == type_lit_int && type_is_integer(rhs) || rhs == type_lit_int && type_is_integer(lhs))
+		else if((lhs == type_lit_int && type_is_integer(rhs)) || (rhs == type_lit_int && type_is_integer(lhs)))
 		{
 			return true;
 		}
