@@ -954,4 +954,11 @@ namespace zay
 		}
 		return res;
 	}
+
+	Tkn
+	parser_pkg(Parser self)
+	{
+		parser_eat_must(self, Tkn::KIND_KEYWORD_PACKAGE);
+		return parser_eat_must(self, Tkn::KIND_STRING);
+	}
 };

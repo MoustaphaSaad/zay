@@ -10,6 +10,7 @@ namespace zay
 	typedef struct IAST* AST;
 	struct IAST
 	{
+		Tkn package;
 		mn::Buf<Decl> decls;
 	};
 

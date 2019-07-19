@@ -40,10 +40,19 @@ namespace zay
 	ZAY_EXPORT Decl
 	parser_decl(Parser self);
 
+	ZAY_EXPORT Tkn
+	parser_pkg(Parser self);
+
 	inline static bool
-	src_parse(Src src)
+	src_parse(Src src, MODE mode)
 	{
 		Parser self = parser_new(src);
+
+		//first parse the package declaration
+		if (mode != MODE::NONE)
+			src->ast->package = parser_pkg(self);
+
+		//then everything else
 		while(self->ix < self->tkns.count)
 		{
 			if (Decl d = parser_decl(self))

@@ -137,7 +137,7 @@ main(int argc, char** argv)
 			}
 
 			//parse the file
-			if(src_parse(src) == false)
+			if(src_parse(src, MODE::LIB) == false)
 			{
 				printfmt("{}\n", src_errs_dump(src, memory::tmp()));
 				continue;

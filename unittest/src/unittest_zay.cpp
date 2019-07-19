@@ -25,7 +25,7 @@ parse(const char* str)
 {
 	Src src = src_from_str(str);
 	CHECK(src_scan(src));
-	CHECK(src_parse(src));
+	CHECK(src_parse(src, MODE::NONE));
 	Str res = src_ast_dump(src, memory::tmp());
 	src_free(src);
 	return res;
@@ -485,7 +485,7 @@ typecheck(const char* str)
 {
 	Src src = src_from_str(str);
 	CHECK(src_scan(src));
-	CHECK(src_parse(src));
+	CHECK(src_parse(src, MODE::NONE));
 	bool res = src_typecheck(src, ITyper::MODE_NONE);
 	Str errs = src_errs_dump(src);
 	src_free(src);
@@ -872,7 +872,7 @@ cgen(const char* str)
 {
 	Src src = src_from_str(str);
 	CHECK(src_scan(src));
-	CHECK(src_parse(src));
+	CHECK(src_parse(src, MODE::NONE));
 	CHECK(src_typecheck(src, ITyper::MODE_NONE));
 	Str res = src_c(src, memory::tmp());
 	src_free(src);

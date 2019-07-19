@@ -15,6 +15,13 @@
 
 namespace zay
 {
+	enum class MODE
+	{
+		NONE,
+		EXE,
+		LIB
+	};
+
 	// Line is a range of source code
 	typedef Rng Line;
 

@@ -13,6 +13,7 @@ namespace zay
 	ast_new()
 	{
 		AST self = alloc<IAST>();
+		self->package = Tkn{};
 		self->decls = buf_new<Decl>();
 		return self;
 	}
