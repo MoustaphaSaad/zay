@@ -6,6 +6,7 @@
 #include <zay/parse/AST_Lisp.h>
 #include <zay/typecheck/Typer.h>
 #include <zay/CGen.h>
+#include <zay/ir/Pkg.h>
 
 using namespace mn;
 using namespace zay;
@@ -1187,4 +1188,11 @@ __unnamed_struct_0 color = (__unnamed_struct_0){
 	.a = 1.0
 };)CODE";
 	CHECK(answer == expected);
+}
+
+TEST_CASE("Koko")
+{
+	ir::Pkg p = ir::pkg_new(str_from_c("test"));
+	ir::Func f = ir::func_new(str_from_c("foo"), ir::type_func(ir::type_int, buf_lit({ir::type_int, ir::type_int})));
+	ir::pkg_free(p);
 }
