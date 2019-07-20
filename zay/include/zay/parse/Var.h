@@ -1,7 +1,7 @@
 #pragma once
 
-#include "zay/Tkn.h"
-#include "zay/Type_Sign.h"
+#include "zay/scan/Tkn.h"
+#include "zay/parse/Type_Sign.h"
 
 #include <mn/Buf.h>
 

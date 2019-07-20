@@ -1,10 +1,10 @@
 #pragma once
 
 #include "zay/Exports.h"
-#include "zay/Tkn.h"
-#include "zay/Type_Sign.h"
-#include "zay/Stmt.h"
-#include "zay/Expr.h"
+#include "zay/scan/Tkn.h"
+#include "zay/parse/Type_Sign.h"
+#include "zay/parse/Stmt.h"
+#include "zay/parse/Expr.h"
 
 #include <mn/Buf.h>
 

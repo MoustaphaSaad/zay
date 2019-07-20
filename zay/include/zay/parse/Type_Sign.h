@@ -1,7 +1,7 @@
 #pragma once
 
 #include "zay/Exports.h"
-#include "zay/Tkn.h"
+#include "zay/scan/Tkn.h"
 
 #include <mn/Buf.h>
 

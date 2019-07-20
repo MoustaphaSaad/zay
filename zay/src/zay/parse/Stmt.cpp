@@ -1,6 +1,6 @@
-#include "zay/Stmt.h"
-#include "zay/Expr.h"
-#include "zay/AST.h"
+#include "zay/parse/Stmt.h"
+#include "zay/parse/Expr.h"
+#include "zay/parse/AST.h"
 
 #include <mn/Memory.h>
 

@@ -1,4 +1,4 @@
-#include "zay/Scope.h"
+#include "zay/typecheck/Scope.h"
 
 #include <mn/Memory.h>
 

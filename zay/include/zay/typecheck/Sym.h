@@ -1,8 +1,8 @@
 #pragma once
 
 #include "zay/Exports.h"
-#include "zay/Tkn.h"
-#include "zay/AST.h"
+#include "zay/scan/Tkn.h"
+#include "zay/parse/AST.h"
 
 #include <assert.h>
 

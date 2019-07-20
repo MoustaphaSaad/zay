@@ -1,4 +1,4 @@
-#include "zay/Decl.h"
+#include "zay/parse/Decl.h"
 
 #include <mn/Memory.h>
 

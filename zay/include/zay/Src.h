@@ -1,12 +1,12 @@
 #pragma once
 
 #include "zay/Exports.h"
-#include "zay/Rng.h"
+#include "zay/scan/Rng.h"
 #include "zay/Err.h"
-#include "zay/Tkn.h"
-#include "zay/AST.h"
-#include "zay/Scope.h"
-#include "zay/Type_Intern.h"
+#include "zay/scan/Tkn.h"
+#include "zay/parse/AST.h"
+#include "zay/typecheck/Scope.h"
+#include "zay/typecheck/Type_Intern.h"
 
 #include <mn/Str.h>
 #include <mn/Str_Intern.h>

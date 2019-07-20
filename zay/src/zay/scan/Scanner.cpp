@@ -1,4 +1,4 @@
-#include "zay/Scanner.h"
+#include "zay/scan/Scanner.h"
 
 #include <mn/Memory.h>
 #include <mn/IO.h>

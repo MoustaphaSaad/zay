@@ -1,5 +1,5 @@
-#include "zay/Type_Sign.h"
-#include "zay/Decl.h"
+#include "zay/parse/Type_Sign.h"
+#include "zay/parse/Decl.h"
 
 namespace zay
 {

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "zay/Pos.h"
-#include "zay/Rng.h"
-#include "zay/Token_Listing.h"
+#include "zay/scan/Pos.h"
+#include "zay/scan/Rng.h"
+#include "zay/scan/Token_Listing.h"
 
 namespace zay
 {

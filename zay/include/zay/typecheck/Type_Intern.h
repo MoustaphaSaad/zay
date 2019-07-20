@@ -1,7 +1,7 @@
 #pragma once 
 
 #include "zay/Exports.h"
-#include "zay/Sym.h"
+#include "zay/typecheck/Sym.h"
 
 #include <mn/Buf.h>
 #include <mn/Map.h>

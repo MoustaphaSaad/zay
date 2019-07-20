@@ -1,4 +1,4 @@
-#include "zay/Typer.h"
+#include "zay/typecheck/Typer.h"
 
 #include <mn/Memory.h>
 #include <mn/IO.h>

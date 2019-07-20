@@ -1,7 +1,7 @@
 #pragma once
 
 #include "zay/Exports.h"
-#include "zay/AST.h"
+#include "zay/parse/AST.h"
 
 #include <mn/Stream.h>
 

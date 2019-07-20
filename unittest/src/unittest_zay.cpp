@@ -1,10 +1,10 @@
 #include <doctest/doctest.h>
 
 #include <zay/Src.h>
-#include <zay/Scanner.h>
-#include <zay/Parser.h>
-#include <zay/AST_Lisp.h>
-#include <zay/Typer.h>
+#include <zay/scan/Scanner.h>
+#include <zay/parse/Parser.h>
+#include <zay/parse/AST_Lisp.h>
+#include <zay/typecheck/Typer.h>
 #include <zay/CGen.h>
 
 using namespace mn;

@@ -2,45 +2,45 @@ cmake_minimum_required(VERSION 3.9)
 
 # list the header files
 set(HEADER_FILES
-	include/zay/Rng.h
-	include/zay/Pos.h
-	include/zay/Tkn.h
-	include/zay/Token_Listing.h
+	include/zay/scan/Rng.h
+	include/zay/scan/Pos.h
+	include/zay/scan/Tkn.h
+	include/zay/scan/Token_Listing.h
+	include/zay/scan/Scanner.h
+	include/zay/parse/AST.h
+	include/zay/parse/Parser.h
+	include/zay/parse/AST_Lisp.h
+	include/zay/parse/Type_Sign.h
+	include/zay/parse/Expr.h
+	include/zay/parse/Var.h
+	include/zay/parse/Stmt.h
+	include/zay/parse/Decl.h
+	include/zay/typecheck/Sym.h
+	include/zay/typecheck/Scope.h
+	include/zay/typecheck/Typer.h
+	include/zay/typecheck/Type_Intern.h
 	include/zay/Err.h
 	include/zay/Src.h
-	include/zay/Scanner.h
-	include/zay/AST.h
-	include/zay/Parser.h
-	include/zay/AST_Lisp.h
-	include/zay/Sym.h
-	include/zay/Scope.h
-	include/zay/Typer.h
-	include/zay/Type_Intern.h
 	include/zay/CGen.h
-	include/zay/Type_Sign.h
-	include/zay/Expr.h
-	include/zay/Var.h
-	include/zay/Stmt.h
-	include/zay/Decl.h
 )
 
 # list the source files
 set(SOURCE_FILES
-	src/zay/Tkn.cpp
+	src/zay/scan/Tkn.cpp
+	src/zay/scan/Scanner.cpp
+	src/zay/parse/AST.cpp
+	src/zay/parse/Parser.cpp
+	src/zay/parse/AST_Lisp.cpp
+	src/zay/parse/Type_Sign.cpp
+	src/zay/parse/Expr.cpp
+	src/zay/parse/Stmt.cpp
+	src/zay/parse/Decl.cpp
+	src/zay/typecheck/Scope.cpp
+	src/zay/typecheck/Typer.cpp
+	src/zay/typecheck/Sym.cpp
+	src/zay/typecheck/Type_Intern.cpp
 	src/zay/Src.cpp
-	src/zay/Scanner.cpp
-	src/zay/AST.cpp
-	src/zay/Parser.cpp
-	src/zay/AST_Lisp.cpp
-	src/zay/Scope.cpp
-	src/zay/Typer.cpp
-	src/zay/Sym.cpp
-	src/zay/Type_Intern.cpp
 	src/zay/CGen.cpp
-	src/zay/Type_Sign.cpp
-	src/zay/Expr.cpp
-	src/zay/Stmt.cpp
-	src/zay/Decl.cpp
 )
 
 # add library target

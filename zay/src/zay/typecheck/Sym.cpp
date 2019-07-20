@@ -1,4 +1,4 @@
-#include "zay/Sym.h"
+#include "zay/typecheck/Sym.h"
 
 #include <mn/Memory.h>
 

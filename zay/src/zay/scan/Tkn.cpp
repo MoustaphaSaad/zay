@@ -1,5 +1,5 @@
-#include "zay/Tkn.h"
-#include "zay/Token_Listing.h"
+#include "zay/scan/Tkn.h"
+#include "zay/scan/Token_Listing.h"
 
 namespace zay
 {

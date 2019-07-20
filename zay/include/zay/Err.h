@@ -1,9 +1,9 @@
 #pragma once
 
-#include "zay/Pos.h"
-#include "zay/Rng.h"
-#include "zay/Tkn.h"
-#include "zay/AST.h"
+#include "zay/scan/Pos.h"
+#include "zay/scan/Rng.h"
+#include "zay/scan/Tkn.h"
+#include "zay/parse/AST.h"
 
 #include <mn/Str.h>
 

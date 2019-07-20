@@ -1,10 +1,10 @@
 #pragma once
 
 #include "zay/Exports.h"
-#include "zay/Rng.h"
-#include "zay/Pos.h"
-#include "zay/Tkn.h"
-#include "zay/Var.h"
+#include "zay/scan/Rng.h"
+#include "zay/scan/Pos.h"
+#include "zay/scan/Tkn.h"
+#include "zay/parse/Var.h"
 
 #include <mn/Buf.h>
 

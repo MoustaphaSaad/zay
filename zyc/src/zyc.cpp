@@ -4,8 +4,8 @@
 #include <mn/Defer.h>
 
 #include <zay/Src.h>
-#include <zay/Scanner.h>
-#include <zay/Parser.h>
+#include <zay/scan/Scanner.h>
+#include <zay/parse/Parser.h>
 
 using namespace mn;
 using namespace zay;

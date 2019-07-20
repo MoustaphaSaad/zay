@@ -1,5 +1,5 @@
-#include "zay/Expr.h"
-#include "zay/Type_Intern.h"
+#include "zay/parse/Expr.h"
+#include "zay/typecheck/Type_Intern.h"
 
 #include <mn/Memory.h>
 

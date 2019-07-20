@@ -1,7 +1,7 @@
 #pragma once
 
 #include "zay/Exports.h"
-#include "zay/Pos.h"
+#include "zay/scan/Pos.h"
 #include "zay/Src.h"
 
 #include <mn/Rune.h>
