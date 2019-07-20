@@ -1,8 +1,8 @@
-#include "zay/ir/Pkg.h"
+#include "cypher/Pkg.h"
 
 #include <mn/Memory.h>
 
-namespace zay::ir
+namespace cypher
 {
 	using namespace mn;
 
@@ -12,7 +12,7 @@ namespace zay::ir
 	{
 		Pkg self = alloc<IPkg>();
 		self->name = name;
-		self->functions = buf_new<Func>();
+		self->funcs = buf_new<Func>();
 		return self;
 	}
 
@@ -20,7 +20,7 @@ namespace zay::ir
 	pkg_free(Pkg self)
 	{
 		str_free(self->name);
-		destruct(self->functions);
+		destruct(self->funcs);
 		free(self);
 	}
 }

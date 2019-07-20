@@ -1,10 +1,10 @@
-#include "zay/ir/Type.h"
+#include "cypher/Type.h"
 
 #include <mn/Memory.h>
 
 #include <assert.h>
 
-namespace zay::ir
+namespace cypher
 {
 	using namespace mn;
 
