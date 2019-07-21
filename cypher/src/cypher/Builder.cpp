@@ -26,7 +26,7 @@ namespace cypher
 	builder_basic_block(Builder self)
 	{
 		Basic_Block_ID id = self->func->blocks.count;
-		buf_push(self->func->blocks, Basic_Block{});
+		buf_push(self->func->blocks, basic_block_new());
 		return id;
 	}
 
@@ -36,6 +36,17 @@ namespace cypher
 		assert(self->block != Basic_Block_ID(-1) && "you need to start a block before adding ins");
 		Ins_ID id = self->func->ins.count;
 		buf_push(self->func->ins, ins_add(x, y));
+		buf_push(self->func->blocks[self->block].instructions, id);
+		return val_ins(self->func, id);
+	}
+
+	Val
+	builder_ret(Builder self, Val x)
+	{
+		assert(self->block != Basic_Block_ID(-1) && "you need to start a block before adding ins");
+		Ins_ID id = self->func->ins.count;
+		buf_push(self->func->ins, ins_ret(x));
+		buf_push(self->func->blocks[self->block].instructions, id);
 		return val_ins(self->func, id);
 	}
 }

@@ -13,7 +13,8 @@ namespace cypher
 		enum OP
 		{
 			OP_NONE,
-			OP_ADD
+			OP_ADD,
+			OP_RET
 		};
 
 		OP op;
@@ -22,6 +23,8 @@ namespace cypher
 			struct {
 				Val a, b;
 			} op_add;
+
+			Val op_ret;
 		};
 	};
 
@@ -31,6 +34,15 @@ namespace cypher
 		Ins self{};
 		self.op = Ins::OP_ADD;
 		self.op_add = { a, b };
+		return self;
+	}
+
+	inline static Ins
+	ins_ret(Val a)
+	{
+		Ins self{};
+		self.op = Ins::OP_RET;
+		self.op_ret = a;
 		return self;
 	}
 }

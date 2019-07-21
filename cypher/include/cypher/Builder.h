@@ -50,4 +50,7 @@ namespace cypher
 
 	CYPHER_EXPORT Val
 	builder_add(Builder self, Val x, Val y);
+
+	CYPHER_EXPORT Val
+	builder_ret(Builder self, Val x);
 }

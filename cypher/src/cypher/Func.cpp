@@ -25,7 +25,7 @@ namespace cypher
 	{
 		str_free(self->name);
 		type_free(self->type);
-		buf_free(self->blocks);
+		destruct(self->blocks);
 		buf_free(self->ins);
 		free(self);
 	}
