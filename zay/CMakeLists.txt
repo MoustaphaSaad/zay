@@ -19,6 +19,7 @@ set(HEADER_FILES
 	include/zay/typecheck/Scope.h
 	include/zay/typecheck/Typer.h
 	include/zay/typecheck/Type_Intern.h
+	include/zay/ir/Build.h
 	include/zay/Err.h
 	include/zay/Src.h
 	include/zay/CGen.h
@@ -39,6 +40,7 @@ set(SOURCE_FILES
 	src/zay/typecheck/Typer.cpp
 	src/zay/typecheck/Sym.cpp
 	src/zay/typecheck/Type_Intern.cpp
+	src/zay/ir/Build.cpp
 	src/zay/Src.cpp
 	src/zay/CGen.cpp
 )
@@ -53,6 +55,7 @@ add_library(zay
 target_link_libraries(zay
 	PUBLIC
 		MoustaphaSaad::mn
+		MoustaphaSaad::cypher
 )
 
 add_library(MoustaphaSaad::zay ALIAS zay)
@@ -60,7 +63,6 @@ add_library(MoustaphaSaad::zay ALIAS zay)
 # make it reflect the same structure as the one on disk
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
-source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${TOOL_FILES})
 
 # let's enable warnings as errors
 if(WIN32)
