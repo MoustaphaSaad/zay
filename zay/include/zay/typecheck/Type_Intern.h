@@ -6,6 +6,7 @@
 #include <mn/Buf.h>
 #include <mn/Map.h>
 #include <mn/IO.h>
+#include <mn/Fmt.h>
 
 namespace zay
 {
@@ -189,50 +190,55 @@ namespace zay
 		type_free(self);
 	}
 
-	inline static size_t
-	print_str(mn::Stream stream, mn::Print_Format&, Type type)
+	inline static std::ostream&
+	operator<<(std::ostream& out, const IType &type)
 	{
-		switch(type->kind)
+		switch(type.kind)
 		{
-		case IType::KIND_VOID: return mn::vprintf(stream, "void");
-		case IType::KIND_BOOL: return mn::vprintf(stream, "bool");
-		case IType::KIND_INT: return mn::vprintf(stream, "int");
-		case IType::KIND_UINT: return mn::vprintf(stream, "uint");
-		case IType::KIND_INT8: return mn::vprintf(stream, "int8");
-		case IType::KIND_UINT8: return mn::vprintf(stream, "uint8");
-		case IType::KIND_INT16: return mn::vprintf(stream, "int16");
-		case IType::KIND_UINT16: return mn::vprintf(stream, "uint16");
-		case IType::KIND_INT32: return mn::vprintf(stream, "int32");
-		case IType::KIND_UINT32: return mn::vprintf(stream, "uint32");
-		case IType::KIND_INT64: return mn::vprintf(stream, "int64");
-		case IType::KIND_UINT64: return mn::vprintf(stream, "uint64");
-		case IType::KIND_FLOAT32: return mn::vprintf(stream, "float32");
-		case IType::KIND_FLOAT64: return mn::vprintf(stream, "float64");
-		case IType::KIND_STRING: return mn::vprintf(stream, "string");
+		case IType::KIND_VOID: out << "void"; break;
+		case IType::KIND_BOOL: out << "bool"; break;
+		case IType::KIND_INT: out << "int"; break;
+		case IType::KIND_UINT: out << "uint"; break;
+		case IType::KIND_INT8: out << "int8"; break;
+		case IType::KIND_UINT8: out << "uint8"; break;
+		case IType::KIND_INT16: out << "int16"; break;
+		case IType::KIND_UINT16: out << "uint16"; break;
+		case IType::KIND_INT32: out << "int32"; break;
+		case IType::KIND_UINT32: out << "uint32"; break;
+		case IType::KIND_INT64: out << "int64"; break;
+		case IType::KIND_UINT64: out << "uint64"; break;
+		case IType::KIND_FLOAT32: out << "float32"; break;
+		case IType::KIND_FLOAT64: out << "float64"; break;
+		case IType::KIND_STRING: out << "string"; break;
 		case IType::KIND_PTR:
-			return mn::vprintf(stream, "*{}", type->ptr.base);
+			out << "*" << *type.ptr.base;
+			break;
 		case IType::KIND_ARRAY:
-			return mn::vprintf(stream, "[{}]{}", type->array.count, type->array.base);
+			out << "[" << type.array.count << "]" << *type.array.base;
+			break;
 		case IType::KIND_FUNC:
 		{
-			size_t res = mn::vprintf(stream, "func(");
-			for(size_t i = 0; i < type->func.args.count; ++i)
+			out << "func(";
+			for(size_t i = 0; i < type.func.args.count; ++i)
 			{
-				if(i != 0)
-					res += mn::vprintf(stream, ", ");
-				res += mn::vprintf(stream, ":{}", type->func.args[i]);
+				if (i != 0)
+					out << ", ";
+				out << ":" << *type.func.args[i];
 			}
-			res += mn::vprintf(stream, "): {}", type->func.ret);
-			return res;
+			out << "): " << *type.func.ret;
+			break;
 		}
 		case IType::KIND_STRUCT:
 		case IType::KIND_UNION:
 		case IType::KIND_ENUM:
 		case IType::KIND_ALIAS:
-			return mn::vprintf(stream, "{}", type->sym->name);
+			out << type.sym->name;
+			break;
 		default:
-			return mn::vprintf(stream, "<UNKNOWN_TYPE>");
+			out << "<UNKNOWN_TYPE";
+			break;
 		}
+		return out;
 	}
 
 

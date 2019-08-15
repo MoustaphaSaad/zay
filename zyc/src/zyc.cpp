@@ -2,6 +2,7 @@
 #include <mn/Buf.h>
 #include <mn/Str.h>
 #include <mn/Defer.h>
+#include <mn/Path.h>
 
 #include <zay/Src.h>
 #include <zay/scan/Scanner.h>
@@ -26,7 +27,7 @@ COMMANDS:
 inline static void
 print_help()
 {
-	printfmt("{}\n", HELP_MSG);
+	print("{}\n", HELP_MSG);
 }
 
 
@@ -98,7 +99,7 @@ main(int argc, char** argv)
 		{
 			if(path_is_file(args.targets[i]) == false)
 			{
-				printfmt_err("'{}' is not a file\n", args.targets[i]);
+				printerr("'{}' is not a file\n", args.targets[i]);
 				continue;
 			}
 
@@ -108,12 +109,12 @@ main(int argc, char** argv)
 			//scan the file
 			if(src_scan(src) == false)
 			{
-				printfmt("{}\n", src_errs_dump(src, memory::tmp()));
+				print("{}\n", src_errs_dump(src, memory::tmp()));
 				continue;
 			}
 
 			//write the tokens
-			printfmt("{}\n", src_tkns_dump(src, memory::tmp()));
+			print("{}\n", src_tkns_dump(src, memory::tmp()));
 		}
 	}
 	else if(args.command == "parse")
@@ -122,7 +123,7 @@ main(int argc, char** argv)
 		{
 			if(path_is_file(args.targets[i]) == false)
 			{
-				printfmt_err("'{}' is not a file\n", args.targets[i]);
+				printerr("'{}' is not a file\n", args.targets[i]);
 				continue;
 			}
 
@@ -132,19 +133,19 @@ main(int argc, char** argv)
 			//scan the file
 			if(src_scan(src) == false)
 			{
-				printfmt("{}\n", src_errs_dump(src, memory::tmp()));
+				print("{}\n", src_errs_dump(src, memory::tmp()));
 				continue;
 			}
 
 			//parse the file
 			if(src_parse(src, MODE::LIB) == false)
 			{
-				printfmt("{}\n", src_errs_dump(src, memory::tmp()));
+				print("{}\n", src_errs_dump(src, memory::tmp()));
 				continue;
 			}
 
 			//write the ast
-			printfmt("{}\n", src_ast_dump(src, memory::tmp()));
+			print("{}\n", src_ast_dump(src, memory::tmp()));
 		}
 	}
 	return 0;

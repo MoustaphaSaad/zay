@@ -15,13 +15,13 @@ namespace zay
 	cgen_indent(CGen self)
 	{
 		for (size_t i = 0; i < self->indent; ++i)
-			vprintf(self->out, "\t");
+			print_to(self->out, "\t");
 	}
 
 	inline static void
 	cgen_newline(CGen self)
 	{
-		vprintf(self->out, "\n");
+		print_to(self->out, "\n");
 		cgen_indent(self);
 	}
 
@@ -216,153 +216,153 @@ namespace zay
 				}
 			}
 			res = strf(res, ")");
-			vprintf(self->out, "{}", cgen_write_field(self, type->func.ret, res));
+			print_to(self->out, "{}", cgen_write_field(self, type->func.ret, res));
 			break;
 		}
 		case IType::KIND_VOID:
 			if (name.count)
-				vprintf(self->out, "void {}", name);
+				print_to(self->out, "void {}", name);
 			else
-				vprintf(self->out, "void");
+				print_to(self->out, "void");
 			break;
 		case IType::KIND_BOOL:
 			if (name.count)
-				vprintf(self->out, "bool {}", name);
+				print_to(self->out, "bool {}", name);
 			else
-				vprintf(self->out, "bool");
+				print_to(self->out, "bool");
 			break;
 		case IType::KIND_INT:
 			if (name.count)
-				vprintf(self->out, "ZayInt {}", name);
+				print_to(self->out, "ZayInt {}", name);
 			else
-				vprintf(self->out, "ZayInt");
+				print_to(self->out, "ZayInt");
 			break;
 		case IType::KIND_UINT:
 			if (name.count)
-				vprintf(self->out, "ZayUint {}", name);
+				print_to(self->out, "ZayUint {}", name);
 			else
-				vprintf(self->out, "ZayUint");
+				print_to(self->out, "ZayUint");
 			break;
 		case IType::KIND_INT8:
 			if (name.count)
-				vprintf(self->out, "int8_t {}", name);
+				print_to(self->out, "int8_t {}", name);
 			else
-				vprintf(self->out, "int8_t");
+				print_to(self->out, "int8_t");
 			break;
 		case IType::KIND_UINT8:
 			if (name.count)
-				vprintf(self->out, "uint8_t {}", name);
+				print_to(self->out, "uint8_t {}", name);
 			else
-				vprintf(self->out, "uint8_t");
+				print_to(self->out, "uint8_t");
 			break;
 		case IType::KIND_INT16:
 			if (name.count)
-				vprintf(self->out, "int16_t {}", name);
+				print_to(self->out, "int16_t {}", name);
 			else
-				vprintf(self->out, "int16_t");
+				print_to(self->out, "int16_t");
 			break;
 		case IType::KIND_UINT16:
 			if (name.count)
-				vprintf(self->out, "uint16_t {}", name);
+				print_to(self->out, "uint16_t {}", name);
 			else
-				vprintf(self->out, "uint16_t");
+				print_to(self->out, "uint16_t");
 			break;
 		case IType::KIND_INT32:
 			if (name.count)
-				vprintf(self->out, "int32_t {}", name);
+				print_to(self->out, "int32_t {}", name);
 			else
-				vprintf(self->out, "int32_t");
+				print_to(self->out, "int32_t");
 			break;
 		case IType::KIND_UINT32:
 			if (name.count)
-				vprintf(self->out, "uint32_t {}", name);
+				print_to(self->out, "uint32_t {}", name);
 			else
-				vprintf(self->out, "uint32_t");
+				print_to(self->out, "uint32_t");
 			break;
 		case IType::KIND_INT64:
 			if (name.count)
-				vprintf(self->out, "int64_t {}", name);
+				print_to(self->out, "int64_t {}", name);
 			else
-				vprintf(self->out, "int64_t");
+				print_to(self->out, "int64_t");
 			break;
 		case IType::KIND_UINT64:
 			if (name.count)
-				vprintf(self->out, "uint64_t {}", name);
+				print_to(self->out, "uint64_t {}", name);
 			else
-				vprintf(self->out, "uint64_t");
+				print_to(self->out, "uint64_t");
 			break;
 		case IType::KIND_FLOAT32:
 			if (name.count)
-				vprintf(self->out, "float {}", name);
+				print_to(self->out, "float {}", name);
 			else
-				vprintf(self->out, "float");
+				print_to(self->out, "float");
 			break;
 		case IType::KIND_FLOAT64:
 			if (name.count)
-				vprintf(self->out, "double {}", name);
+				print_to(self->out, "double {}", name);
 			else
-				vprintf(self->out, "double");
+				print_to(self->out, "double");
 			break;
 		case IType::KIND_STRING:
 			if (name.count)
-				vprintf(self->out, "ZayString {}", name);
+				print_to(self->out, "ZayString {}", name);
 			else
-				vprintf(self->out, "ZayString");
+				print_to(self->out, "ZayString");
 			break;
 		case IType::KIND_STRUCT:
 		{
-			vprintf(self->out, "struct {} {{", type_name);
+			print_to(self->out, "struct {} {{", type_name);
 			self->indent++;
 			for(Field_Sign& f: type->fields)
 			{
 				cgen_newline(self);
-				vprintf(self->out, "{};", cgen_write_field(self, f.type, f.name));
+				print_to(self->out, "{};", cgen_write_field(self, f.type, f.name));
 			}
 			self->indent--;
 			cgen_newline(self);
-			vprintf(self->out, "} {}", name);
+			print_to(self->out, "}} {}", name);
 			break;
 		}
 		case IType::KIND_UNION:
 		{
-			vprintf(self->out, "union {} {{", type_name);
+			print_to(self->out, "union {} {{", type_name);
 			self->indent++;
 			for(Field_Sign& f: type->fields)
 			{
 				cgen_newline(self);
-				vprintf(self->out, "{};", cgen_write_field(self, f.type, f.name));
+				print_to(self->out, "{};", cgen_write_field(self, f.type, f.name));
 			}
 			self->indent--;
 			cgen_newline(self);
-			vprintf(self->out, "} {}", name);
+			print_to(self->out, "}} {}", name);
 			break;
 		}
 		case IType::KIND_ENUM:
 		{
-			vprintf(self->out, "enum {} {{", type_name);
+			print_to(self->out, "enum {} {{", type_name);
 			self->indent++;
 			for(size_t i = 0; i < type->enum_values.count; ++i)
 			{
 				if (i != 0)
-					vprintf(self->out, ", ");
+					print_to(self->out, ", ");
 				cgen_newline(self);
-				vprintf(self->out, "{}", type->enum_values[i].id.str);
+				print_to(self->out, "{}", type->enum_values[i].id.str);
 				if(type->enum_values[i].value)
 				{
-					vprintf(self->out, " = ");
+					print_to(self->out, " = ");
 					cgen_expr_gen(self, type->enum_values[i].value);
 				}
 			}
 			self->indent--;
 			cgen_newline(self);
-			vprintf(self->out, "} {}", name);
+			print_to(self->out, "}} {}", name);
 			break;
 		}
 		case IType::KIND_ALIAS:
 			cgen_write_type(self, type->alias, type_name, name);
 			break;
 		default:
-			vprintf(self->out, "<UNDEFINED TYPE>");
+			print_to(self->out, "<UNDEFINED TYPE>");
 			break;
 		}
 	}
@@ -381,7 +381,7 @@ namespace zay
 	cgen_expr_atom(CGen self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_ATOM);
-		vprintf(self->out, "{}", expr->atom.str);
+		print_to(self->out, "{}", expr->atom.str);
 	}
 
 	inline static void
@@ -389,7 +389,7 @@ namespace zay
 	{
 		assert(expr->kind == IExpr::KIND_BINARY);
 		cgen_expr_gen(self, expr->binary.lhs);
-		vprintf(self->out, " {} ", expr->binary.op.str);
+		print_to(self->out, " {} ", expr->binary.op.str);
 		cgen_expr_gen(self, expr->binary.rhs);
 	}
 
@@ -397,7 +397,7 @@ namespace zay
 	cgen_expr_unary(CGen self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_UNARY);
-		vprintf(self->out, "{}", expr->unary.op.str);
+		print_to(self->out, "{}", expr->unary.op.str);
 		cgen_expr_gen(self, expr->unary.expr);
 	}
 
@@ -407,11 +407,11 @@ namespace zay
 		assert(expr->kind == IExpr::KIND_DOT);
 		cgen_expr_gen(self, expr->dot.base);
 		if(expr->dot.base->type->kind == IType::KIND_ENUM)
-			vprintf(self->out, "::{}", expr->dot.member.str);
+			print_to(self->out, "::{}", expr->dot.member.str);
 		else if(expr->dot.base->type->kind == IType::KIND_PTR)
-			vprintf(self->out, "->{}", expr->dot.member.str);
+			print_to(self->out, "->{}", expr->dot.member.str);
 		else
-			vprintf(self->out, ".{}", expr->dot.member.str);
+			print_to(self->out, ".{}", expr->dot.member.str);
 	}
 
 	inline static void
@@ -419,9 +419,9 @@ namespace zay
 	{
 		assert(expr->kind == IExpr::KIND_INDEXED);
 		cgen_expr_gen(self, expr->indexed.base);
-		vprintf(self->out, "[");
+		print_to(self->out, "[");
 		cgen_expr_gen(self, expr->indexed.index);
-		vprintf(self->out, "]");
+		print_to(self->out, "]");
 	}
 
 	inline static void
@@ -429,21 +429,21 @@ namespace zay
 	{
 		assert(expr->kind == IExpr::KIND_CALL);
 		cgen_expr_gen(self, expr->call.base);
-		vprintf(self->out, "(");
+		print_to(self->out, "(");
 		for(size_t i = 0; i < expr->call.args.count; ++i)
 		{
 			if (i != 0)
-				vprintf(self->out, ", ");
+				print_to(self->out, ", ");
 			cgen_expr_gen(self, expr->call.args[i]);
 		}
-		vprintf(self->out, ")");
+		print_to(self->out, ")");
 	}
 
 	inline static void
 	cgen_expr_cast(CGen self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_CAST);
-		vprintf(self->out, "({})", cgen_write_field(self, expr->type, ""));
+		print_to(self->out, "({})", cgen_write_field(self, expr->type, ""));
 		cgen_expr_gen(self, expr->cast.base);
 	}
 
@@ -451,9 +451,9 @@ namespace zay
 	cgen_expr_paren(CGen self, Expr expr)
 	{
 		assert(expr->kind == IExpr::KIND_PAREN);
-		vprintf(self->out, "(");
+		print_to(self->out, "(");
 		cgen_expr_gen(self, expr->paren);
-		vprintf(self->out, ")");
+		print_to(self->out, ")");
 	}
 
 	inline static void
@@ -461,32 +461,32 @@ namespace zay
 	{
 		assert(expr->kind == IExpr::KIND_COMPLIT);
 		if(expr->type->kind != IType::KIND_ARRAY)
-			vprintf(self->out, "({})", cgen_write_field(self, expr->type, ""));
-		vprintf(self->out, "{");
+			print_to(self->out, "({})", cgen_write_field(self, expr->type, ""));
+		print_to(self->out, "{{");
 		self->indent++;
 		for (size_t i = 0; i < expr->complit.fields.count; ++i)
 		{
 			if(i != 0)
-				vprintf(self->out, ",");
+				print_to(self->out, ",");
 			cgen_newline(self);
 			if (expr->complit.fields[i].kind == Complit_Field::KIND_MEMBER)
 			{
-				vprintf(self->out, ".");
+				print_to(self->out, ".");
 				cgen_expr_gen(self, expr->complit.fields[i].left);
 			}
 			else if(expr->complit.fields[i].kind == Complit_Field::KIND_ARRAY)
 			{
-				vprintf(self->out, "[");
+				print_to(self->out, "[");
 				cgen_expr_gen(self, expr->complit.fields[i].left);
-				vprintf(self->out, "]");
+				print_to(self->out, "]");
 			}
-			vprintf(self->out, " = ");
+			print_to(self->out, " = ");
 			cgen_expr_gen(self, expr->complit.fields[i].right);
 		}
 		self->indent--;
 		if(expr->complit.fields.count > 0)
 			cgen_newline(self);
-		vprintf(self->out, "}");
+		print_to(self->out, "}}");
 	}
 
 	inline static void
@@ -541,12 +541,12 @@ namespace zay
 		assert(stmt->kind == IStmt::KIND_RETURN);
 		if(stmt->return_stmt)
 		{
-			vprintf(self->out, "return ");
+			print_to(self->out, "return ");
 			cgen_expr_gen(self, stmt->return_stmt);
 		}
 		else
 		{
-			vprintf(self->out, "return");
+			print_to(self->out, "return");
 		}
 	}
 
@@ -555,22 +555,22 @@ namespace zay
 	{
 		assert(stmt->kind == IStmt::KIND_IF);
 
-		vprintf(self->out, "if (");
+		print_to(self->out, "if (");
 		cgen_expr_gen(self, stmt->if_stmt.if_cond);
-		vprintf(self->out, ") ");
+		print_to(self->out, ") ");
 		cgen_stmt_gen(self, stmt->if_stmt.if_body);
 
 		for(const Else_If& e: stmt->if_stmt.else_ifs)
 		{
-			vprintf(self->out, " else if (");
+			print_to(self->out, " else if (");
 			cgen_expr_gen(self, e.cond);
-			vprintf(self->out, ") ");
+			print_to(self->out, ") ");
 			cgen_stmt_gen(self, e.body);
 		}
 
 		if(stmt->if_stmt.else_body)
 		{
-			vprintf(self->out, " else ");
+			print_to(self->out, " else ");
 			cgen_stmt_gen(self, stmt->if_stmt.else_body);
 		}
 	}
@@ -582,31 +582,31 @@ namespace zay
 
 		cgen_scope_enter(self, src_scope_of(self->src, stmt));
 
-		vprintf(self->out, "for (");
+		print_to(self->out, "for (");
 		if (stmt->for_stmt.init_stmt)
 		{
 			cgen_stmt_gen(self, stmt->for_stmt.init_stmt);
-			vprintf(self->out, "; ");
+			print_to(self->out, "; ");
 		}
 		else
 		{
-			vprintf(self->out, ";");
+			print_to(self->out, ";");
 		}
 
 		if (stmt->for_stmt.loop_cond)
 		{
 			cgen_expr_gen(self, stmt->for_stmt.loop_cond);
-			vprintf(self->out, "; ");
+			print_to(self->out, "; ");
 		}
 		else
 		{
-			vprintf(self->out, ";");
+			print_to(self->out, ";");
 		}
 
 		if (stmt->for_stmt.post_stmt)
 			cgen_stmt_gen(self, stmt->for_stmt.post_stmt);
 
-		vprintf(self->out, ") ");
+		print_to(self->out, ") ");
 
 		cgen_stmt_gen(self, stmt->for_stmt.loop_body);
 
@@ -622,16 +622,16 @@ namespace zay
 		{
 			if(i != 0)
 			{
-				vprintf(self->out, ";");
+				print_to(self->out, ";");
 				cgen_newline(self);
 			}
 
 			Type t = cgen_sym(self, stmt->var_stmt.ids[i].str)->type;
-			vprintf(self->out, "{}", cgen_write_field(self, t, stmt->var_stmt.ids[i].str));
+			print_to(self->out, "{}", cgen_write_field(self, t, stmt->var_stmt.ids[i].str));
 
 			if(i < stmt->var_stmt.exprs.count)
 			{
-				vprintf(self->out, " = ");
+				print_to(self->out, " = ");
 				cgen_expr_gen(self, stmt->var_stmt.exprs[i]);
 			}
 		}
@@ -645,12 +645,12 @@ namespace zay
 		{
 			if (i != 0)
 			{
-				vprintf(self->out, ";");
+				print_to(self->out, ";");
 				cgen_newline(self);
 			}
 
 			cgen_expr_gen(self, stmt->assign_stmt.lhs[i]);
-			vprintf(self->out, " {} ", stmt->assign_stmt.op.str);
+			print_to(self->out, " {} ", stmt->assign_stmt.op.str);
 			cgen_expr_gen(self, stmt->assign_stmt.rhs[i]);
 		}
 	}
@@ -662,7 +662,7 @@ namespace zay
 
 		cgen_scope_enter(self, src_scope_of(self->src, stmt));
 
-		vprintf(self->out, "{");
+		print_to(self->out, "{{");
 
 		self->indent++;
 
@@ -676,14 +676,14 @@ namespace zay
 				s->kind == IStmt::KIND_RETURN ||
 				s->kind == IStmt::KIND_VAR)
 			{
-				vprintf(self->out, ";");
+				print_to(self->out, ";");
 			}
 		}
 
 		self->indent--;
 		cgen_newline(self);
 
-		vprintf(self->out, "}");
+		print_to(self->out, "}}");
 
 		cgen_scope_leave(self);
 	}
@@ -693,7 +693,7 @@ namespace zay
 	{
 		assert(stmt->kind == IStmt::KIND_BLOCK);
 
-		vprintf(self->out, "{");
+		print_to(self->out, "{{");
 
 		self->indent++;
 
@@ -707,14 +707,14 @@ namespace zay
 				s->kind == IStmt::KIND_RETURN ||
 				s->kind == IStmt::KIND_VAR)
 			{
-				vprintf(self->out, ";");
+				print_to(self->out, ";");
 			}
 		}
 
 		self->indent--;
 		cgen_newline(self);
 
-		vprintf(self->out, "}");
+		print_to(self->out, "}}");
 	}
 
 	inline static void
@@ -723,10 +723,10 @@ namespace zay
 		switch(stmt->kind)
 		{
 		case IStmt::KIND_BREAK:
-			vprintf(self->out, "break");
+			print_to(self->out, "break");
 			break;
 		case IStmt::KIND_CONTINUE:
-			vprintf(self->out, "continue");
+			print_to(self->out, "continue");
 			break;
 		case IStmt::KIND_RETURN:
 			cgen_stmt_return(self, stmt);
@@ -763,7 +763,7 @@ namespace zay
 		assert(sym->kind == ISym::KIND_FUNC);
 		Decl decl = sym->func_sym;
 		
-		vprintf(
+		print_to(
 			self->out,
 			"{} {}(",
 			cgen_write_field(self, sym->type->func.ret, ""),
@@ -772,7 +772,7 @@ namespace zay
 
 		if(sym->type->func.args.count == 0)
 		{
-			vprintf(self->out, "void");
+			print_to(self->out, "void");
 		}
 		else
 		{
@@ -783,13 +783,13 @@ namespace zay
 				for(const Tkn& id: arg.ids)
 				{
 					if (i != 0)
-						vprintf(self->out, ", ");
-					vprintf(self->out, "{}", cgen_write_field(self, t, id.str));
+						print_to(self->out, ", ");
+					print_to(self->out, "{}", cgen_write_field(self, t, id.str));
 					++i;
 				}
 			}
 		}
-		vprintf(self->out, ") ");
+		print_to(self->out, ") ");
 
 		cgen_scope_enter(self, src_scope_of(self->src, decl));
 		cgen_stmt_block_gen(self, decl->func_decl.body);
@@ -800,22 +800,22 @@ namespace zay
 	cgen_sym_var_gen(CGen self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_VAR);
-		vprintf(self->out, "{}", cgen_write_field(self, sym->type, sym->name));
+		print_to(self->out, "{}", cgen_write_field(self, sym->type, sym->name));
 		if(sym->var_sym.expr)
 		{
-			vprintf(self->out, " = ");
+			print_to(self->out, " = ");
 			cgen_expr_gen(self, sym->var_sym.expr);
 		}
-		vprintf(self->out, ";");
+		print_to(self->out, ";");
 	}
 
 	inline static void
 	cgen_sym_type_gen(CGen self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_TYPE);
-		vprintf(self->out, "typedef ");
+		print_to(self->out, "typedef ");
 		cgen_write_type(self, sym->type, sym->name, sym->name);
-		vprintf(self->out, ";");
+		print_to(self->out, ";");
 	}
 
 	inline static void
@@ -846,7 +846,7 @@ namespace zay
 		CGen self = alloc<ICGen>();
 		self->indent = 0;
 		self->src = src;
-		self->out = stream_memory_new();
+		self->out = memory_stream_new();
 		self->scope_stack = buf_new<Scope>();
 
 		buf_push(self->scope_stack, src_scope_of(src, nullptr));
@@ -869,7 +869,6 @@ namespace zay
 			if (i != 0)
 				cgen_newline(self);
 			cgen_sym_gen(self, self->src->reachable_syms[i]);
-			memory::tmp()->free_all();
 		}
 	}
 }

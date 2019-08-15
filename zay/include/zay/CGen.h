@@ -4,7 +4,7 @@
 #include "zay/Src.h"
 #include "zay/typecheck/Scope.h"
 
-#include <mn/Stream.h>
+#include <mn/Memory_Stream.h>
 #include <mn/Buf.h>
 
 #include <stddef.h>
@@ -16,7 +16,7 @@ namespace zay
 	{
 		size_t indent;
 		Src src;
-		mn::Stream out;
+		mn::Memory_Stream out;
 		mn::Buf<Scope> scope_stack;
 	};
 
@@ -40,7 +40,7 @@ namespace zay
 	{
 		CGen self = cgen_new(src);
 		cgen_gen(self);
-		mn::Str res = mn::str_from_c(mn::stream_str(self->out), allocator);
+		mn::Str res = mn::str_from_c(mn::memory_stream_ptr(self->out), allocator);
 		cgen_free(self);
 		return res;
 	}

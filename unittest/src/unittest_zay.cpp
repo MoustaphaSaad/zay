@@ -41,10 +41,10 @@ parse_expr(const char* str)
 	Expr e = parser_expr(parser);
 	parser_free(parser);
 
-	Stream out = stream_tmp();
+	Memory_Stream out = memory_stream_new(memory::tmp());
 	AST_Lisp writer = ast_lisp_new(out);
 	ast_lisp_expr(writer, e);
-	Str res = str_from_c(stream_str(out), memory::tmp());
+	Str res = memory_stream_str(out);
 
 	expr_free(e);
 	src_free(src);
@@ -61,10 +61,10 @@ parse_stmt(const char* str)
 	Stmt s = parser_stmt(parser);
 	parser_free(parser);
 
-	Stream out = stream_tmp();
+	Memory_Stream out = memory_stream_new(memory::tmp());
 	AST_Lisp writer = ast_lisp_new(out);
 	ast_lisp_stmt(writer, s);
-	Str res = str_from_c(stream_str(out), memory::tmp());
+	Str res = memory_stream_str(out);
 
 	stmt_free(s);
 	src_free(src);

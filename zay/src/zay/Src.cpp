@@ -3,8 +3,10 @@
 
 #include <mn/Memory.h>
 #include <mn/File.h>
+#include <mn/Path.h>
 #include <mn/Stream.h>
 #include <mn/IO.h>
+#include <mn/Defer.h>
 
 namespace zay
 {
@@ -66,46 +68,48 @@ namespace zay
 	Str
 	src_errs_dump(Src self, Allocator allocator)
 	{
-		Stream out = stream_tmp();
+		Memory_Stream out = memory_stream_new(allocator);
+		mn_defer(memory_stream_free(out));
 		for(const Err& e: self->errs)
 		{
 			Line l = self->lines[e.pos.line - 1];
 			//we need to put ^^^ under the word the compiler means by the error
 			if(e.rng.begin && e.rng.end)
 			{
-				vprintf(out, ">> {}\n", str_from_substr(l.begin, l.end, memory::tmp()));
-				vprintf(out, ">> ");
+				print_to(out, ">> {}\n", str_from_substr(l.begin, l.end, memory::tmp()));
+				print_to(out, ">> ");
 				for(const char* it = l.begin; it != l.end; it = rune_next(it))
 				{
 					Rune c = rune_read(it);
 					if(it >= e.rng.begin && it < e.rng.end)
 					{
-						vprintf(out, "^");
+						print_to(out, "^");
 					}
 					else if(c == '\t')
 					{
-						vprintf(out, "\t");
+						print_to(out, "\t");
 					}
 					else
 					{
-						vprintf(out, " ");
+						print_to(out, " ");
 					}
 				}
-				vprintf(out, "\n");
+				print_to(out, "\n");
 			}
-			vprintf(out, "Error[{}:{}:{}]: {}\n\n", self->path, e.pos.line, e.pos.col, e.msg);
+			print_to(out, "Error[{}:{}:{}]: {}\n\n", self->path, e.pos.line, e.pos.col, e.msg);
 		}
-		return str_from_c(stream_str(out), allocator);
+		return memory_stream_str(out);
 	}
 
 	Str
 	src_tkns_dump(Src self, Allocator allocator)
 	{
 		//this is a tmp stream you can use to construct strings into
-		Stream out = stream_tmp();
+		Memory_Stream out = memory_stream_new(allocator);
+		mn_defer(memory_stream_free(out));
 		for(const Tkn& t: self->tkns)
 		{
-			vprintf(
+			print_to(
 				out,
 				"line: {}, col: {}, kind: \"{}\" str: \"{}\"\n",
 				t.pos.line,
@@ -114,19 +118,19 @@ namespace zay
 				t.str
 			);
 		}
-		return str_from_c(stream_str(out), allocator);
+		return memory_stream_str(out);
 	}
 
 	Str
 	src_ast_dump(Src self, Allocator allocator)
 	{
-		Stream out = stream_tmp();
+		Memory_Stream out = memory_stream_new(allocator);
 		AST_Lisp writer = ast_lisp_new(out);
 		for(size_t i = 0; i < self->ast->decls.count; ++i)
 		{
 			ast_lisp_decl(writer, self->ast->decls[i]);
-			vprintf(out, "\n");
+			print_to(out, "\n");
 		}
-		return str_from_c(stream_str(out), allocator);
+		return memory_stream_str(out);
 	}
 }

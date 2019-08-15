@@ -279,7 +279,7 @@ namespace zay
 						{
 							src_err(
 								self->src,
-								err_expr(v.value, strf("enums should have int values but found '{}'", value_type))
+								err_expr(v.value, strf("enums should have int values but found '{}'", *value_type))
 							);
 						}
 					}
@@ -526,7 +526,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(expr->indexed.base, strf("expression type '{}' is not an array", type))
+				err_expr(expr->indexed.base, strf("expression type '{}' is not an array", *type))
 			);
 			return type_void;
 		}
@@ -535,7 +535,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(expr->indexed.index, strf("index expression type '{}' is not an integer", type))
+				err_expr(expr->indexed.index, strf("index expression type '{}' is not an integer", *type))
 			);
 		}
 		return type->array.base;
@@ -592,7 +592,7 @@ namespace zay
 
 		src_err(
 			self->src,
-			err_expr(expr, strf("can't cast '{}' to '{}'", from_type, to_type))
+			err_expr(expr, strf("can't cast '{}' to '{}'", *from_type, *to_type))
 		);
 		return type_void;
 	}
@@ -631,7 +631,7 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_expr(field.left, strf("'{}' type doesn't have this field", type))
+						err_expr(field.left, strf("'{}' type doesn't have this field", *type))
 					);
 				}
 			}
@@ -645,7 +645,7 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_expr(field.left, strf("'{}' type is not an array", type))
+						err_expr(field.left, strf("'{}' type is not an array", *type))
 					);
 				}
 			}
@@ -654,7 +654,7 @@ namespace zay
 
 			if(type_is_same(left_type, right_type) == false)
 			{
-				Str msg = strf("type mismatch, type '{}' expected but type '{}' was provided", left_type, right_type);
+				Str msg = strf("type mismatch, type '{}' expected but type '{}' was provided", *left_type, *right_type);
 				src_err(self->src, err_expr(field.right, msg));
 			}
 		}
@@ -734,7 +734,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(stmt->return_stmt, strf("wrong return type '{}' expected '{}'", ret, expected))
+				err_expr(stmt->return_stmt, strf("wrong return type '{}' expected '{}'", *ret, *expected))
 			);
 		}
 		return ret;
@@ -749,7 +749,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(stmt->if_stmt.if_cond, strf("if conditions type '{}' is not a boolean", type))
+				err_expr(stmt->if_stmt.if_cond, strf("if conditions type '{}' is not a boolean", *type))
 			);
 		}
 		typer_stmt_resolve(self, stmt->if_stmt.if_body);
@@ -761,7 +761,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(e.cond, strf("if conditions type '{}' is not a boolean", cond_type))
+					err_expr(e.cond, strf("if conditions type '{}' is not a boolean", *cond_type))
 				);
 			}
 			typer_stmt_resolve(self, e.body);
@@ -789,7 +789,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(stmt->for_stmt.loop_cond, strf("for loop condition type '{}' is not a boolean", cond_type))
+					err_expr(stmt->for_stmt.loop_cond, strf("for loop condition type '{}' is not a boolean", *cond_type))
 				);
 			}
 		}
@@ -845,7 +845,7 @@ namespace zay
 					{
 						src_err(
 							self->src,
-							err_expr(e, strf("type mismatch expected '{}' but found '{}'", type, expr_type))
+							err_expr(e, strf("type mismatch expected '{}' but found '{}'", *type, *expr_type))
 						);
 					}
 				}
@@ -883,8 +883,8 @@ namespace zay
 			{
 				Str msg = strf(
 					"type mismatch in assignment statement, expected '{}' but found '{}'",
-					lhs_type,
-					rhs_type
+					*lhs_type,
+					*rhs_type
 				);
 				src_err(self->src, err_expr(stmt->assign_stmt.rhs[i], msg));
 			}
@@ -1063,7 +1063,7 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_expr(e, strf("type mismatch expected '{}' but found '{}'", type, expr_type))
+						err_expr(e, strf("type mismatch expected '{}' but found '{}'", *type, *expr_type))
 					);
 				}
 			}
