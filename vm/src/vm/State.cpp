@@ -98,7 +98,7 @@ namespace vm
 	}
 
 	bool
-	state_exec(State& self)
+	exec(State& self)
 	{
 		if (load_ip(self) >= self.code.count)
 		{
@@ -351,6 +351,7 @@ namespace vm
 
 		case ISA::HALT:
 		{
+			self.halted = true;
 			break;
 		}
 
@@ -363,6 +364,17 @@ namespace vm
 		}
 
 		}
+		return self.last_error == false;
+	}
+
+	bool
+	run(State& self)
+	{
+		load_ip(self) = 0;
+		self.halted = false;
+		while (self.halted == false)
+			if (exec(self) == false)
+				break;
 		return self.last_error == false;
 	}
 }

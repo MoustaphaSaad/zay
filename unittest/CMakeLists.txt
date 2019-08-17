@@ -5,6 +5,7 @@ set(SOURCE_FILES
 	src/unittest_main.cpp
 	src/unittest_zay.cpp
 	src/unittest_cypher.cpp
+	src/unittest_rgx.cpp
 )
 
 # add executable target
@@ -14,6 +15,7 @@ add_executable(unittest
 
 target_link_libraries(unittest
 	PRIVATE
+		MoustaphaSaad::rgx
 		MoustaphaSaad::zay
 		MoustaphaSaad::cypher
 )

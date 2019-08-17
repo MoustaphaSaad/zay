@@ -12,6 +12,7 @@ namespace vm
 		mn::Buf<uint8_t> code;
 		mn::Buf<uint8_t> stack;
 		Register r[int(REGISTER::R_COUNT)];
+		bool halted;
 		bool last_error;
 	};
 
@@ -28,5 +29,8 @@ namespace vm
 	}
 
 	VM_EXPORT bool
-	state_exec(State& self);
+	exec(State& self);
+
+	VM_EXPORT bool
+	run(State& self);
 }
