@@ -5,6 +5,7 @@
 
 #include <mn/Str.h>
 #include <mn/IO.h>
+#include <utf8proc/utf8proc.h>
 
 using namespace rgx;
 using namespace mn;
@@ -123,6 +124,17 @@ TEST_CASE("quoted string")
 	CHECK(matched(prog, "\"my name is \\\"mostafa\\\"\"") == true);
 	CHECK(matched(prog, "moustapha.saad.abdelhamed@gmail") == false);
 	CHECK(matched(prog, "") == false);
+
+	buf_free(prog);
+}
+
+TEST_CASE("arabic")
+{
+	auto prog = compile("أبجد*");
+
+	CHECK(matched(prog, "أبجد") == true);
+	CHECK(matched(prog, "أد") == false);
+	CHECK(matched(prog, "أبجددددددد") == true);
 
 	buf_free(prog);
 }

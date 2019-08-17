@@ -5,6 +5,7 @@
 #include "alp/Rng.h"
 #include "alp/Err.h"
 #include "alp/Tkn.h"
+#include "alp/AST.h"
 
 #include <mn/Buf.h>
 #include <mn/Str.h>
@@ -23,6 +24,7 @@ namespace alp
 		mn::Str_Intern str_table;
 		mn::Buf<Err> errs;
 		mn::Buf<Tkn> tkns;
+		AST ast;
 	};
 
 	ALP_EXPORT Src
@@ -75,4 +77,7 @@ namespace alp
 
 	ALP_EXPORT mn::Str
 	src_tkns_dump(Src self, mn::Allocator allocator = mn::allocator_top());
+
+	ALP_EXPORT mn::Str
+	src_ast_dump(Src self, mn::Allocator allocator = mn::allocator_top());
 }

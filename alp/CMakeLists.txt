@@ -9,6 +9,9 @@ set(HEADER_FILES
 	include/alp/Err.h
 	include/alp/Src.h
 	include/alp/Scanner.h
+	include/alp/Decl.h
+	include/alp/AST.h
+	include/alp/Parser.h
 )
 
 # list the source files
@@ -16,6 +19,9 @@ set(SOURCE_FILES
 	src/alp/Tkn.cpp
 	src/alp/Src.cpp
 	src/alp/Scanner.cpp
+	src/alp/Decl.cpp
+	src/alp/AST.cpp
+	src/alp/Parser.cpp
 )
 
 # add library target

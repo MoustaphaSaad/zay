@@ -2,6 +2,7 @@
 
 #include <alp/Src.h>
 #include <alp/Scanner.h>
+#include <alp/Parser.h>
 
 #include <mn/Defer.h>
 #include <mn/Str.h>
@@ -60,3 +61,32 @@ line: 7, col: 38, kind: ";" str: ";"
 )""";
 	CHECK(answer == expected);
 }
+
+Str
+parse(const char* code)
+{
+	Src src = src_from_str(code);
+	mn_defer(src_free(src));
+	CHECK(src_scan(src) == true);
+	CHECK(src_parse(src) == true);
+	return src_ast_dump(src, memory::tmp());
+}
+
+TEST_CASE("parse")
+{
+	Str answer = parse(R"""(
+		package calc;
+
+		token digit = [0-9];
+		token not_digit = [^0-9];
+		token Id = not_digit (not_digit | digit)*;
+		token String = "\"([^\\\"]|\\.)*\"";
+	)""");
+	const char* expected = R"""(token digit: [0-9];
+token not_digit: [^0-9];
+token Id: not_digit(not_digit|digit)*;
+token String: \"([^\\\"]|\\.)*\";
+)""";
+	CHECK(answer == expected);
+}
+

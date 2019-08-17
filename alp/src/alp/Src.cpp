@@ -20,6 +20,7 @@ namespace alp
 		self->str_table = str_intern_new();
 		self->errs = buf_new<Err>();
 		self->tkns = buf_new<Tkn>();
+		self->ast = ast_new();
 		return self;
 	}
 
@@ -45,6 +46,7 @@ namespace alp
 		str_intern_free(self->str_table);
 		destruct(self->errs);
 		buf_free(self->tkns);
+		ast_free(self->ast);
 		free(self);
 	}
 
@@ -100,6 +102,27 @@ namespace alp
 				Tkn::NAMES[t.kind],
 				t.str
 			);
+		}
+		return memory_stream_str(out);
+	}
+
+	Str
+	src_ast_dump(Src self, Allocator allocator)
+	{
+		//this is a tmp stream you can use to construct strings into
+		Memory_Stream out = memory_stream_new(allocator);
+		mn_defer(memory_stream_free(out));
+		for(Decl d: self->ast->decls)
+		{
+			switch(d->kind)
+			{
+			case IDecl::KIND_TOKEN:
+				print_to(out, "token {}: {};\n", d->name.str, d->regex);
+				break;
+			default:
+				assert(false && "unreachable");
+				break;
+			}
 		}
 		return memory_stream_str(out);
 	}
