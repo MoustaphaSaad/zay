@@ -8,6 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin/$<CONFIG>")
 
 add_subdirectory(mn EXCLUDE_FROM_ALL)
 add_subdirectory(rgx)
+add_subdirectory(alp)
 add_subdirectory(vm)
 add_subdirectory(cypher)
 add_subdirectory(zay)

@@ -4,6 +4,7 @@
 #include <rgx/VM.h>
 
 #include <mn/Str.h>
+#include <mn/IO.h>
 
 using namespace rgx;
 using namespace mn;
