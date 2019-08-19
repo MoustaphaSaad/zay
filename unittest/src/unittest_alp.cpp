@@ -3,6 +3,7 @@
 #include <alp/Src.h>
 #include <alp/Scanner.h>
 #include <alp/Parser.h>
+#include <alp/Gen.h>
 
 #include <mn/Defer.h>
 #include <mn/Str.h>
@@ -90,3 +91,47 @@ token String: \"([^\\\"]|\\.)*\";
 	CHECK(answer == expected);
 }
 
+Code
+gen(const char* code)
+{
+	Src src = src_from_str(code);
+	mn_defer(src_free(src));
+	CHECK(src_scan(src) == true);
+	CHECK(src_parse(src) == true);
+	return gen_std(src, memory::tmp());
+}
+
+TEST_CASE("header generation")
+{
+	Code answer = gen(R"""(
+		package calc;
+
+		token digit = [0-9];
+		token not_digit = [^0-9];
+		token Id = not_digit (not_digit | digit)*;
+		token String = "\"([^\\\"]|\\.)*\"";
+	)""");
+
+	const char* expected_header = R"""(#pragma once
+#include <vector>
+#include <stdint.h>
+namespace calc {
+	struct Pos { uint32_t line, col; };
+	struct Rng { const char *begin, *end; };
+	struct Tkn {
+		enum class KIND {
+			None,
+			Id,\\[^0-9]([^0-9]|[0-9])*
+			String,\\\"([^\\\"]|\\.)*\"
+		};
+		KIND kind;
+		Rng rng;
+		Pos pos;
+	};
+	struct Scan_Result {
+		std::vector<Tkn> tokens;
+	};
+	Scan_Result scan(const char* str);
+})""";
+	CHECK(answer.header == expected_header);
+}

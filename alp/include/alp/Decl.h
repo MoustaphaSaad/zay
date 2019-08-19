@@ -5,7 +5,7 @@
 #include "alp/Pos.h"
 #include "alp/Rng.h"
 
-#include <mn/Str.h>
+#include <mn/Buf.h>
 
 namespace alp
 {
@@ -24,12 +24,12 @@ namespace alp
 		Pos pos;
 		union
 		{
-			mn::Str regex;
+			mn::Buf<Tkn> regex;
 		};
 	};
 
 	ALP_EXPORT Decl
-	decl_token(const Tkn& name, const mn::Str& regex);
+	decl_token(const Tkn& name, const mn::Buf<Tkn>& regex);
 
 	ALP_EXPORT void
 	decl_free(Decl self);

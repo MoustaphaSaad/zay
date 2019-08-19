@@ -117,7 +117,10 @@ namespace alp
 			switch(d->kind)
 			{
 			case IDecl::KIND_TOKEN:
-				print_to(out, "token {}: {};\n", d->name.str, d->regex);
+				print_to(out, "token {}: ", d->name.str);
+				for (Tkn t : d->regex)
+					print_to(out, "{}", t.str);
+				print_to(out, ";\n");
 				break;
 			default:
 				assert(false && "unreachable");

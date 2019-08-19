@@ -10,7 +10,7 @@ namespace alp
 
 	//API
 	Decl
-	decl_token(const Tkn& name, const mn::Str& regex)
+	decl_token(const Tkn& name, const Buf<Tkn>& regex)
 	{
 		Decl self = alloc_zerod<IDecl>();
 		self->kind = IDecl::KIND_TOKEN;
@@ -25,7 +25,7 @@ namespace alp
 		switch(self->kind)
 		{
 		case IDecl::KIND_TOKEN:
-			str_free(self->regex);
+			buf_free(self->regex);
 			break;
 
 		default:

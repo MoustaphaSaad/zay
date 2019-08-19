@@ -12,6 +12,7 @@ set(HEADER_FILES
 	include/alp/Decl.h
 	include/alp/AST.h
 	include/alp/Parser.h
+	include/alp/Gen.h
 )
 
 # list the source files
@@ -22,6 +23,7 @@ set(SOURCE_FILES
 	src/alp/Decl.cpp
 	src/alp/AST.cpp
 	src/alp/Parser.cpp
+	src/alp/Gen.cpp
 )
 
 # add library target

@@ -86,11 +86,11 @@ namespace alp
 		parser_eat_must(self, Tkn::KIND_KEYWORD_TOKEN);
 		Tkn name = parser_eat_must(self, Tkn::KIND_ID);
 		parser_eat_must(self, Tkn::KIND_EQUAL);
-		Str regex = str_new();
+		Buf<Tkn> regex = buf_new<Tkn>();
 		while(parser_look_kind(self, Tkn::KIND_SEMICOLON) == false)
 		{
 			Tkn tkn = parser_eat(self);
-			str_push(regex, tkn.str);
+			buf_push(regex, tkn);
 		}
 		parser_eat_must(self, Tkn::KIND_SEMICOLON);
 		return decl_token(name, regex);
