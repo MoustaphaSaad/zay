@@ -7,6 +7,7 @@
 #include <zay/Src.h>
 #include <zay/scan/Scanner.h>
 #include <zay/parse/Parser.h>
+#include <zay/c/Preprocessor.h>
 
 using namespace mn;
 using namespace zay;
@@ -22,6 +23,8 @@ COMMANDS:
     'zyc scan path/to/file.zy'
   parse: parses the file
     'zyc parse path/to/file.zy'
+  cpp: preprocesses c file
+    'zyc cpp path/to/file.c'
 )MSG";
 
 inline static void
@@ -146,6 +149,25 @@ main(int argc, char** argv)
 
 			//write the ast
 			print("{}\n", src_ast_dump(src, memory::tmp()));
+		}
+	}
+	else if(args.command == "cpp")
+	{
+		for(size_t i = 0; i < args.targets.count; ++i)
+		{
+			if(path_is_file(args.targets[i]) == false)
+			{
+				printerr("'{}' is not a file\n", args.targets[i]);
+				continue;
+			}
+
+			Str content = file_content_str(args.targets[i]);
+			mn_defer(str_free(content));
+
+			Str contentpp = c::preprocess(content);
+			mn_defer(str_free(contentpp));
+
+			print("{}\n", contentpp);
 		}
 	}
 	return 0;

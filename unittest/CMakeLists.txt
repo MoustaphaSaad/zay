@@ -4,6 +4,7 @@ cmake_minimum_required(VERSION 3.9)
 set(SOURCE_FILES
 	src/unittest_main.cpp
 	src/unittest_zay.cpp
+	src/unittest_zay_c.cpp
 	src/unittest_cypher.cpp
 	src/unittest_rgx.cpp
 	src/unittest_alp.cpp

@@ -23,6 +23,7 @@ set(HEADER_FILES
 	include/zay/Err.h
 	include/zay/Src.h
 	include/zay/CGen.h
+	include/zay/c/Preprocessor.h
 )
 
 # list the source files
@@ -43,6 +44,7 @@ set(SOURCE_FILES
 	src/zay/ir/Build.cpp
 	src/zay/Src.cpp
 	src/zay/CGen.cpp
+	src/zay/c/Preprocessor.cpp
 )
 
 # add library target
