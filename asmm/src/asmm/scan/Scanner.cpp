@@ -292,14 +292,12 @@ namespace asmm
 		}
 		else
 		{
-			//now for operators
-			Rune c = self->c;
-			Pos begin_pos = self->pos;
+			// this is an illegal rune
 			scanner_eat(self);
 			src_err(self->src, Err{
-				begin_pos,
+				self->pos,
 				Rng{},
-				strf("illegal rune {:c}", c)
+				strf("illegal rune {:c}", self->c)
 			});
 		}
 
