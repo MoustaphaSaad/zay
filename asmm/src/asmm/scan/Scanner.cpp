@@ -69,7 +69,7 @@ namespace asmm
 	scanner_id(Scanner self)
 	{
 		const char* begin_it = self->it;
-		while(is_letter(self->c) || is_digit(self->c))
+		while(is_letter(self->c) || is_digit(self->c) || self->c == '.')
 			if(scanner_eat(self) == false)
 				break;
 		return str_intern(self->src->str_table, begin_it, self->it);

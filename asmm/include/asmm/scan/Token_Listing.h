@@ -7,7 +7,6 @@
 	TOKEN(INTEGER, "<INTEGER>"), \
 	TOKEN(FLOAT, "<FLOAT>"), \
 	TOKEN(KEYWORDS__BEGIN, ""), \
-	TOKEN(KEYWORD_PACKAGE, "package"), \
 	TOKEN(KEYWORD_FUNC, "func"), \
 	TOKEN(KEYWORD_END, "end"), \
 	TOKEN(KEYWORD_I8_ADD,  "i8.add"), \
