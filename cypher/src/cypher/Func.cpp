@@ -35,6 +35,6 @@ namespace cypher
 	{
 		if (ix >= self->type->func.args.count)
 			return Val{};
-		return val_arg(self, ix);
+		return val_arg(self->type->func.args[ix], self, ix);
 	}
 }

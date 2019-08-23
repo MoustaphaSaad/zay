@@ -13,7 +13,7 @@ namespace zay
 	typedef struct IType* Type;
 
 	//now we'll need to represent function types since this is what we're currently doing
-	//function types is the aggregate of thier argument types and return type
+	//function types is the aggregate of their argument types and return type
 	struct Func_Sign
 	{
 		mn::Buf<Type> args;

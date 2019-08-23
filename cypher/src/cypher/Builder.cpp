@@ -37,7 +37,7 @@ namespace cypher
 		Ins_ID id = self->func->ins.count;
 		buf_push(self->func->ins, ins_add(x, y));
 		buf_push(self->func->blocks[self->block].instructions, id);
-		return val_ins(self->func, id);
+		return val_ins(x.type, self->func, id);
 	}
 
 	Val
@@ -47,6 +47,6 @@ namespace cypher
 		Ins_ID id = self->func->ins.count;
 		buf_push(self->func->ins, ins_ret(x));
 		buf_push(self->func->blocks[self->block].instructions, id);
-		return val_ins(self->func, id);
+		return val_ins(type_void, self->func, id);
 	}
 }

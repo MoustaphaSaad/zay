@@ -1,9 +1,12 @@
 #pragma once
 
+#include "cypher/Exports.h"
+
 #include <stddef.h>
 
 namespace cypher
 {
+	typedef struct IType* Type;
 	typedef struct IFunc* Func;
 	typedef size_t Ins_ID;
 
@@ -17,6 +20,7 @@ namespace cypher
 		};
 
 		KIND kind;
+		Type type;
 		union
 		{
 			struct
@@ -33,21 +37,9 @@ namespace cypher
 		};
 	};
 
-	inline static Val
-	val_arg(Func func, size_t ix)
-	{
-		Val self{};
-		self.kind = Val::KIND_ARG;
-		self.arg = { func, ix };
-		return self;
-	}
+	CYPHER_EXPORT Val
+	val_arg(Type t, Func func, size_t ix);
 
-	inline static Val
-	val_ins(Func func, Ins_ID id)
-	{
-		Val self{};
-		self.kind = Val::KIND_INS;
-		self.ins = { func, id };
-		return self;
-	}
+	CYPHER_EXPORT Val
+	val_ins(Type t, Func func, Ins_ID id);
 }
