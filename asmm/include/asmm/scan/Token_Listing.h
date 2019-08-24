@@ -113,4 +113,6 @@
 	TOKEN(KEYWORD_JF, "jf"), \
 	TOKEN(KEYWORD_JUMP, "jump"), \
 	TOKEN(KEYWORD_HALT, "halt"), \
+	TOKEN(KEYWORD_RET, "ret"), \
+	TOKEN(KEYWORD_CALL, "call"), \
 	TOKEN(KEYWORDS__END, ""),

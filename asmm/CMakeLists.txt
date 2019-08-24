@@ -10,11 +10,13 @@ set(HEADER_FILES
 	include/asmm/scan/Scanner.h
 	include/asmm/scan/Tkn.h
 	include/asmm/scan/Token_Listing.h
+	include/asmm/parse/Ins.h
 	include/asmm/Exports.h
 )
 
 # list the source files
 set(SOURCE_FILES
+	src/asmm/scan/Tkn.cpp
 	src/asmm/scan/Scanner.cpp
 	src/asmm/Src.cpp
 )
