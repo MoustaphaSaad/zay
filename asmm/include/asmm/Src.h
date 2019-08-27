@@ -1,9 +1,12 @@
 #pragma once
 
 #include "asmm/Exports.h"
-#include "asmm/scan/Rng.h"
 #include "asmm/Err.h"
+#include "asmm/scan/Rng.h"
 #include "asmm/scan/Tkn.h"
+#include "asmm/parse/Func.h"
+
+#include <vm/Program.h>
 
 #include <mn/Str.h>
 #include <mn/Str_Intern.h>
@@ -12,13 +15,6 @@
 
 namespace asmm
 {
-	enum class MODE
-	{
-		NONE,
-		EXE,
-		LIB
-	};
-
 	// Line is a range of source code
 	typedef Rng Line;
 
@@ -37,6 +33,10 @@ namespace asmm
 		mn::Buf<Err> errs;
 		// tokens of this compilation unit
 		mn::Buf<Tkn> tkns;
+		// the functions in the compilation unit
+		mn::Buf<Func> funcs;
+		// vm assembled output
+		vm::Program program;
 	};
 	typedef ISrc* Src;
 

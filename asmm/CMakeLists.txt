@@ -2,15 +2,17 @@ cmake_minimum_required(VERSION 3.9)
 
 # list the header files
 set(HEADER_FILES
-	include/asmm/Ins.h
 	include/asmm/Err.h
 	include/asmm/Src.h
+	include/asmm/Gen.h
 	include/asmm/scan/Pos.h
 	include/asmm/scan/Rng.h
 	include/asmm/scan/Scanner.h
 	include/asmm/scan/Tkn.h
 	include/asmm/scan/Token_Listing.h
 	include/asmm/parse/Ins.h
+	include/asmm/parse/Func.h
+	include/asmm/parse/Parser.h
 	include/asmm/Exports.h
 )
 
@@ -18,7 +20,10 @@ set(HEADER_FILES
 set(SOURCE_FILES
 	src/asmm/scan/Tkn.cpp
 	src/asmm/scan/Scanner.cpp
+	src/asmm/parse/Func.cpp
+	src/asmm/parse/Parser.cpp
 	src/asmm/Src.cpp
+	src/asmm/Gen.cpp
 )
 
 # add library target

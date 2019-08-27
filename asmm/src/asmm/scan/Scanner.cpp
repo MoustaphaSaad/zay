@@ -199,7 +199,6 @@ namespace asmm
 
 		while(self->c != '\n')
 		{
-			end_it = self->it;
 			//windows style line ending \r\n
 			if(self->c == '\r')
 			{
@@ -212,6 +211,7 @@ namespace asmm
 			if(scanner_eat(self) == false)
 				break;
 		}
+		end_it = self->it;
 
 		scanner_eat(self); //for the \n
 		return str_intern(self->src->str_table, begin_it, end_it);
@@ -293,12 +293,32 @@ namespace asmm
 		else
 		{
 			// this is an illegal rune
+			Rune c = self->c;
 			scanner_eat(self);
-			src_err(self->src, Err{
-				self->pos,
-				Rng{},
-				strf("illegal rune {:c}", self->c)
-			});
+			bool no_intern = false;
+
+			switch(c)
+			{
+			case ':': tkn.kind = Tkn::KIND_COLON; break;
+			case '/':
+				if(self->c == '/')
+				{
+					tkn.kind = Tkn::KIND_COMMENT;
+					scanner_eat(self); //for the second /
+					tkn.str = scanner_comment(self);
+					no_intern = true;
+				}
+				break;
+			default:
+				src_err(self->src, Err{
+					self->pos,
+					Rng{},
+					strf("illegal rune {:c}", self->c)
+				});
+				break;
+			}
+			if(no_intern == false)
+				tkn.str = str_intern(self->src->str_table, tkn.rng.begin, self->it);
 		}
 
 		tkn.rng.end = self->it;

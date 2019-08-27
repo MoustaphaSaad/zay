@@ -21,6 +21,8 @@ namespace asmm
 		self->str_table = str_intern_new();
 		self->errs = buf_new<Err>();
 		self->tkns = buf_new<Tkn>();
+		self->funcs = mn::buf_new<Func>();
+		self->program = vm::program_new();
 		return self;
 	}
 
@@ -34,6 +36,8 @@ namespace asmm
 		self->str_table = str_intern_new();
 		self->errs = buf_new<Err>();
 		self->tkns = buf_new<Tkn>();
+		self->funcs = mn::buf_new<Func>();
+		self->program = vm::program_new();
 		return self;
 	}
 
@@ -46,6 +50,8 @@ namespace asmm
 		str_intern_free(self->str_table);
 		destruct(self->errs);
 		buf_free(self->tkns);
+		mn::destruct(self->funcs);
+		vm::program_free(self->program);
 		free(self);
 	}
 

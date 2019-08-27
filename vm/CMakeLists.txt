@@ -5,12 +5,14 @@ set(HEADER_FILES
 	include/vm/Register.h
 	include/vm/ISA.h
 	include/vm/State.h
+	include/vm/Program.h
 	include/vm/Exports.h
 )
 
 # list the source files
 set(SOURCE_FILES
 	src/vm/State.cpp
+	src/vm/Program.cpp
 )
 
 # add library target

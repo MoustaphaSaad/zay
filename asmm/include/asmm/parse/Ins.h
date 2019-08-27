@@ -9,11 +9,34 @@ namespace asmm
 		Tkn op;
 		union
 		{
-			//a mode 3 is "op register1(dest) register2(op1) register3(op2)"
+			//mode 3: op register1(dst) register2(op1) register3(op2)
 			struct
 			{
 				Tkn dst, op1, op2;
 			} mode3;
+			
+			//mode 2: op register1(dst) register2(src)
+			struct
+			{
+				Tkn dst, src;
+			} mode2;
+
+			//const : op register1(dst) immediate value
+			struct
+			{
+				Tkn dst, value;
+			} constant;
+
+			//conditional jump: op register1(cond) label
+			struct
+			{
+				Tkn cond, label;
+			} cond_jump;
+			
+			struct
+			{
+				Tkn label;
+			} jump;
 		};
 	};
 }
