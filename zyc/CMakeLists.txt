@@ -13,6 +13,8 @@ add_executable(zyc
 target_link_libraries(zyc
 	PUBLIC
 		MoustaphaSaad::zay
+		MoustaphaSaad::asmm
+		MoustaphaSaad::flag
 )
 
 # make it reflect the same structure as the one on disk

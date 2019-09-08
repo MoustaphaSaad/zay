@@ -54,6 +54,9 @@ namespace vm
 	VM_EXPORT void
 	program_fixup(Program& self, const Fixup& fixup);
 
+	VM_EXPORT void
+	program_save(Program& self, const mn::Str& filename);
+
 	VM_EXPORT Program
-	program_save(const mn::Str& filename);
+	program_load(const mn::Str& filename);
 }
