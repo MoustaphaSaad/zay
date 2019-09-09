@@ -1,11 +1,11 @@
-#include "asmm/scan/Scanner.h"
+#include "zsm/scan/Scanner.h"
 
 #include <mn/Memory.h>
 #include <mn/IO.h>
 
 #include <string.h>
 
-namespace asmm
+namespace zsm
 {
 	using namespace mn;
 

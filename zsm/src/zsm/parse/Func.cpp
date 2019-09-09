@@ -1,6 +1,6 @@
-#include "asmm/parse/Func.h"
+#include "zsm/parse/Func.h"
 
-namespace asmm
+namespace zsm
 {
 	//API
 	Func

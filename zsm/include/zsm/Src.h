@@ -1,10 +1,10 @@
 #pragma once
 
-#include "asmm/Exports.h"
-#include "asmm/Err.h"
-#include "asmm/scan/Rng.h"
-#include "asmm/scan/Tkn.h"
-#include "asmm/parse/Func.h"
+#include "zsm/Exports.h"
+#include "zsm/Err.h"
+#include "zsm/scan/Rng.h"
+#include "zsm/scan/Tkn.h"
+#include "zsm/parse/Func.h"
 
 #include <vm/Program.h>
 
@@ -13,7 +13,7 @@
 #include <mn/Buf.h>
 #include <mn/Map.h>
 
-namespace asmm
+namespace zsm
 {
 	// Line is a range of source code
 	typedef Rng Line;
@@ -40,13 +40,13 @@ namespace asmm
 	};
 	typedef ISrc* Src;
 
-	ASMM_EXPORT Src
+	ZSM_EXPORT Src
 	src_from_file(const char* path);
 
-	ASMM_EXPORT Src
+	ZSM_EXPORT Src
 	src_from_str(const char* code);
 
-	ASMM_EXPORT void
+	ZSM_EXPORT void
 	src_free(Src self);
 
 	inline static void
@@ -85,9 +85,9 @@ namespace asmm
 		mn::buf_push(self->tkns, t);
 	}
 
-	ASMM_EXPORT mn::Str
+	ZSM_EXPORT mn::Str
 	src_errs_dump(Src self, mn::Allocator allocator = mn::allocator_top());
 
-	ASMM_EXPORT mn::Str
+	ZSM_EXPORT mn::Str
 	src_tkns_dump(Src self, mn::Allocator allocator = mn::allocator_top());
 }

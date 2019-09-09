@@ -1,4 +1,4 @@
-#include "asmm/Gen.h"
+#include "zsm/Gen.h"
 
 #include <vm/Program.h>
 #include <vm/ISA.h>
@@ -11,7 +11,7 @@
 
 #include <assert.h>
 
-namespace asmm
+namespace zsm
 {
 	struct Patch
 	{

@@ -1,10 +1,10 @@
-#include "asmm/parse/Parser.h"
+#include "zsm/parse/Parser.h"
 
 #include <mn/Memory.h>
 #include <mn/IO.h>
 #include <mn/Defer.h>
 
-namespace asmm
+namespace zsm
 {
 	using namespace mn;
 

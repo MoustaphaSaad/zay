@@ -1,13 +1,13 @@
 #pragma once
 
-#include "asmm/Exports.h"
-#include "asmm/Src.h"
+#include "zsm/Exports.h"
+#include "zsm/Src.h"
 
 #include <mn/Buf.h>
 
 #include <stddef.h>
 
-namespace asmm
+namespace zsm
 {
 	struct IParser
 	{
@@ -17,10 +17,10 @@ namespace asmm
 	};
 	typedef IParser* Parser;
 
-	ASMM_EXPORT Parser
+	ZSM_EXPORT Parser
 	parser_new(Src src);
 
-	ASMM_EXPORT void
+	ZSM_EXPORT void
 	parser_free(Parser self);
 
 	inline static void
@@ -29,7 +29,7 @@ namespace asmm
 		parser_free(self);
 	}
 
-	ASMM_EXPORT Func
+	ZSM_EXPORT Func
 	parser_func(Parser self);
 
 	inline static bool

@@ -1,4 +1,4 @@
-#include "asmm/Src.h"
+#include "zsm/Src.h"
 
 #include <mn/Memory.h>
 #include <mn/File.h>
@@ -7,7 +7,7 @@
 #include <mn/IO.h>
 #include <mn/Defer.h>
 
-namespace asmm
+namespace zsm
 {
 	using namespace mn;
 

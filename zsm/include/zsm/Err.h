@@ -1,12 +1,12 @@
 #pragma once
 
-#include "asmm/scan/Pos.h"
-#include "asmm/scan/Rng.h"
-#include "asmm/scan/Tkn.h"
+#include "zsm/scan/Pos.h"
+#include "zsm/scan/Rng.h"
+#include "zsm/scan/Tkn.h"
 
 #include <mn/Str.h>
 
-namespace asmm
+namespace zsm
 {
 	// An Error is just position in the source code and a string error msg
 	struct Err

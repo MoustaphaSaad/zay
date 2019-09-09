@@ -2,7 +2,7 @@
 
 #include <stdint.h>
 
-namespace asmm
+namespace zsm
 {
 	//Pos is a position in source code text
 	struct Pos

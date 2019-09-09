@@ -8,7 +8,7 @@ set(SOURCE_FILES
 	src/unittest_cypher.cpp
 	src/unittest_rgx.cpp
 	src/unittest_alp.cpp
-	src/unittest_asmm.cpp
+	src/unittest_zsm.cpp
 )
 
 # add executable target
@@ -22,7 +22,7 @@ target_link_libraries(unittest
 		MoustaphaSaad::zay
 		MoustaphaSaad::cypher
 		MoustaphaSaad::alp
-		MoustaphaSaad::asmm
+		MoustaphaSaad::zsm
 )
 
 # add doctest folder

@@ -1,11 +1,11 @@
 #pragma once
 
-#include "asmm/Exports.h"
-#include "asmm/scan/Pos.h"
-#include "asmm/scan/Rng.h"
-#include "asmm/scan/Token_Listing.h"
+#include "zsm/Exports.h"
+#include "zsm/scan/Pos.h"
+#include "zsm/scan/Rng.h"
+#include "zsm/scan/Token_Listing.h"
 
-namespace asmm
+namespace zsm
 {
 	struct Tkn
 	{

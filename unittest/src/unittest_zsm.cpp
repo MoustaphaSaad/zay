@@ -1,9 +1,9 @@
 #include <doctest/doctest.h>
 
-#include <asmm/Src.h>
-#include <asmm/scan/Scanner.h>
-#include <asmm/parse/Parser.h>
-#include <asmm/Gen.h>
+#include <zsm/Src.h>
+#include <zsm/scan/Scanner.h>
+#include <zsm/parse/Parser.h>
+#include <zsm/Gen.h>
 
 #include <mn/Str.h>
 
@@ -11,10 +11,10 @@
 inline static mn::Str
 scan(const char* code)
 {
-	auto src = asmm::src_from_str(code);
-	CHECK(asmm::src_scan(src));
-	auto res = asmm::src_tkns_dump(src, mn::memory::tmp());
-	asmm::src_free(src);
+	auto src = zsm::src_from_str(code);
+	CHECK(zsm::src_scan(src));
+	auto res = zsm::src_tkns_dump(src, mn::memory::tmp());
+	zsm::src_free(src);
 	return res;
 }
 
@@ -48,9 +48,9 @@ TEST_CASE("Koko")
 		i64.eq r0 r0 r1		//r0 = r0 == r1
 	end
 )""";
-	auto src = asmm::src_from_str(code);
-	CHECK(asmm::src_scan(src));
-	CHECK(asmm::src_parse(src));
-	CHECK(asmm::gen(src));
-	asmm::src_free(src);
+	auto src = zsm::src_from_str(code);
+	CHECK(zsm::src_scan(src));
+	CHECK(zsm::src_parse(src));
+	CHECK(zsm::gen(src));
+	zsm::src_free(src);
 }

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "asmm/Exports.h"
-#include "asmm/scan/Pos.h"
-#include "asmm/Src.h"
+#include "zsm/Exports.h"
+#include "zsm/scan/Pos.h"
+#include "zsm/Src.h"
 
 #include <mn/Rune.h>
 
-namespace asmm
+namespace zsm
 {
 	struct IScanner
 	{
@@ -20,10 +20,10 @@ namespace asmm
 	};
 	typedef IScanner* Scanner;
 
-	ASMM_EXPORT Scanner
+	ZSM_EXPORT Scanner
 	scanner_new(Src src);
 
-	ASMM_EXPORT void
+	ZSM_EXPORT void
 	scanner_free(Scanner self);
 
 	inline static void
@@ -38,7 +38,7 @@ namespace asmm
 		return self->it >= end(self->src->content);
 	}
 
-	ASMM_EXPORT Tkn
+	ZSM_EXPORT Tkn
 	scanner_tkn(Scanner self);
 
 	inline static bool

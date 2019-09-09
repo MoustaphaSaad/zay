@@ -13,10 +13,10 @@
 #include <zay/parse/Parser.h>
 #include <zay/c/Preprocessor.h>
 
-#include <asmm/Src.h>
-#include <asmm/scan/Scanner.h>
-#include <asmm/parse/Parser.h>
-#include <asmm/Gen.h>
+#include <zsm/Src.h>
+#include <zsm/scan/Scanner.h>
+#include <zsm/parse/Parser.h>
+#include <zsm/Gen.h>
 
 using namespace mn;
 using namespace zay;
@@ -134,29 +134,35 @@ main(int argc, char** argv)
 				continue;
 			}
 
-			auto src = asmm::src_from_file(args.args[i].ptr);
-			mn_defer(asmm::src_free(src));
+			auto src = zsm::src_from_file(args.args[i].ptr);
+			mn_defer(zsm::src_free(src));
 
-			if(asmm::src_scan(src) == false)
+			if(zsm::src_scan(src) == false)
 			{
 				print("{}\n", src_errs_dump(src, memory::tmp()));
 				continue;
 			}
 
-			if(asmm::src_parse(src) == false)
+			if(zsm::src_parse(src) == false)
 			{
 				print("{}\n", src_errs_dump(src, memory::tmp()));
 				continue;
 			}
 
-			if(asmm::gen(src) == false)
+			if(zsm::gen(src) == false)
 			{
 				print("{}\n", src_errs_dump(src, memory::tmp()));
 				continue;
 			}
 
 			vm::program_save(src->program, output);
+			break;
 		}
+	}
+	else if(args.cmd == "vm-run")
+	{
+		auto p = vm::program_load(args.args[0]);
+		mn::print("VM Run\n");
 	}
 	else
 	{

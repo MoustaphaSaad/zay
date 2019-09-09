@@ -1,8 +1,8 @@
 #pragma once
 
-#include "asmm/scan/Tkn.h"
+#include "zsm/scan/Tkn.h"
 
-namespace asmm
+namespace zsm
 {
 	struct Ins
 	{

@@ -1,12 +1,12 @@
 #pragma once
 
-#include "asmm/Exports.h"
-#include "asmm/scan/Tkn.h"
-#include "asmm/parse/Ins.h"
+#include "zsm/Exports.h"
+#include "zsm/scan/Tkn.h"
+#include "zsm/parse/Ins.h"
 
 #include <mn/Buf.h>
 
-namespace asmm
+namespace zsm
 {
 	struct Func
 	{
@@ -14,10 +14,10 @@ namespace asmm
 		mn::Buf<Ins> ins;
 	};
 
-	ASMM_EXPORT Func
+	ZSM_EXPORT Func
 	func_new(const Tkn& name);
 
-	ASMM_EXPORT void
+	ZSM_EXPORT void
 	func_free(Func& self);
 
 	inline static void
