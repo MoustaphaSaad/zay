@@ -13,14 +13,8 @@
 #include <zay/parse/Parser.h>
 #include <zay/c/Preprocessor.h>
 
-#include <zsm/Src.h>
-#include <zsm/scan/Scanner.h>
-#include <zsm/parse/Parser.h>
-#include <zsm/Gen.h>
-
 using namespace mn;
 using namespace zay;
-
 
 int
 main(int argc, char** argv)
@@ -32,8 +26,6 @@ main(int argc, char** argv)
 	flag::args_cmd(args, "scan", "scans the file");
 	flag::args_cmd(args, "parse", "parses the file");
 	flag::args_cmd(args, "cpp", "preprocesses c file");
-	flag::args_cmd(args, "asm", "assembles the given files");
-	flag::args_cmd(args, "vm-run", "runs the provided bytecode in the zay vm");
 
 	mn::Str output;
 	flag::args_str(args, &output, "-o", "a.out", "output of the compiler");
@@ -123,46 +115,6 @@ main(int argc, char** argv)
 
 			print("{}\n", contentpp);
 		}
-	}
-	else if(args.cmd == "asm")
-	{
-		for(size_t i = 0; i < args.args.count; ++i)
-		{
-			if(path_is_file(args.args[i]) == false)
-			{
-				printerr("'{}' is not a file\n", args.args[i]);
-				continue;
-			}
-
-			auto src = zsm::src_from_file(args.args[i].ptr);
-			mn_defer(zsm::src_free(src));
-
-			if(zsm::src_scan(src) == false)
-			{
-				print("{}\n", src_errs_dump(src, memory::tmp()));
-				continue;
-			}
-
-			if(zsm::src_parse(src) == false)
-			{
-				print("{}\n", src_errs_dump(src, memory::tmp()));
-				continue;
-			}
-
-			if(zsm::gen(src) == false)
-			{
-				print("{}\n", src_errs_dump(src, memory::tmp()));
-				continue;
-			}
-
-			vm::program_save(src->program, output);
-			break;
-		}
-	}
-	else if(args.cmd == "vm-run")
-	{
-		auto p = vm::program_load(args.args[0]);
-		mn::print("VM Run\n");
 	}
 	else
 	{

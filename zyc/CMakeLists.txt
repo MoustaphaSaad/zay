@@ -13,7 +13,6 @@ add_executable(zyc
 target_link_libraries(zyc
 	PUBLIC
 		MoustaphaSaad::zay
-		MoustaphaSaad::zsm
 		MoustaphaSaad::flag
 )
 

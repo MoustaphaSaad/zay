@@ -30,7 +30,6 @@ add_library(cypher
 target_link_libraries(cypher
 	PUBLIC
 		MoustaphaSaad::mn
-		MoustaphaSaad::vm
 )
 
 add_library(MoustaphaSaad::cypher ALIAS cypher)
