@@ -10,6 +10,8 @@ set(HEADER_FILES
 	include/cypher/Builder.h
 	include/cypher/Val.h
 	include/cypher/Ins.h
+	include/cypher/VM.h
+	include/cypher/VM_Value.h
 )
 
 # list the source files
@@ -19,6 +21,7 @@ set(SOURCE_FILES
 	src/cypher/Func.cpp
 	src/cypher/Pkg.cpp
 	src/cypher/Builder.cpp
+	src/cypher/VM.cpp
 )
 
 # add library target

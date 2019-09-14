@@ -34,7 +34,7 @@ namespace cypher
 	}
 
 	inline static Func
-	pkg_func(Pkg self, const mn::Str& name, Type type)
+	pkg_func_new(Pkg self, const mn::Str& name, Type type)
 	{
 		Func f = func_new(name, type);
 		buf_push(self->funcs, f);
@@ -42,8 +42,17 @@ namespace cypher
 	}
 
 	inline static Func
-	pkg_func(Pkg self, const char* name, Type type)
+	pkg_func_new(Pkg self, const char* name, Type type)
 	{
-		return pkg_func(self, mn::str_from_c(name), type);
+		return pkg_func_new(self, mn::str_from_c(name), type);
+	}
+
+	inline static Func
+	pkg_func_get(Pkg self, const mn::Str& name)
+	{
+		for(auto f: self->funcs)
+			if(f->name == name)
+				return f;
+		return nullptr;
 	}
 }

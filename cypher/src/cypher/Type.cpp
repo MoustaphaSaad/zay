@@ -19,15 +19,6 @@ namespace cypher
 	static IType _type_void = builtin(IType::KIND_VOID);
 	Type type_void = &_type_void;
 
-	static IType _type_bool = builtin(IType::KIND_BOOL);
-	Type type_bool = &_type_bool;
-
-	static IType _type_int = builtin(IType::KIND_INT);
-	Type type_int = &_type_int;
-
-	static IType _type_uint = builtin(IType::KIND_UINT);
-	Type type_uint = &_type_uint;
-
 	static IType _type_int8 = builtin(IType::KIND_INT8);
 	Type type_int8 = &_type_int8;
 
@@ -98,9 +89,6 @@ namespace cypher
 		switch(self->kind)
 		{
 		case IType::KIND_VOID:
-		case IType::KIND_BOOL:
-		case IType::KIND_INT:
-		case IType::KIND_UINT:
 		case IType::KIND_INT8:
 		case IType::KIND_UINT8:
 		case IType::KIND_INT16:

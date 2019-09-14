@@ -16,9 +16,6 @@ namespace cypher
 		{
 			KIND_NONE,
 			KIND_VOID,
-			KIND_BOOL,
-			KIND_INT,
-			KIND_UINT,
 			KIND_INT8,
 			KIND_UINT8,
 			KIND_INT16,
@@ -53,9 +50,6 @@ namespace cypher
 	};
 
 	CYPHER_EXPORT extern Type type_void;
-	CYPHER_EXPORT extern Type type_bool;
-	CYPHER_EXPORT extern Type type_int;
-	CYPHER_EXPORT extern Type type_uint;
 	CYPHER_EXPORT extern Type type_int8;
 	CYPHER_EXPORT extern Type type_uint8;
 	CYPHER_EXPORT extern Type type_int16;
