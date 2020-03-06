@@ -4,15 +4,13 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	Scope
 	scope_new(Scope parent, bool inside_loop, Type ret)
 	{
-		Scope self = alloc<IScope>();
+		Scope self = mn::alloc<IScope>();
 		self->parent = parent;
-		self->syms = buf_new<Sym>();
-		self->table = map_new<const char*, Sym>();
+		self->syms = mn::buf_new<Sym>();
+		self->table = mn::map_new<const char*, Sym>();
 		self->inside_loop = inside_loop;
 		self->ret = ret;
 		return self;
@@ -22,14 +20,14 @@ namespace zay
 	scope_free(Scope self)
 	{
 		destruct(self->syms);
-		map_free(self->table);
-		free(self);
+		mn::map_free(self->table);
+		mn::free(self);
 	}
 
 	Sym
 	scope_has(Scope self, const char* name)
 	{
-		if(auto it = map_lookup(self->table, name))
+		if(auto it = mn::map_lookup(self->table, name))
 			return it->value;
 		return nullptr;
 	}
@@ -48,8 +46,8 @@ namespace zay
 	Sym
 	scope_add(Scope self, Sym sym)
 	{
-		buf_push(self->syms, sym);
-		map_insert(self->table, sym->name, sym);
+		mn::buf_push(self->syms, sym);
+		mn::map_insert(self->table, sym->name, sym);
 		return sym;
 	}
 
