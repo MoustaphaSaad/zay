@@ -5,12 +5,10 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	Expr
 	expr_atom(const Tkn& t)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_ATOM;
 		self->atom = t;
@@ -20,7 +18,7 @@ namespace zay
 	Expr
 	expr_paren(Expr e)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_PAREN;
 		self->paren = e;
@@ -30,7 +28,7 @@ namespace zay
 	Expr
 	expr_call(Expr base, const mn::Buf<Expr>& args)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_CALL;
 		self->call.base = base;
@@ -41,7 +39,7 @@ namespace zay
 	Expr
 	expr_indexed(Expr base, Expr index)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_INDEXED;
 		self->indexed.base = base;
@@ -52,7 +50,7 @@ namespace zay
 	Expr
 	expr_dot(Expr base, const Tkn& t)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_DOT;
 		self->dot.base = base;
@@ -63,7 +61,7 @@ namespace zay
 	Expr
 	expr_unary(const Tkn& op, Expr expr)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_UNARY;
 		self->unary.op = op;
@@ -74,7 +72,7 @@ namespace zay
 	Expr
 	expr_cast(Expr expr, const Type_Sign& type)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_CAST;
 		self->cast.base = expr;
@@ -85,7 +83,7 @@ namespace zay
 	Expr
 	expr_binary(Expr lhs, const Tkn& op, Expr rhs)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_BINARY;
 		self->binary.lhs = lhs;
@@ -97,7 +95,7 @@ namespace zay
 	Expr
 	expr_complit(const Type_Sign& type, const mn::Buf<Complit_Field>& fields)
 	{
-		Expr self = alloc<IExpr>();
+		Expr self = mn::alloc<IExpr>();
 		self->type = type_void;
 		self->kind = IExpr::KIND_COMPLIT;
 		self->complit.type = type;
@@ -143,10 +141,10 @@ namespace zay
 				expr_free(f.left);
 				expr_free(f.right);
 			}
-			buf_free(self->complit.fields);
+			mn::buf_free(self->complit.fields);
 			break;
 		default: assert(false && "unreachable"); break;
 		}
-		free(self);
+		mn::free(self);
 	}
 }
