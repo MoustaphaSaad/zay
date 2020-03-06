@@ -19,7 +19,7 @@ namespace zay
 		};
 
 		MODE mode;
-		Src src;
+		Src *src;
 
 		mn::Buf<Scope> scope_stack;
 		Scope global_scope;
@@ -28,7 +28,7 @@ namespace zay
 	};
 
 	ZAY_EXPORT Typer
-	typer_new(Src src, ITyper::MODE mode);
+	typer_new(Src *src, ITyper::MODE mode);
 
 	ZAY_EXPORT void
 	typer_free(Typer self);
@@ -43,7 +43,7 @@ namespace zay
 	typer_check(Typer self);
 
 	inline static bool
-	src_typecheck(Src src, ITyper::MODE mode)
+	src_typecheck(Src *src, ITyper::MODE mode)
 	{
 		Typer self = typer_new(src, mode);
 		typer_check(self);

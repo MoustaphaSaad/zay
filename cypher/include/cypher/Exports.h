@@ -22,7 +22,7 @@
 #endif
 
 #ifndef CYPHER_DEPRECATED
-#  define CYPHER_DEPRECATED __declspec(deprecated)
+#  define CYPHER_DEPRECATED __attribute__ ((__deprecated__))
 #endif
 
 #ifndef CYPHER_DEPRECATED_EXPORT

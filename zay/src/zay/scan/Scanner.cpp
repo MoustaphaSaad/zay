@@ -239,7 +239,7 @@ namespace zay
 
 	//API
 	Scanner
-	scanner_new(Src src)
+	scanner_new(Src *src)
 	{
 		Scanner self = mn::alloc<IScanner>();
 		self->src = src;

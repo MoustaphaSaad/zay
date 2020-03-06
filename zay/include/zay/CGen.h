@@ -15,13 +15,13 @@ namespace zay
 	struct ICGen
 	{
 		size_t indent;
-		Src src;
+		Src *src;
 		mn::Memory_Stream out;
 		mn::Buf<Scope> scope_stack;
 	};
 
 	ZAY_EXPORT CGen
-	cgen_new(Src src);
+	cgen_new(Src *src);
 
 	ZAY_EXPORT void
 	cgen_free(CGen self);
@@ -36,7 +36,7 @@ namespace zay
 	cgen_gen(CGen self);
 
 	inline static mn::Str
-	src_c(Src src, mn::Allocator allocator = mn::allocator_top())
+	src_c(Src *src, mn::Allocator allocator = mn::allocator_top())
 	{
 		CGen self = cgen_new(src);
 		cgen_gen(self);

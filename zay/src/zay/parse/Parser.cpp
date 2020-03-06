@@ -845,7 +845,7 @@ namespace zay
 
 	//API
 	Parser
-	parser_new(Src src)
+	parser_new(Src *src)
 	{
 		Parser self = alloc<IParser>();
 		self->src = src;

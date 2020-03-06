@@ -52,7 +52,7 @@ main(int argc, char** argv)
 				continue;
 			}
 
-			Src src = src_from_file(args.args[i].ptr);
+			auto src = src_from_file(args.args[i].ptr);
 			mn_defer(src_free(src));
 
 			//scan the file
@@ -76,7 +76,7 @@ main(int argc, char** argv)
 				continue;
 			}
 
-			Src src = src_from_file(args.args[i].ptr);
+			auto src = src_from_file(args.args[i].ptr);
 			mn_defer(src_free(src));
 
 			//scan the file

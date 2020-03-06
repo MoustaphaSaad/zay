@@ -13,7 +13,7 @@ using namespace zay;
 inline static Str
 scan(const char* str)
 {
-	Src src = src_from_str(str);
+	auto src = src_from_str(str);
 	CHECK(src_scan(src));
 	Str res = src_tkns_dump(src, memory::tmp());
 	src_free(src);
@@ -23,7 +23,7 @@ scan(const char* str)
 inline static Str
 parse(const char* str)
 {
-	Src src = src_from_str(str);
+	auto src = src_from_str(str);
 	CHECK(src_scan(src));
 	CHECK(src_parse(src, MODE::NONE));
 	Str res = src_ast_dump(src, memory::tmp());
@@ -34,7 +34,7 @@ parse(const char* str)
 inline static Str
 parse_expr(const char* str)
 {
-	Src src = src_from_str(str);
+	auto src = src_from_str(str);
 	CHECK(src_scan(src));
 
 	Parser parser = parser_new(src);
@@ -54,7 +54,7 @@ parse_expr(const char* str)
 inline static Str
 parse_stmt(const char* str)
 {
-	Src src = src_from_str(str);
+	auto src = src_from_str(str);
 	CHECK(src_scan(src));
 
 	Parser parser = parser_new(src);
@@ -483,7 +483,7 @@ TEST_CASE("[zay]: composite literal")
 bool
 typecheck(const char* str)
 {
-	Src src = src_from_str(str);
+	auto src = src_from_str(str);
 	CHECK(src_scan(src));
 	CHECK(src_parse(src, MODE::NONE));
 	bool res = src_typecheck(src, ITyper::MODE_NONE);
@@ -870,7 +870,7 @@ TEST_CASE("[zay]: missing return")
 inline static Str
 cgen(const char* str)
 {
-	Src src = src_from_str(str);
+	auto src = src_from_str(str);
 	CHECK(src_scan(src));
 	CHECK(src_parse(src, MODE::NONE));
 	CHECK(src_typecheck(src, ITyper::MODE_NONE));

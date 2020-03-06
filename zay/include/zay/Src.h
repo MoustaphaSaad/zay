@@ -26,7 +26,7 @@ namespace zay
 	typedef Rng Line;
 
 	// Src is our compilation unit
-	struct ISrc
+	struct Src
 	{
 		// path of compilation unit on disk "<STRING>" if there's none
 		mn::Str path;
@@ -51,55 +51,54 @@ namespace zay
 		// Reachable symbols
 		mn::Buf<Sym> reachable_syms;
 	};
-	typedef ISrc* Src;
 
-	ZAY_EXPORT Src
+	ZAY_EXPORT Src*
 	src_from_file(const char* path);
 
-	ZAY_EXPORT Src
+	ZAY_EXPORT Src*
 	src_from_str(const char* code);
 
 	ZAY_EXPORT void
-	src_free(Src self);
+	src_free(Src *self);
 
 	inline static void
-	destruct(Src self)
+	destruct(Src *self)
 	{
 		src_free(self);
 	}
 
 	inline static void
-	src_line_begin(Src self, const char* begin)
+	src_line_begin(Src *self, const char* begin)
 	{
 		mn::buf_push(self->lines, Line{begin, begin});
 	}
 
 	inline static void
-	src_line_end(Src self, const char* end)
+	src_line_end(Src *self, const char* end)
 	{
 		mn::buf_top(self->lines).end = end;
 	}
 
 	inline static void
-	src_err(Src self, const Err& e)
+	src_err(Src *self, const Err& e)
 	{
 		mn::buf_push(self->errs, e);
 	}
 
 	inline static bool
-	src_has_err(Src self)
+	src_has_err(Src *self)
 	{
 		return self->errs.count != 0;
 	}
 
 	inline static void
-	src_tkn(Src self, const Tkn& t)
+	src_tkn(Src *self, const Tkn& t)
 	{
 		mn::buf_push(self->tkns, t);
 	}
 
 	inline static Scope
-	src_scope_new(Src self, void* ast_node, Scope parent, bool inside_loop, Type ret)
+	src_scope_new(Src *self, void* ast_node, Scope parent, bool inside_loop, Type ret)
 	{
 		Scope scope = scope_new(parent, inside_loop, ret);
 		mn::buf_push(self->scopes, scope);
@@ -108,7 +107,7 @@ namespace zay
 	}
 
 	inline static Scope
-	src_scope_of(Src self, void* ast_node)
+	src_scope_of(Src *self, void* ast_node)
 	{
 		if(auto it = mn::map_lookup(self->scope_table, ast_node))
 			return it->value;
@@ -116,11 +115,11 @@ namespace zay
 	}
 
 	ZAY_EXPORT mn::Str
-	src_errs_dump(Src self, mn::Allocator allocator = mn::allocator_top());
+	src_errs_dump(Src *self, mn::Allocator allocator = mn::allocator_top());
 
 	ZAY_EXPORT mn::Str
-	src_tkns_dump(Src self, mn::Allocator allocator = mn::allocator_top());
+	src_tkns_dump(Src *self, mn::Allocator allocator = mn::allocator_top());
 
 	ZAY_EXPORT mn::Str
-	src_ast_dump(Src self, mn::Allocator allocator = mn::allocator_top());
+	src_ast_dump(Src *self, mn::Allocator allocator = mn::allocator_top());
 }

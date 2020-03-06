@@ -12,7 +12,7 @@ namespace zay
 {
 	struct IParser
 	{
-		Src src;
+		Src *src;
 		mn::Buf<Tkn> tkns;
 		size_t ix;
 		mn::Buf<Tkn> typenames;
@@ -20,7 +20,7 @@ namespace zay
 	typedef IParser* Parser;
 
 	ZAY_EXPORT Parser
-	parser_new(Src src);
+	parser_new(Src *src);
 
 	ZAY_EXPORT void
 	parser_free(Parser self);
@@ -44,9 +44,9 @@ namespace zay
 	parser_pkg(Parser self);
 
 	inline static bool
-	src_parse(Src src, MODE mode)
+	src_parse(Src *src, MODE mode)
 	{
-		Parser self = parser_new(src);
+		auto self = parser_new(src);
 
 		//first parse the package declaration
 		if (mode != MODE::NONE)

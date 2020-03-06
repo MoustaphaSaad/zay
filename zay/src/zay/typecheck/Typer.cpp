@@ -1136,7 +1136,7 @@ namespace zay
 
 	//API
 	Typer
-	typer_new(Src src, ITyper::MODE mode)
+	typer_new(Src *src, ITyper::MODE mode)
 	{
 		Typer self = alloc<ITyper>();
 		self->mode = mode;

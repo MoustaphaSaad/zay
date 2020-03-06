@@ -10,7 +10,7 @@ namespace zay
 {
 	struct IScanner
 	{
-		Src src;
+		Src *src;
 		// iterator on the source code
 		const char* it;
 		// Rune is a utf-8 codepoint (A character)
@@ -21,7 +21,7 @@ namespace zay
 	typedef IScanner* Scanner;
 
 	ZAY_EXPORT Scanner
-	scanner_new(Src src);
+	scanner_new(Src *src);
 
 	ZAY_EXPORT void
 	scanner_free(Scanner self);
@@ -42,9 +42,9 @@ namespace zay
 	scanner_tkn(Scanner self);
 
 	inline static bool
-	src_scan(Src src)
+	src_scan(Src *src)
 	{
-		Scanner self = scanner_new(src);
+		auto self = scanner_new(src);
 		while(true)
 		{
 			if(Tkn tkn = scanner_tkn(self))

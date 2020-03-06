@@ -841,7 +841,7 @@ namespace zay
 
 	//API
 	CGen
-	cgen_new(Src src)
+	cgen_new(Src *src)
 	{
 		CGen self = alloc<ICGen>();
 		self->indent = 0;
