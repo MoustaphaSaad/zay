@@ -7,10 +7,8 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	inline static bool
-	is_whitespace(Rune c)
+	is_whitespace(mn::Rune c)
 	{
 		return (
 			c == ' ' ||
@@ -22,13 +20,13 @@ namespace zay
 	}
 
 	inline static bool
-	is_letter(Rune c)
+	is_letter(mn::Rune c)
 	{
-		return (rune_is_letter(c) || c == '_');
+		return (mn::rune_is_letter(c) || c == '_');
 	}
 
 	inline static bool
-	is_digit(Rune c)
+	is_digit(mn::Rune c)
 	{
 		return (c >= '0' && c <= '9');
 	}
@@ -40,10 +38,10 @@ namespace zay
 			return false;
 
 		const char* prev_it = self->it;
-		Rune prev_c = rune_read(self->it);
+		auto prev_c = mn::rune_read(self->it);
 
-		self->it = rune_next(self->it);
-		self->c = rune_read(self->it);
+		self->it = mn::rune_next(self->it);
+		self->c = mn::rune_read(self->it);
 
 		self->pos.col++;
 
@@ -72,11 +70,11 @@ namespace zay
 		while(is_letter(self->c) || is_digit(self->c))
 			if(scanner_eat(self) == false)
 				break;
-		return str_intern(self->src->str_table, begin_it, self->it);
+		return mn::str_intern(self->src->str_table, begin_it, self->it);
 	}
 
 	inline static int
-	digit_value(Rune c)
+	digit_value(mn::Rune c)
 	{
 		if (is_digit(c))
 			return c - '0';
@@ -130,16 +128,16 @@ namespace zay
 					src_err(self->src, Err{
 						begin_pos,
 						Rng{begin_it, self->it},
-						strf("illegal int literal {:c}", self->c)
+						mn::strf("illegal int literal {:c}", self->c)
 					});
 				}
-				tkn.str = str_intern(self->src->str_table, begin_it, self->it);
+				tkn.str = mn::str_intern(self->src->str_table, begin_it, self->it);
 				return;
 			}
 
 			//this is not a 0x number
 			self->it = backup_it;
-			self->c = rune_read(self->it);
+			self->c = mn::rune_read(self->it);
 			self->pos = backup_pos;
 		}
 
@@ -150,7 +148,7 @@ namespace zay
 			src_err(self->src, Err{
 				begin_pos,
 				Rng{begin_it, self->it},
-				strf("illegal int literal {:c}", self->c)
+				mn::strf("illegal int literal {:c}", self->c)
 			});
 		}
 
@@ -165,7 +163,7 @@ namespace zay
 				src_err(self->src, Err{
 					begin_pos,
 					Rng{begin_it, self->it},
-					strf("illegal float literal {:c}", self->c)
+					mn::strf("illegal float literal {:c}", self->c)
 				});
 			}
 		}
@@ -182,13 +180,13 @@ namespace zay
 				src_err(self->src, Err{
 					begin_pos,
 					Rng{begin_it, self->it},
-					strf("illegal float literal {:c}", self->c)
+					mn::strf("illegal float literal {:c}", self->c)
 				});
 			}
 		}
 
 		//finished the parsing of the number whether it's a float or int
-		tkn.str = str_intern(self->src->str_table, begin_it, self->it);
+		tkn.str = mn::str_intern(self->src->str_table, begin_it, self->it);
 	}
 
 	inline static const char*
@@ -214,7 +212,7 @@ namespace zay
 		}
 
 		scanner_eat(self); //for the \n
-		return str_intern(self->src->str_table, begin_it, end_it);
+		return mn::str_intern(self->src->str_table, begin_it, end_it);
 	}
 
 	inline static const char*
@@ -223,7 +221,7 @@ namespace zay
 		const char* begin_it = self->it;
 		const char* end_it = self->it;
 
-		Rune prev = self->c;
+		auto prev = self->c;
 		//eat all runes even those escaped by \ like \"
 		while(self->c != '"' || prev == '\\')
 		{
@@ -233,7 +231,7 @@ namespace zay
 
 		end_it = self->it;
 		scanner_eat(self); //for the "
-		return str_intern(self->src->str_table, begin_it, end_it);
+		return mn::str_intern(self->src->str_table, begin_it, end_it);
 	}
 
 
@@ -244,7 +242,7 @@ namespace zay
 		Scanner self = mn::alloc<IScanner>();
 		self->src = src;
 		self->it = begin(self->src->content);
-		self->c = rune_read(self->it);
+		self->c = mn::rune_read(self->it);
 		self->pos = Pos{1, 0};
 
 		src_line_begin(self->src, self->it);
@@ -254,7 +252,7 @@ namespace zay
 	void
 	scanner_free(Scanner self)
 	{
-		free(self);
+		mn::free(self);
 	}
 
 	Tkn
@@ -293,7 +291,7 @@ namespace zay
 		else
 		{
 			//now for operators
-			Rune c = self->c;
+			auto c = self->c;
 			Pos begin_pos = self->pos;
 			scanner_eat(self);
 			bool no_intern = false;
@@ -464,13 +462,13 @@ namespace zay
 				src_err(self->src, Err{
 					begin_pos,
 					Rng{},
-					strf("illegal rune {:c}", c)
+					mn::strf("illegal rune {:c}", c)
 				});
 				break;
 			}
 
 			if(no_intern == false)
-				tkn.str = str_intern(self->src->str_table, tkn.rng.begin, self->it);
+				tkn.str = mn::str_intern(self->src->str_table, tkn.rng.begin, self->it);
 		}
 
 		tkn.rng.end = self->it;
