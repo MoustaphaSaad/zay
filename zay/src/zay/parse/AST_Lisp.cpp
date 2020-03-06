@@ -6,8 +6,6 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	inline static void
 	ast_lisp_field(AST_Lisp& self, const Field& field);
 
@@ -15,75 +13,75 @@ namespace zay
 	ast_lisp_indent(AST_Lisp& self)
 	{
 		for(size_t i = 0; i < self.level; ++i)
-			print_to(self.out, "\t");
+			mn::print_to(self.out, "\t");
 	}
 
 	inline static void
 	ast_lisp_type_sign(AST_Lisp& self, const Type_Sign& type)
 	{
-		print_to(self.out, "(type-sign ");
+		mn::print_to(self.out, "(type-sign ");
 		for(size_t i = 0; i < type.count; ++i)
 		{
 			switch(type[i].kind)
 			{
 			case Type_Atom::KIND_NAMED:
-				print_to(self.out, " {}", type[i].named.str);
+				mn::print_to(self.out, " {}", type[i].named.str);
 				break;
 
 			case Type_Atom::KIND_PTR:
-				print_to(self.out, "*");
+				mn::print_to(self.out, "*");
 				break;
 
 			case Type_Atom::KIND_ARRAY:
-				print_to(self.out, "[{}]", type[i].count.str);
+				mn::print_to(self.out, "[{}]", type[i].count.str);
 				break;
 
 			case Type_Atom::KIND_STRUCT:
-				print_to(self.out, "(struct\n");
+				mn::print_to(self.out, "(struct\n");
 				self.level++;
 				for (const Field& field : type[i].struct_fields)
 				{
 					ast_lisp_indent(self);
 					ast_lisp_field(self, field);
-					print_to(self.out, "\n");
+					mn::print_to(self.out, "\n");
 				}
 				self.level--;
 				ast_lisp_indent(self);
-				print_to(self.out, ")");
+				mn::print_to(self.out, ")");
 				break;
 
 			case Type_Atom::KIND_UNION:
-				print_to(self.out, "(union\n");
+				mn::print_to(self.out, "(union\n");
 				self.level++;
 				for (const Field& field : type[i].union_fields)
 				{
 					ast_lisp_indent(self);
 					ast_lisp_field(self, field);
-					print_to(self.out, "\n");
+					mn::print_to(self.out, "\n");
 				}
 				self.level--;
 				ast_lisp_indent(self);
-				print_to(self.out, ")");
+				mn::print_to(self.out, ")");
 				break;
 
 			case Type_Atom::KIND_ENUM:
-				print_to(self.out, "(enum\n");
+				mn::print_to(self.out, "(enum\n");
 				self.level++;
 				for (const Enum_Field& field : type[i].enum_fields)
 				{
 					ast_lisp_indent(self);
-					print_to(self.out, "(field {}", field.id.str);
+					mn::print_to(self.out, "(field {}", field.id.str);
 					if (field.expr)
 					{
-						print_to(self.out, " ");
+						mn::print_to(self.out, " ");
 						ast_lisp_expr(self, field.expr);
 					}
-					print_to(self.out, ")");
-					print_to(self.out, "\n");
+					mn::print_to(self.out, ")");
+					mn::print_to(self.out, "\n");
 				}
 				self.level--;
 				ast_lisp_indent(self);
-				print_to(self.out, ")");
+				mn::print_to(self.out, ")");
 				break;
 
 			default:
@@ -91,46 +89,46 @@ namespace zay
 				break;
 			}
 		}
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_field(AST_Lisp& self, const Field& field)
 	{
-		print_to(self.out, "(field ");
+		mn::print_to(self.out, "(field ");
 
 		for(size_t i = 0; i < field.ids.count; ++i)
 		{
 			if(i != 0)
-				print_to(self.out, ", ");
-			print_to(self.out, "{}", field.ids[i].str);
+				mn::print_to(self.out, ", ");
+			mn::print_to(self.out, "{}", field.ids[i].str);
 		}
 
-		print_to(self.out, ": ");
+		mn::print_to(self.out, ": ");
 
 		ast_lisp_type_sign(self, field.type);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_variable(AST_Lisp& self, const Var& v)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "(var ");
+		mn::print_to(self.out, "(var ");
 
 		for(size_t i = 0; i < v.ids.count; ++i)
 		{
 			if(i != 0)
-				print_to(self.out, ", ");
-			print_to(self.out, "{}", v.ids[i].str);
+				mn::print_to(self.out, ", ");
+			mn::print_to(self.out, "{}", v.ids[i].str);
 		}
 
 		self.level++;
 
 		if(v.type.count != 0)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_indent(self);
 			ast_lisp_type_sign(self, v.type);
 		}
@@ -139,22 +137,22 @@ namespace zay
 		{
 			if(i == 0)
 			{
-				print_to(self.out, "\n");
+				mn::print_to(self.out, "\n");
 				ast_lisp_indent(self);
 			}
 			else
 			{
-				print_to(self.out, ", ");
+				mn::print_to(self.out, ", ");
 			}
 			ast_lisp_expr(self, v.exprs[i]);
 		}
 
 		self.level--;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
@@ -167,11 +165,11 @@ namespace zay
 	ast_lisp_func(AST_Lisp& self, Decl decl)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "(func {}", decl->name.str);
+		mn::print_to(self.out, "(func {}", decl->name.str);
 
 		self.level++;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
 		//write the args
@@ -180,36 +178,36 @@ namespace zay
 			for(size_t i = 0; i < a.ids.count; ++i)
 			{
 				if(i != 0)
-					print_to(self.out, ", ");
-				print_to(self.out, "{}", a.ids[i].str);
+					mn::print_to(self.out, ", ");
+				mn::print_to(self.out, "{}", a.ids[i].str);
 			}
 
-			print_to(self.out, ": ");
+			mn::print_to(self.out, ": ");
 			ast_lisp_type_sign(self, a.type);
-			print_to(self.out, " ");
+			mn::print_to(self.out, " ");
 		}
 
 		//write the ret type
 		if(decl->func_decl.ret_type.count != 0)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_indent(self);
-			print_to(self.out, ": ");
+			mn::print_to(self.out, ": ");
 			ast_lisp_type_sign(self, decl->func_decl.ret_type);
 		}
 
 		if(decl->func_decl.body)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_stmt(self, decl->func_decl.body);
 		}
 
 		self.level--;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
@@ -217,116 +215,116 @@ namespace zay
 	{
 		ast_lisp_indent(self);
 
-		print_to(self.out, "(type-decl {}\n", decl->name.str);
+		mn::print_to(self.out, "(type-decl {}\n", decl->name.str);
 
 		self.level++;
 		ast_lisp_indent(self);
 
 		ast_lisp_type_sign(self, decl->type_decl);
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		self.level--;
 		ast_lisp_indent(self);
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 
 	inline static void
 	ast_lisp_atom(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(atom {})", expr->atom.str);
+		mn::print_to(self.out, "(atom {})", expr->atom.str);
 	}
 
 	inline static void
 	ast_lisp_binary(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(binary {} ", expr->binary.op.str);
+		mn::print_to(self.out, "(binary {} ", expr->binary.op.str);
 		ast_lisp_expr(self, expr->binary.lhs);
 
-		print_to(self.out, " ");
+		mn::print_to(self.out, " ");
 
 		ast_lisp_expr(self, expr->binary.rhs);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_unary(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(unary {} ", expr->unary.op.str);
+		mn::print_to(self.out, "(unary {} ", expr->unary.op.str);
 		ast_lisp_expr(self, expr->unary.expr);
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_dot(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(dot ");
+		mn::print_to(self.out, "(dot ");
 		ast_lisp_expr(self, expr->dot.base);
-		print_to(self.out, ".{})", expr->dot.member.str);
+		mn::print_to(self.out, ".{})", expr->dot.member.str);
 	}
 
 	inline static void
 	ast_lisp_indexed(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(indexed ");
+		mn::print_to(self.out, "(indexed ");
 		ast_lisp_expr(self, expr->indexed.base);
-		print_to(self.out, "[");
+		mn::print_to(self.out, "[");
 		ast_lisp_expr(self, expr->indexed.index);
-		print_to(self.out, "])");
+		mn::print_to(self.out, "])");
 	}
 
 	inline static void
 	ast_lisp_call(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(call ");
+		mn::print_to(self.out, "(call ");
 		ast_lisp_expr(self, expr->call.base);
-		print_to(self.out, " ");
+		mn::print_to(self.out, " ");
 		for(size_t i = 0; i < expr->call.args.count; ++i)
 		{
 			if(i != 0)
-				print_to(self.out, ", ");
+				mn::print_to(self.out, ", ");
 			ast_lisp_expr(self, expr->call.args[i]);
 		}
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_cast(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(cast ");
+		mn::print_to(self.out, "(cast ");
 		ast_lisp_expr(self, expr->cast.base);
 		ast_lisp_type_sign(self, expr->cast.type);
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_paren(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(paren ");
+		mn::print_to(self.out, "(paren ");
 		ast_lisp_expr(self, expr->paren);
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_complit(AST_Lisp& self, Expr expr)
 	{
-		print_to(self.out, "(complit ");
+		mn::print_to(self.out, "(complit ");
 		ast_lisp_type_sign(self, expr->complit.type);
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		self.level++;
 		for(const Complit_Field& f: expr->complit.fields)
 		{
 			ast_lisp_indent(self);
 			ast_lisp_expr(self, f.left);
-			print_to(self.out, " ");
+			mn::print_to(self.out, " ");
 			ast_lisp_expr(self, f.right);
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 		}
 		
 		self.level--;
 		ast_lisp_indent(self);
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 
@@ -335,96 +333,96 @@ namespace zay
 	ast_lisp_stmt_break(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "({})", stmt->break_stmt.str);
+		mn::print_to(self.out, "({})", stmt->break_stmt.str);
 	}
 
 	inline static void
 	ast_lisp_stmt_continue(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "({})", stmt->continue_stmt.str);
+		mn::print_to(self.out, "({})", stmt->continue_stmt.str);
 	}
 
 	inline static void
 	ast_lisp_stmt_return(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "(return ");
+		mn::print_to(self.out, "(return ");
 
 		ast_lisp_expr(self, stmt->return_stmt);
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_stmt_if(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "(if ");
+		mn::print_to(self.out, "(if ");
 		ast_lisp_expr(self, stmt->if_stmt.if_cond);
 
 		self.level++;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_stmt(self, stmt->if_stmt.if_body);
 
 		for(const Else_If& e: stmt->if_stmt.else_ifs)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_indent(self);
 			ast_lisp_expr(self, e.cond);
 
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_stmt(self, e.body);
 		}
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		if(stmt->if_stmt.else_body)
 			ast_lisp_stmt(self, stmt->if_stmt.else_body);
 
 		self.level--;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_stmt_for(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "(for");
+		mn::print_to(self.out, "(for");
 
 		self.level++;
 
 		if(stmt->for_stmt.init_stmt)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_stmt(self, stmt->for_stmt.init_stmt);
 		}
 
 		if(stmt->for_stmt.loop_cond)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_indent(self);
 			ast_lisp_expr(self, stmt->for_stmt.loop_cond);
 		}
 
 		if(stmt->for_stmt.post_stmt)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_stmt(self, stmt->for_stmt.post_stmt);
 		}
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_stmt(self, stmt->for_stmt.loop_body);
 
 		self.level--;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
@@ -437,7 +435,7 @@ namespace zay
 	ast_lisp_stmt_assign(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "({} ", stmt->assign_stmt.op.str);
+		mn::print_to(self.out, "({} ", stmt->assign_stmt.op.str);
 
 		self.level++;
 
@@ -445,12 +443,12 @@ namespace zay
 		{
 			if(i == 0)
 			{
-				print_to(self.out, "\n");
+				mn::print_to(self.out, "\n");
 				ast_lisp_indent(self);
 			}
 			else
 			{
-				print_to(self.out, ", ");
+				mn::print_to(self.out, ", ");
 			}
 			ast_lisp_expr(self, stmt->assign_stmt.lhs[i]);
 		}
@@ -459,62 +457,62 @@ namespace zay
 		{
 			if(i == 0)
 			{
-				print_to(self.out, "\n");
+				mn::print_to(self.out, "\n");
 				ast_lisp_indent(self);
 			}
 			else
 			{
-				print_to(self.out, ", ");
+				mn::print_to(self.out, ", ");
 			}
 			ast_lisp_expr(self, stmt->assign_stmt.rhs[i]);
 		}
 
 		self.level--;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_stmt_expr(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "(expr-stmt");
+		mn::print_to(self.out, "(expr-stmt");
 
 		self.level++;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 		ast_lisp_expr(self, stmt->expr_stmt);
 
 		self.level--;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 	inline static void
 	ast_lisp_stmt_block(AST_Lisp& self, Stmt stmt)
 	{
 		ast_lisp_indent(self);
-		print_to(self.out, "(block-stmt");
+		mn::print_to(self.out, "(block-stmt");
 
 		self.level++;
 		for(size_t i = 0; i < stmt->block_stmt.count; ++i)
 		{
-			print_to(self.out, "\n");
+			mn::print_to(self.out, "\n");
 			ast_lisp_stmt(self, stmt->block_stmt[i]);
 		}
 		self.level--;
 
-		print_to(self.out, "\n");
+		mn::print_to(self.out, "\n");
 		ast_lisp_indent(self);
 
-		print_to(self.out, ")");
+		mn::print_to(self.out, ")");
 	}
 
 
