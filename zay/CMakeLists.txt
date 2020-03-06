@@ -63,19 +63,6 @@ add_library(MoustaphaSaad::zay ALIAS zay)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${HEADER_FILES})
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} FILES ${SOURCE_FILES})
 
-# let's enable warnings as errors
-if(WIN32)
-	target_compile_options(zay
-		PRIVATE
-			/WX /W4
-	)
-elseif(UNIX)
-	target_compile_options(zay
-		PRIVATE
-			-Wall -Werror
-	)
-endif()
-
 # enable C++17
 # disable any compiler specifc extensions
 # add d suffix in debug mode
