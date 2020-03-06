@@ -6,8 +6,6 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	inline static Field
 	parser_field(Parser self);
 
@@ -69,7 +67,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_str(strf("expected '{}' but found EOF", Tkn::NAMES[kind]))
+				err_str(mn::strf("expected '{}' but found EOF", Tkn::NAMES[kind]))
 			);
 			return Tkn{};
 		}
@@ -80,7 +78,7 @@ namespace zay
 
 		src_err(
 			self->src,
-			err_tkn(tkn, strf("expected '{}' but found '{}'", Tkn::NAMES[kind], tkn.str))
+			err_tkn(tkn, mn::strf("expected '{}' but found '{}'", Tkn::NAMES[kind], tkn.str))
 		);
 		return Tkn{};
 	}
@@ -141,11 +139,11 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_tkn(tkn, strf("'{}' is not a type", tkn.str))
+						err_tkn(tkn, mn::strf("'{}' is not a type", tkn.str))
 					);
 				}
 
-				buf_push(type, type_atom_named(parser_eat(self)));
+				mn::buf_push(type, type_atom_named(parser_eat(self)));
 				break;
 			}
 			else if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT ||
@@ -153,21 +151,21 @@ namespace zay
 			{
 				parser_eat(self);
 				parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
-				Buf<Field> fields = buf_new<Field>();
+				auto fields = mn::buf_new<Field>();
 				while (parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
-					buf_push(fields, parser_field(self));
+					mn::buf_push(fields, parser_field(self));
 				parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
 				if(tkn.kind == Tkn::KIND_KEYWORD_STRUCT)
-					buf_push(type, type_atom_struct(fields));
+					mn::buf_push(type, type_atom_struct(fields));
 				else if(tkn.kind == Tkn::KIND_KEYWORD_UNION)
-					buf_push(type, type_atom_union(fields));
+					mn::buf_push(type, type_atom_union(fields));
 				break;
 			}
 			else if(tkn.kind == Tkn::KIND_KEYWORD_ENUM)
 			{
 				parser_eat(self);
 				parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
-				Buf<Enum_Field> fields = buf_new<Enum_Field>();
+				auto fields = mn::buf_new<Enum_Field>();
 				do
 				{
 					if(Tkn id = parser_eat_kind(self, Tkn::KIND_ID))
@@ -175,25 +173,25 @@ namespace zay
 						Expr expr = nullptr;
 						if (parser_eat_kind(self, Tkn::KIND_EQUAL))
 							expr = parser_expr(self);
-						buf_push(fields, Enum_Field{ id, expr });
+						mn::buf_push(fields, Enum_Field{ id, expr });
 					}
 				} while (parser_eat_kind(self, Tkn::KIND_COMMA));
 				parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
-				buf_push(type, type_atom_enum(fields));
+				mn::buf_push(type, type_atom_enum(fields));
 				break;
 			}
 			else if(tkn.kind == Tkn::KIND_KEYWORD_FUNC)
 			{
 				parser_eat(self);
 				parser_eat_must(self, Tkn::KIND_OPEN_PAREN);
-				Buf<Type_Sign> args = buf_new<Type_Sign>();
+				auto args = mn::buf_new<Type_Sign>();
 				do
 				{
 					Tkn arg_tkn = parser_look(self);
 					if (arg_tkn.kind == Tkn::KIND_COLON)
 					{
 						parser_eat(self);
-						buf_push(args, parser_type(self));
+						mn::buf_push(args, parser_type(self));
 					}
 					else if(arg_tkn.kind == Tkn::KIND_ID)
 					{
@@ -206,7 +204,7 @@ namespace zay
 						parser_eat_must(self, Tkn::KIND_COLON);
 						Type_Sign arg_type = parser_type(self);
 						for (size_t i = 0; i < tkn_count; ++i)
-							buf_push(args, clone(arg_type));
+							mn::buf_push(args, clone(arg_type));
 						type_sign_free(arg_type);
 					}
 				} while (parser_eat_kind(self, Tkn::KIND_COMMA));
@@ -214,19 +212,19 @@ namespace zay
 				Type_Sign ret = type_sign_new();
 				if (parser_eat_kind(self, Tkn::KIND_COLON))
 					ret = parser_type(self);
-				buf_push(type, type_atom_func(args, ret));
+				mn::buf_push(type, type_atom_func(args, ret));
 				break;
 			}
 			else if(tkn.kind == Tkn::KIND_STAR)
 			{
 				parser_eat(self); //for the *
-				buf_push(type, type_atom_ptr());
+				mn::buf_push(type, type_atom_ptr());
 			}
 			else if(tkn.kind == Tkn::KIND_OPEN_BRACKET)
 			{
 				parser_eat_must(self, Tkn::KIND_OPEN_BRACKET);
 				//this is an integer for now but really this should be an const expr
-				buf_push(type, type_atom_array(parser_eat_must(self, Tkn::KIND_INTEGER)));
+				mn::buf_push(type, type_atom_array(parser_eat_must(self, Tkn::KIND_INTEGER)));
 				parser_eat_must(self, Tkn::KIND_CLOSE_BRACKET);
 			}
 			else
@@ -245,7 +243,7 @@ namespace zay
 		do
 		{
 			if(Tkn id = parser_eat_kind(self, Tkn::KIND_ID))
-				buf_push(field.ids, id);
+				mn::buf_push(field.ids, id);
 		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 
 		parser_eat_must(self, Tkn::KIND_COLON);
@@ -271,7 +269,7 @@ namespace zay
 		do
 		{
 			if(Tkn id = parser_eat_must(self, Tkn::KIND_ID))
-				buf_push(v.ids, id);
+				mn::buf_push(v.ids, id);
 		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 
 		if(parser_eat_kind(self, Tkn::KIND_COLON))
@@ -282,7 +280,7 @@ namespace zay
 			do
 			{
 				if(Expr e = parser_expr(self))
-					buf_push(v.exprs, e);
+					mn::buf_push(v.exprs, e);
 			}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 		}
 
@@ -302,7 +300,7 @@ namespace zay
 		do
 		{
 			if(Tkn id = parser_eat_kind(self, Tkn::KIND_ID))
-				buf_push(arg.ids, id);
+				mn::buf_push(arg.ids, id);
 		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 
 		//function arguments must have a type
@@ -320,14 +318,14 @@ namespace zay
 		parser_eat_must(self, Tkn::KIND_KEYWORD_FUNC);
 		Tkn name = parser_eat_must(self, Tkn::KIND_ID);
 
-		Buf<Arg> args = buf_new<Arg>();
+		auto args = mn::buf_new<Arg>();
 		parser_eat_must(self, Tkn::KIND_OPEN_PAREN);
 		do
 		{
 			//we didn't reach the end of the argument list
 			if(parser_look_kind(self, Tkn::KIND_CLOSE_PAREN) == false)
 			{
-				buf_push(args, parser_arg(self));
+				mn::buf_push(args, parser_arg(self));
 			}
 		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 		parser_eat_must(self, Tkn::KIND_CLOSE_PAREN);
@@ -399,7 +397,7 @@ namespace zay
 	{
 		Type_Sign type = parser_type(self);
 
-		Buf<Complit_Field> fields = buf_new<Complit_Field>();
+		auto fields = mn::buf_new<Complit_Field>();
 		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
 		bool comma = true;
 		while(comma && parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
@@ -420,12 +418,12 @@ namespace zay
 			}
 			else
 			{
-				src_err(self->src, err_tkn(tkn, strf("'{}' unknown field in composite literal", tkn.str)));
+				src_err(self->src, err_tkn(tkn, mn::strf("'{}' unknown field in composite literal", tkn.str)));
 				break;
 			}
 			parser_eat_must(self, Tkn::KIND_COLON);
 			field.right = parser_expr(self);
-			buf_push(fields, field);
+			mn::buf_push(fields, field);
 			comma = parser_eat_kind(self, Tkn::KIND_COMMA);
 		}
 		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
@@ -520,11 +518,11 @@ namespace zay
 			if(tkn.kind == Tkn::KIND_OPEN_PAREN)
 			{
 				parser_eat(self); //for the (
-				Buf<Expr> args = buf_new<Expr>();
+				auto args = mn::buf_new<Expr>();
 				do
 				{
 					if(Expr arg = parser_expr(self))
-						buf_push(args, arg);
+						mn::buf_push(args, arg);
 				}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 				parser_eat_must(self, Tkn::KIND_CLOSE_PAREN);
 				expr = expr_call(expr, args);
@@ -716,9 +714,9 @@ namespace zay
 	{
 		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
 
-		Buf<Stmt> stmts = buf_new<Stmt>();
+		auto stmts = mn::buf_new<Stmt>();
 		while(parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
-			buf_push(stmts, parser_stmt(self));
+			mn::buf_push(stmts, parser_stmt(self));
 
 		parser_eat_must(self, Tkn::KIND_CLOSE_CURLY);
 		return stmt_block(stmts);
@@ -731,14 +729,14 @@ namespace zay
 		Expr if_cond = parser_expr(self);
 		Stmt if_body = parser_stmt_block(self);
 		Stmt else_body = nullptr;
-		Buf<Else_If> else_ifs = buf_new<Else_If>();
+		auto else_ifs = mn::buf_new<Else_If>();
 		while(parser_eat_kind(self, Tkn::KIND_KEYWORD_ELSE))
 		{
 			if(parser_eat_kind(self, Tkn::KIND_KEYWORD_IF))
 			{
 				Expr cond = parser_expr(self);
 				Stmt body = parser_stmt_block(self);
-				buf_push(else_ifs, Else_If{cond, body});
+				mn::buf_push(else_ifs, Else_If{cond, body});
 			}
 			else
 			{
@@ -809,21 +807,21 @@ namespace zay
 	{
 		//simple stmt could be assignment or expression
 		//assignment
-		Buf<Expr> lhs = buf_new<Expr>();
+		auto lhs = mn::buf_new<Expr>();
 		do
 		{
 			if(Expr e = parser_expr(self))
-				buf_push(lhs, e);
+				mn::buf_push(lhs, e);
 		}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 
 		if(is_assign_op(parser_look(self)))
 		{
 			Tkn op = parser_eat(self);
-			Buf<Expr> rhs = buf_new<Expr>();
+			auto rhs = mn::buf_new<Expr>();
 			do
 			{
 				if(Expr e = parser_expr(self))
-					buf_push(rhs, e);
+					mn::buf_push(rhs, e);
 			}while(parser_eat_kind(self, Tkn::KIND_COMMA));
 			return stmt_assign(lhs, op, rhs);
 		}
@@ -833,12 +831,12 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_str(strf("can't have multiple expression in the same statements"))
+				err_str(mn::strf("can't have multiple expression in the same statements"))
 			);
 		}
 
 		Stmt s = stmt_expr(lhs[0]);
-		buf_free(lhs);
+		mn::buf_free(lhs);
 		return s;
 	}
 
@@ -847,11 +845,11 @@ namespace zay
 	Parser
 	parser_new(Src *src)
 	{
-		Parser self = alloc<IParser>();
+		Parser self = mn::alloc<IParser>();
 		self->src = src;
 		self->tkns = clone(src->tkns);
 		self->ix = 0;
-		self->typenames = buf_new<Tkn>();
+		self->typenames = mn::buf_new<Tkn>();
 		//ignore the comments and other unwanted tokens for parsing
 		buf_remove_if(self->tkns, [](const Tkn& t) {
 			return t.kind == Tkn::KIND_COMMENT;
@@ -859,7 +857,7 @@ namespace zay
 		for (size_t i = 0; i < self->tkns.count; ++i)
 		{
 			if (self->tkns[i].kind == Tkn::KIND_KEYWORD_TYPE && i < self->tkns.count)
-				buf_push(self->typenames, self->tkns[i + 1]);
+				mn::buf_push(self->typenames, self->tkns[i + 1]);
 		}
 
 		return self;
@@ -868,9 +866,9 @@ namespace zay
 	void
 	parser_free(Parser self)
 	{
-		buf_free(self->tkns);
-		buf_free(self->typenames);
-		free(self);
+		mn::buf_free(self->tkns);
+		mn::buf_free(self->typenames);
+		mn::free(self);
 	}
 
 	Expr
