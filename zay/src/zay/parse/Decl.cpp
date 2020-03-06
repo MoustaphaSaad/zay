@@ -4,12 +4,10 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	Decl
 	decl_var(const Var& v)
 	{
-		Decl self = alloc<IDecl>();
+		Decl self = mn::alloc<IDecl>();
 		self->kind = IDecl::KIND_VAR;
 		//let's put the first id as the name of this declaration
 		if(v.ids.count > 0)
@@ -19,9 +17,9 @@ namespace zay
 	}
 
 	Decl
-	decl_func(const Tkn& name, const Buf<Arg>& args, const Type_Sign& ret_type, Stmt body)
+	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt body)
 	{
-		Decl self = alloc<IDecl>();
+		Decl self = mn::alloc<IDecl>();
 		self->kind = IDecl::KIND_FUNC;
 		self->name = name;
 		self->func_decl.args = args;
@@ -33,7 +31,7 @@ namespace zay
 	Decl
 	decl_type(const Tkn& name, const Type_Sign& type)
 	{
-		Decl self = alloc<IDecl>();
+		Decl self = mn::alloc<IDecl>();
 		self->kind = IDecl::KIND_TYPE;
 		self->name = name;
 		self->type_decl = type;
@@ -59,6 +57,6 @@ namespace zay
 			break;
 		default: assert(false && "unreachable"); break;
 		}
-		free(self);
+		mn::free(self);
 	}
 }
