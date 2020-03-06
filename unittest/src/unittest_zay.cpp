@@ -7,67 +7,64 @@
 #include <zay/typecheck/Typer.h>
 #include <zay/CGen.h>
 
-using namespace mn;
-using namespace zay;
-
-inline static Str
+inline static mn::Str
 scan(const char* str)
 {
-	auto src = src_from_str(str);
-	CHECK(src_scan(src));
-	Str res = src_tkns_dump(src, memory::tmp());
-	src_free(src);
+	auto src = zay::src_from_str(str);
+	CHECK(zay::src_scan(src));
+	auto res = zay::src_tkns_dump(src, mn::memory::tmp());
+	zay::src_free(src);
 	return res;
 }
 
-inline static Str
+inline static mn::Str
 parse(const char* str)
 {
-	auto src = src_from_str(str);
-	CHECK(src_scan(src));
-	CHECK(src_parse(src, MODE::NONE));
-	Str res = src_ast_dump(src, memory::tmp());
-	src_free(src);
+	auto src = zay::src_from_str(str);
+	CHECK(zay::src_scan(src));
+	CHECK(zay::src_parse(src, zay::MODE::NONE));
+	auto res = zay::src_ast_dump(src, mn::memory::tmp());
+	zay::src_free(src);
 	return res;
 }
 
-inline static Str
+inline static mn::Str
 parse_expr(const char* str)
 {
-	auto src = src_from_str(str);
-	CHECK(src_scan(src));
+	auto src = zay::src_from_str(str);
+	CHECK(zay::src_scan(src));
 
-	Parser parser = parser_new(src);
-	Expr e = parser_expr(parser);
-	parser_free(parser);
+	auto parser = zay::parser_new(src);
+	auto e = zay::parser_expr(parser);
+	zay::parser_free(parser);
 
-	Memory_Stream out = memory_stream_new(memory::tmp());
-	AST_Lisp writer = ast_lisp_new(out);
-	ast_lisp_expr(writer, e);
-	Str res = memory_stream_str(out);
+	auto out = mn::memory_stream_new(mn::memory::tmp());
+	auto writer = zay::ast_lisp_new(out);
+	zay::ast_lisp_expr(writer, e);
+	auto res = mn::memory_stream_str(out);
 
-	expr_free(e);
-	src_free(src);
+	zay::expr_free(e);
+	zay::src_free(src);
 	return res;
 }
 
-inline static Str
+inline static mn::Str
 parse_stmt(const char* str)
 {
-	auto src = src_from_str(str);
-	CHECK(src_scan(src));
+	auto src = zay::src_from_str(str);
+	CHECK(zay::src_scan(src));
 
-	Parser parser = parser_new(src);
-	Stmt s = parser_stmt(parser);
-	parser_free(parser);
+	auto parser = zay::parser_new(src);
+	auto s = zay::parser_stmt(parser);
+	zay::parser_free(parser);
 
-	Memory_Stream out = memory_stream_new(memory::tmp());
-	AST_Lisp writer = ast_lisp_new(out);
-	ast_lisp_stmt(writer, s);
-	Str res = memory_stream_str(out);
+	auto out = mn::memory_stream_new(mn::memory::tmp());
+	auto writer = zay::ast_lisp_new(out);
+	zay::ast_lisp_stmt(writer, s);
+	auto res = mn::memory_stream_str(out);
 
-	stmt_free(s);
-	src_free(src);
+	zay::stmt_free(s);
+	zay::src_free(src);
 	return res;
 }
 
@@ -87,7 +84,7 @@ line: 2, col: 14, kind: "<INTEGER>" str: "234"
 line: 2, col: 17, kind: ";" str: ";"
 )EXPECTED";
 
-	Str answer = scan(code);
+	auto answer = scan(code);
 	CHECK(answer == expected);
 }
 
@@ -149,7 +146,7 @@ line: 9, col: 14, kind: ";" str: ";"
 line: 10, col: 1, kind: "}" str: "}"
 )EXPECTED";
 
-	Str answer = scan(code);
+	auto answer = scan(code);
 	CHECK(answer == expected);
 }
 
@@ -169,7 +166,7 @@ TEST_CASE("[zay]: parse basic struct")
 )
 )EXPECTED";
 
-	Str answer = parse(code);
+	auto answer = parse(code);
 	CHECK(answer == expected);
 }
 
@@ -193,7 +190,7 @@ TEST_CASE("[zay]: parse basic union")
 )
 )EXPECTED";
 
-	Str answer = parse(code);
+	auto answer = parse(code);
 	CHECK(answer == expected);
 }
 
@@ -302,7 +299,7 @@ func foo(a: *Point, b: int) {
 )
 )EXPECTED";
 
-	Str answer = parse(code);
+	auto answer = parse(code);
 	CHECK(answer == expected);
 }
 
@@ -310,7 +307,7 @@ TEST_CASE("[zay]: parse basic expression")
 {
 	const char* code = "123 + 456";
 	const char* expected = "(binary + (atom 123) (atom 456))";
-	Str answer = parse_expr(code);
+	auto answer = parse_expr(code);
 	CHECK(answer == expected);
 }
 
@@ -318,7 +315,7 @@ TEST_CASE("[zay]: parse add mul expression")
 {
 	const char* code = "123 + 456 * v.xy";
 	const char* expected = "(binary + (atom 123) (binary * (atom 456) (dot (atom v).xy)))";
-	Str answer = parse_expr(code);
+	auto answer = parse_expr(code);
 	CHECK(answer == expected);
 }
 
@@ -326,7 +323,7 @@ TEST_CASE("[zay]: complex dereference returned pointer")
 {
 	const char* code = "*arr[v.x + b * c[123]].koko(z: float32, w)";
 	const char* expected = "(unary * (call (dot (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]).koko) (cast (atom z)(type-sign  float32)), (atom w)))";
-	Str answer = parse_expr(code);
+	auto answer = parse_expr(code);
 	CHECK(answer == expected);
 }
 
@@ -334,7 +331,7 @@ TEST_CASE("[zay]: complex dereference indexed expression")
 {
 	const char* code = "(*arr[v.x + b * c[123]]).koko(z: float, w)";
 	const char* expected = "(call (dot (paren (unary * (indexed (atom arr)[(binary + (dot (atom v).x) (binary * (atom b) (indexed (atom c)[(atom 123)])))]))).koko) (cast (atom z)(type-sign  float)), (atom w))";
-	Str answer = parse_expr(code);
+	auto answer = parse_expr(code);
 	CHECK(answer == expected);
 }
 
@@ -345,7 +342,7 @@ TEST_CASE("[zay]: simple var")
 	(type-sign  float)
 	(atom 1.0), (atom 2.0), (atom 3.0)
 ))EXPECTED";
-	Str answer = parse_stmt(code);
+	auto answer = parse_stmt(code);
 	CHECK(answer == expected);
 }
 
@@ -400,7 +397,7 @@ TEST_CASE("[zay]: complex stmt")
 	)
 	(return (atom false))
 ))EXPECTED";
-	Str answer = parse_stmt(code);
+	auto answer = parse_stmt(code);
 	CHECK(answer == expected);
 }
 
@@ -476,20 +473,20 @@ TEST_CASE("[zay]: composite literal")
 	)
 )
 )CODE";
-	Str answer = parse(code);
+	auto answer = parse(code);
 	CHECK(answer == expected);
 }
 
 bool
 typecheck(const char* str)
 {
-	auto src = src_from_str(str);
-	CHECK(src_scan(src));
-	CHECK(src_parse(src, MODE::NONE));
-	bool res = src_typecheck(src, ITyper::MODE_NONE);
-	Str errs = src_errs_dump(src);
-	src_free(src);
-	str_free(errs);
+	auto src = zay::src_from_str(str);
+	CHECK(zay::src_scan(src));
+	CHECK(zay::src_parse(src, zay::MODE::NONE));
+	bool res = zay::src_typecheck(src, zay::ITyper::MODE_NONE);
+	auto errs = zay::src_errs_dump(src);
+	zay::src_free(src);
+	mn::str_free(errs);
 	return res;
 }
 
@@ -867,21 +864,21 @@ TEST_CASE("[zay]: missing return")
 	)CODE") == false);
 }
 
-inline static Str
+inline static mn::Str
 cgen(const char* str)
 {
-	auto src = src_from_str(str);
-	CHECK(src_scan(src));
-	CHECK(src_parse(src, MODE::NONE));
-	CHECK(src_typecheck(src, ITyper::MODE_NONE));
-	Str res = src_c(src, memory::tmp());
-	src_free(src);
+	auto src = zay::src_from_str(str);
+	CHECK(zay::src_scan(src));
+	CHECK(zay::src_parse(src, zay::MODE::NONE));
+	CHECK(zay::src_typecheck(src, zay::ITyper::MODE_NONE));
+	auto res = zay::src_c(src, mn::memory::tmp());
+	zay::src_free(src);
 	return res;
 }
 
 TEST_CASE("[zay]: struct gen")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 		type X struct {
 			x, y: int
 			z, w: float32
@@ -898,7 +895,7 @@ TEST_CASE("[zay]: struct gen")
 
 TEST_CASE("[zay]: union gen")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 		type X union {
 			x, y: int
 			z, w: float32
@@ -915,7 +912,7 @@ TEST_CASE("[zay]: union gen")
 
 TEST_CASE("[zay]: fib func gen")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 		func fib(x: int): int {
 			if x == 0 { return 0: int } else if x == 1 { return 1 } else { return fib(x - 1) + fib(x - 2) }
 		}
@@ -934,7 +931,7 @@ TEST_CASE("[zay]: fib func gen")
 
 TEST_CASE("[zay]: sum func gen")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 		func sum(n: int): int {
 			var res = 0
 			for var i = 0; i < n; ++i { res += i }
@@ -953,7 +950,7 @@ TEST_CASE("[zay]: sum func gen")
 
 TEST_CASE("[zay]: global var gen")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 		var x, y = 0, 3.14
 	)CODE");
 	const char* expected = R"CODE(ZayInt x = 0;
@@ -963,7 +960,7 @@ double y = 3.14;)CODE";
 
 TEST_CASE("[zay]: enum codegen")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type Direction enum {
 		Up = 1,
 		Down = -1,
@@ -982,7 +979,7 @@ TEST_CASE("[zay]: enum codegen")
 
 TEST_CASE("[zay]: enum var codegen")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type Direction enum {
 		Up = 1,
 		Down = -1,
@@ -1003,7 +1000,7 @@ Direction d = Direction::Up;)CODE";
 
 TEST_CASE("[zay]: struct pointer")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type Point struct { x, y: float32 }
 	func add(a: *Point, b: Point) {
 		a.x += b.x
@@ -1023,7 +1020,7 @@ void add(Point (*a), Point b) {
 
 TEST_CASE("[zay]: struct pointer type")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type Point *struct { x, y: float32 }
 	)CODE");
 	const char* expected = R"CODE(typedef struct Point {
@@ -1035,7 +1032,7 @@ TEST_CASE("[zay]: struct pointer type")
 
 TEST_CASE("[zay]: int alias")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type X int
 	func add(a, b: X): X {
 		return a + b
@@ -1050,7 +1047,7 @@ ZayInt add(ZayInt a, ZayInt b) {
 
 TEST_CASE("[zay]: anonymous struct in union")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type vec3f union {
 		data: [3]float32
 		elements: struct {
@@ -1072,7 +1069,7 @@ typedef union vec3f {
 
 TEST_CASE("[zay]: array types")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type vec3 [3]float32
 	type vec4 [4]float32
 	type mat4 [4]vec4
@@ -1088,7 +1085,7 @@ typedef float ((mat3x4[3])[4]);)CODE";
 TEST_CASE("[zay]: C interface")
 {
 	//i haven't yet done function types
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type Reader struct {
 		read: func(request_amount: uint): uint
 	}
@@ -1102,7 +1099,7 @@ TEST_CASE("[zay]: C interface")
 TEST_CASE("[zay]: func pointers")
 {
 	//i haven't yet done function types
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 	type OP func(a, b: int): int
 	func exec(a, b: int, op: OP): int { return op(a, b) }
 	func add(a, b: int): int { return a + b }
@@ -1121,7 +1118,7 @@ ZayInt res = exec(1, 2, add);)CODE";
 
 TEST_CASE("[zay]: composite literal")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 		type Vec3f struct {x, y, z: float32}
 		var origin = Vec3f{}
 		type Color struct {r, g, b, a: float32}
@@ -1170,7 +1167,7 @@ Vec3f (vertices[3]) = {
 
 TEST_CASE("[zay]: anonymous composite literal")
 {
-	Str answer = cgen(R"CODE(
+	auto answer = cgen(R"CODE(
 		var color = struct { r, g, b, a: float32 } {
 			g: 1.0,
 			a: 1.0
