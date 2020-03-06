@@ -7,8 +7,6 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	inline static void
 	typer_sym_resolve(Typer self, Sym sym);
 
@@ -27,19 +25,19 @@ namespace zay
 	inline static void
 	typer_scope_enter(Typer self, Scope scope)
 	{
-		buf_push(self->scope_stack, scope);
+		mn::buf_push(self->scope_stack, scope);
 	}
 
 	inline static void
 	typer_scope_leave(Typer self)
 	{
-		buf_pop(self->scope_stack);
+		mn::buf_pop(self->scope_stack);
 	}
 
 	inline static Scope
 	typer_scope(Typer self)
 	{
-		return buf_top(self->scope_stack);
+		return mn::buf_top(self->scope_stack);
 	}
 
 	inline static void
@@ -50,7 +48,7 @@ namespace zay
 		{
 			Tkn new_tkn = sym_tkn(sym);
 			Tkn old_tkn = sym_tkn(old);
-			Str msg = strf(
+			auto msg = mn::strf(
 				"'{}' symbol redefinition, it was first defined {}:{}",
 				new_tkn.str,
 				old_tkn.pos.line,
@@ -147,7 +145,7 @@ namespace zay
 					{
 						src_err(
 							self->src,
-							err_tkn(atom.named, strf("'{}' undefined symbol", atom.named.str))
+							err_tkn(atom.named, mn::strf("'{}' undefined symbol", atom.named.str))
 						);
 					}
 				}
@@ -166,7 +164,7 @@ namespace zay
 			{
 				size_t array_count = 0;
 				if (atom.count.kind == Tkn::KIND_INTEGER)
-					reads(atom.count.str, array_count);
+					mn::reads(atom.count.str, array_count);
 				res = type_intern_array(self->src->type_table, Array_Sign{ res, array_count });
 				break;
 			}
@@ -175,10 +173,10 @@ namespace zay
 				//this is not a named type, so generate a name for it and put it in global scope
 				if(incomplete_type == nullptr)
 				{
-					Str name = str_tmpf("__unnamed_struct_{}", self->unnamed_id++);
+					auto name = mn::str_tmpf("__unnamed_struct_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
-					buf_push(self->src->ast->decls, unnamed_decl);
+					mn::buf_push(self->src->ast->decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
@@ -188,7 +186,7 @@ namespace zay
 				}
 				res = incomplete_type;
 
-				Buf<Field_Sign> fields = buf_new<Field_Sign>();
+				auto fields = mn::buf_new<Field_Sign>();
 				for(size_t j = 0; j < atom.struct_fields.count; ++j)
 				{
 					Type field_type = typer_type_sign_resolve(self, atom.struct_fields[j].type, nullptr);
@@ -200,7 +198,7 @@ namespace zay
 
 					for(size_t k = 0; k < atom.struct_fields[j].ids.count; ++k)
 					{
-						buf_push(fields, Field_Sign{
+						mn::buf_push(fields, Field_Sign{
 							atom.struct_fields[j].ids[k].str,
 							field_type,
 							0 //set the offset here to be 0 for now
@@ -215,10 +213,10 @@ namespace zay
 				//this is not a named type, so generate a name for it and put it in global scope
 				if(incomplete_type == nullptr)
 				{
-					Str name = str_tmpf("__unnamed_union_{}", self->unnamed_id++);
+					auto name = mn::str_tmpf("__unnamed_union_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
-					buf_push(self->src->ast->decls, unnamed_decl);
+					mn::buf_push(self->src->ast->decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
@@ -228,7 +226,7 @@ namespace zay
 				}
 				res = incomplete_type;
 
-				Buf<Field_Sign> fields = buf_new<Field_Sign>();
+				auto fields = mn::buf_new<Field_Sign>();
 				for(size_t j = 0; j < atom.union_fields.count; ++j)
 				{
 					Type field_type = typer_type_sign_resolve(self, atom.union_fields[j].type, nullptr);
@@ -240,7 +238,7 @@ namespace zay
 
 					for(size_t k = 0; k < atom.union_fields[j].ids.count; ++k)
 					{
-						buf_push(fields, Field_Sign{
+						mn::buf_push(fields, Field_Sign{
 							atom.union_fields[j].ids[k].str,
 							field_type,
 							0 //set the offset here to be 0 for now
@@ -255,10 +253,10 @@ namespace zay
 				//this is not a named type, so generate a name for it and put it in global scope
 				if(incomplete_type == nullptr)
 				{
-					Str name = str_tmpf("__unnamed_enum_{}", self->unnamed_id++);
+					auto name = mn::str_tmpf("__unnamed_enum_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
-					buf_push(self->src->ast->decls, unnamed_decl);
+					mn::buf_push(self->src->ast->decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
@@ -268,7 +266,7 @@ namespace zay
 				}
 				res = incomplete_type;
 
-				Buf<Enum_Value> values = buf_new<Enum_Value>();
+				auto values = mn::buf_new<Enum_Value>();
 				for(size_t j = 0; j < atom.enum_fields.count; ++j)
 				{
 					Enum_Value v{ atom.enum_fields[j].id, atom.enum_fields[j].expr };
@@ -279,11 +277,11 @@ namespace zay
 						{
 							src_err(
 								self->src,
-								err_expr(v.value, strf("enums should have int values but found '{}'", *value_type))
+								err_expr(v.value, mn::strf("enums should have int values but found '{}'", *value_type))
 							);
 						}
 					}
-					buf_push(values, v);
+					mn::buf_push(values, v);
 				}
 				type_enum_complete(res, values);
 				break;
@@ -292,7 +290,7 @@ namespace zay
 			{
 				Func_Sign func_sign = func_sign_new();
 				for(const Type_Sign& arg: atom.func.args)
-					buf_push(func_sign.args, typer_type_sign_resolve(self, arg, nullptr));
+					mn::buf_push(func_sign.args, typer_type_sign_resolve(self, arg, nullptr));
 				func_sign.ret = typer_type_sign_resolve(self, atom.func.ret, nullptr);
 				res = type_intern_func(self->src->type_table, func_sign);
 				break;
@@ -312,7 +310,7 @@ namespace zay
 		Type type = sym->type;
 		if(type->kind == IType::KIND_COMPLETING)
 		{
-			src_err(self->src, err_tkn(sym_tkn(sym), strf("'{}' recursive type", sym->name)));
+			src_err(self->src, err_tkn(sym_tkn(sym), mn::strf("'{}' recursive type", sym->name)));
 			return;
 		}
 		else if(type->kind != IType::KIND_INCOMPLETE)
@@ -352,7 +350,7 @@ namespace zay
 				typer_sym_resolve(self, sym);
 				return sym->type;
 			}
-			src_err(self->src, err_expr(expr, strf("'{}' undefined symbol", expr->atom.str)));
+			src_err(self->src, err_expr(expr, mn::strf("'{}' undefined symbol", expr->atom.str)));
 			return type_void;
 		default: assert(false && "unreachable"); return type_void;
 		}
@@ -367,7 +365,7 @@ namespace zay
 		Type rhs_type = typer_expr_resolve(self, expr->binary.rhs);
 
 		if(type_is_same(lhs_type, rhs_type) == false)
-			src_err(self->src, err_expr(expr, strf("type mismatch in binary expression")));
+			src_err(self->src, err_expr(expr, mn::strf("type mismatch in binary expression")));
 
 		if(expr->binary.op.kind == Tkn::KIND_LOGIC_AND || expr->binary.op.kind == Tkn::KIND_LOGIC_OR)
 		{
@@ -375,7 +373,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(expr->binary.lhs, strf("logical operator only work on boolean types"))
+					err_expr(expr->binary.lhs, mn::strf("logical operator only work on boolean types"))
 				);
 			}
 
@@ -383,7 +381,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(expr->binary.rhs, strf("logical operator only work on boolean types"))
+					err_expr(expr->binary.rhs, mn::strf("logical operator only work on boolean types"))
 				);
 			}
 		}
@@ -418,7 +416,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(expr->unary.expr, strf("'{}' is only allowed for numeric types", expr->unary.op.str))
+					err_expr(expr->unary.expr, mn::strf("'{}' is only allowed for numeric types", expr->unary.op.str))
 				);
 			}
 		}
@@ -428,7 +426,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(expr, strf("logical not operator is only allowed for boolean types"))
+					err_expr(expr, mn::strf("logical not operator is only allowed for boolean types"))
 				);
 			}
 		}
@@ -442,7 +440,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(expr->unary.expr, strf("cannot dereference non pointer type"))
+					err_expr(expr->unary.expr, mn::strf("cannot dereference non pointer type"))
 				);
 			}
 			else
@@ -481,7 +479,7 @@ namespace zay
 			}
 			if(type_is_same(res, type_void))
 			{
-				src_err(self->src, err_tkn(expr->dot.member, strf("undefined struct field")));
+				src_err(self->src, err_tkn(expr->dot.member, mn::strf("undefined struct field")));
 			}
 		}
 		else if (unqualified_type->kind == IType::KIND_UNION)
@@ -496,7 +494,7 @@ namespace zay
 			}
 			if (type_is_same(res, type_void))
 			{
-				src_err(self->src, err_tkn(expr->dot.member, strf("undefined union field")));
+				src_err(self->src, err_tkn(expr->dot.member, mn::strf("undefined union field")));
 			}
 		}
 		else if (unqualified_type->kind == IType::KIND_ENUM)
@@ -511,7 +509,7 @@ namespace zay
 			}
 			if (type_is_same(res, type_void))
 			{
-				src_err(self->src, err_tkn(expr->dot.member, strf("undefined enum field")));
+				src_err(self->src, err_tkn(expr->dot.member, mn::strf("undefined enum field")));
 			}
 		}
 		return res;
@@ -526,7 +524,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(expr->indexed.base, strf("expression type '{}' is not an array", *type))
+				err_expr(expr->indexed.base, mn::strf("expression type '{}' is not an array", *type))
 			);
 			return type_void;
 		}
@@ -535,7 +533,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(expr->indexed.index, strf("index expression type '{}' is not an integer", *type))
+				err_expr(expr->indexed.index, mn::strf("index expression type '{}' is not an integer", *type))
 			);
 		}
 		return type->array.base;
@@ -548,13 +546,13 @@ namespace zay
 		Type res = typer_expr_resolve(self, expr->call.base);
 		if(res->kind != IType::KIND_FUNC)
 		{
-			src_err(self->src, err_expr(expr->call.base, strf("invalid call, expression is not a function")));
+			src_err(self->src, err_expr(expr->call.base, mn::strf("invalid call, expression is not a function")));
 			return type_void;
 		}
 
 		if(expr->call.args.count != res->func.args.count)
 		{
-			Str msg = strf(
+			auto msg = mn::strf(
 				"function expected {} arguments but {} were provided",
 				res->func.args.count,
 				expr->call.args.count
@@ -568,7 +566,7 @@ namespace zay
 			Type type = typer_expr_resolve(self, expr->call.args[i]);
 			if(type_is_same(type, res->func.args[i]) == false)
 			{
-				Str msg = strf("function argument {} type mismatch", i);
+				auto msg = mn::strf("function argument {} type mismatch", i);
 				src_err(self->src, err_expr(expr->call.args[i], msg));
 			}
 		}
@@ -592,7 +590,7 @@ namespace zay
 
 		src_err(
 			self->src,
-			err_expr(expr, strf("can't cast '{}' to '{}'", *from_type, *to_type))
+			err_expr(expr, mn::strf("can't cast '{}' to '{}'", *from_type, *to_type))
 		);
 		return type_void;
 	}
@@ -631,7 +629,7 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_expr(field.left, strf("'{}' type doesn't have this field", *type))
+						err_expr(field.left, mn::strf("'{}' type doesn't have this field", *type))
 					);
 				}
 			}
@@ -645,7 +643,7 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_expr(field.left, strf("'{}' type is not an array", *type))
+						err_expr(field.left, mn::strf("'{}' type is not an array", *type))
 					);
 				}
 			}
@@ -654,7 +652,7 @@ namespace zay
 
 			if(type_is_same(left_type, right_type) == false)
 			{
-				Str msg = strf("type mismatch, type '{}' expected but type '{}' was provided", *left_type, *right_type);
+				auto msg = mn::strf("type mismatch, type '{}' expected but type '{}' was provided", *left_type, *right_type);
 				src_err(self->src, err_expr(field.right, msg));
 			}
 		}
@@ -703,7 +701,7 @@ namespace zay
 	{
 		assert(stmt->kind == IStmt::KIND_BREAK);
 		if (scope_inside_loop(typer_scope(self)) == false)
-			src_err(self->src, err_stmt(stmt, strf("unexpected break statement")));
+			src_err(self->src, err_stmt(stmt, mn::strf("unexpected break statement")));
 		return type_void;
 	}
 
@@ -712,7 +710,7 @@ namespace zay
 	{
 		assert(stmt->kind == IStmt::KIND_CONTINUE);
 		if (scope_inside_loop(typer_scope(self)) == false)
-			src_err(self->src, err_stmt(stmt, strf("unexpected continue statement")));
+			src_err(self->src, err_stmt(stmt, mn::strf("unexpected continue statement")));
 		return type_void;
 	}
 
@@ -726,7 +724,7 @@ namespace zay
 		Type expected = scope_ret(scope);
 		if(expected == nullptr)
 		{
-			src_err(self->src, err_stmt(stmt, strf("unexpected return statement")));
+			src_err(self->src, err_stmt(stmt, mn::strf("unexpected return statement")));
 			return ret;
 		}
 
@@ -734,7 +732,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(stmt->return_stmt, strf("wrong return type '{}' expected '{}'", *ret, *expected))
+				err_expr(stmt->return_stmt, mn::strf("wrong return type '{}' expected '{}'", *ret, *expected))
 			);
 		}
 		return ret;
@@ -749,7 +747,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_expr(stmt->if_stmt.if_cond, strf("if conditions type '{}' is not a boolean", *type))
+				err_expr(stmt->if_stmt.if_cond, mn::strf("if conditions type '{}' is not a boolean", *type))
 			);
 		}
 		typer_stmt_resolve(self, stmt->if_stmt.if_body);
@@ -761,7 +759,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(e.cond, strf("if conditions type '{}' is not a boolean", *cond_type))
+					err_expr(e.cond, mn::strf("if conditions type '{}' is not a boolean", *cond_type))
 				);
 			}
 			typer_stmt_resolve(self, e.body);
@@ -789,7 +787,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_expr(stmt->for_stmt.loop_cond, strf("for loop condition type '{}' is not a boolean", *cond_type))
+					err_expr(stmt->for_stmt.loop_cond, mn::strf("for loop condition type '{}' is not a boolean", *cond_type))
 				);
 			}
 		}
@@ -832,7 +830,7 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_tkn(stmt->var_stmt.ids[i], strf("no expression to infer type from"))
+						err_tkn(stmt->var_stmt.ids[i], mn::strf("no expression to infer type from"))
 					);
 				}
 			}
@@ -845,7 +843,7 @@ namespace zay
 					{
 						src_err(
 							self->src,
-							err_expr(e, strf("type mismatch expected '{}' but found '{}'", *type, *expr_type))
+							err_expr(e, mn::strf("type mismatch expected '{}' but found '{}'", *type, *expr_type))
 						);
 					}
 				}
@@ -868,20 +866,20 @@ namespace zay
 			Type lhs_type = typer_expr_resolve(self, stmt->assign_stmt.lhs[i]);
 			if(type_is_same(lhs_type, type_void))
 			{
-				Str msg = strf("can't assign into a void type");
+				auto msg = mn::strf("can't assign into a void type");
 				src_err(self->src, err_expr(stmt->assign_stmt.lhs[i], msg));
 			}
 
 			Type rhs_type = typer_expr_resolve(self, stmt->assign_stmt.rhs[i]);
 			if (type_is_same(rhs_type, type_void))
 			{
-				Str msg = strf("can't assign into a void type");
+				auto msg = mn::strf("can't assign into a void type");
 				src_err(self->src, err_expr(stmt->assign_stmt.rhs[i], msg));
 			}
 
 			if(type_is_same(lhs_type, rhs_type) == false)
 			{
-				Str msg = strf(
+				auto msg = mn::strf(
 					"type mismatch in assignment statement, expected '{}' but found '{}'",
 					*lhs_type,
 					*rhs_type
@@ -951,7 +949,7 @@ namespace zay
 		case IStmt::KIND_BLOCK:
 			if (stmt->block_stmt.count == 0)
 				return false;
-			return typer_is_terminating(self, buf_top(stmt->block_stmt));
+			return typer_is_terminating(self, mn::buf_top(stmt->block_stmt));
 		case IStmt::KIND_RETURN:
 			return true;
 		case IStmt::KIND_FOR:
@@ -1021,7 +1019,7 @@ namespace zay
 		{
 			src_err(
 				self->src,
-				err_decl(decl, strf("missing return at the end of the function"))
+				err_decl(decl, mn::strf("missing return at the end of the function"))
 			);
 		}
 
@@ -1050,7 +1048,7 @@ namespace zay
 			{
 				src_err(
 					self->src,
-					err_tkn(sym->var_sym.id, strf("no expression to infer type from"))
+					err_tkn(sym->var_sym.id, mn::strf("no expression to infer type from"))
 				);
 			}
 		}
@@ -1063,7 +1061,7 @@ namespace zay
 				{
 					src_err(
 						self->src,
-						err_expr(e, strf("type mismatch expected '{}' but found '{}'", *type, *expr_type))
+						err_expr(e, mn::strf("type mismatch expected '{}' but found '{}'", *type, *expr_type))
 					);
 				}
 			}
@@ -1085,7 +1083,7 @@ namespace zay
 		else if(sym->state == ISym::STATE_RESOLVING)
 		{
 			Tkn id = sym_tkn(sym);
-			src_err(self->src, err_tkn(id, strf("'{}' symbol cyclic dependency", id.str)));
+			src_err(self->src, err_tkn(id, mn::strf("'{}' symbol cyclic dependency", id.str)));
 			return;
 		}
 
@@ -1130,7 +1128,7 @@ namespace zay
 			assert(false && "unreachable");
 			break;
 		}
-		buf_push(self->src->reachable_syms, sym);
+		mn::buf_push(self->src->reachable_syms, sym);
 	}
 
 
@@ -1138,10 +1136,10 @@ namespace zay
 	Typer
 	typer_new(Src *src, ITyper::MODE mode)
 	{
-		Typer self = alloc<ITyper>();
+		Typer self = mn::alloc<ITyper>();
 		self->mode = mode;
 		self->src = src;
-		self->scope_stack = buf_new<Scope>();
+		self->scope_stack = mn::buf_new<Scope>();
 		self->global_scope = src_scope_new(self->src, nullptr, nullptr, false, nullptr);
 		self->unnamed_id = 0;
 
@@ -1153,7 +1151,7 @@ namespace zay
 	typer_free(Typer self)
 	{
 		buf_free(self->scope_stack);
-		free(self);
+		mn::free(self);
 	}
 
 	void
@@ -1176,7 +1174,7 @@ namespace zay
 
 			if(main_sym == nullptr)
 			{
-				src_err(self->src, err_str(strf("program doesn't have a main function")));
+				src_err(self->src, err_str(mn::strf("program doesn't have a main function")));
 				return;
 			}
 
