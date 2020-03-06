@@ -4,12 +4,10 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	Sym
 	sym_struct(Decl d)
 	{
-		Sym self = alloc<ISym>();
+		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_STRUCT;
 		self->state = ISym::STATE_UNRESOLVED;
 		self->name = d->name.str;
@@ -21,7 +19,7 @@ namespace zay
 	Sym
 	sym_union(Decl d)
 	{
-		Sym self = alloc<ISym>();
+		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_UNION;
 		self->state = ISym::STATE_UNRESOLVED;
 		self->name = d->name.str;
@@ -33,7 +31,7 @@ namespace zay
 	Sym
 	sym_enum(Decl d)
 	{
-		Sym self = alloc<ISym>();
+		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_ENUM;
 		self->state = ISym::STATE_UNRESOLVED;
 		self->name = d->name.str;
@@ -45,7 +43,7 @@ namespace zay
 	Sym
 	sym_var(const Tkn& id, Decl decl, const Type_Sign& type, Expr expr)
 	{
-		Sym self = alloc<ISym>();
+		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_VAR;
 		self->state = ISym::STATE_UNRESOLVED;
 		self->name = id.str;
@@ -60,7 +58,7 @@ namespace zay
 	Sym
 	sym_func(Decl d)
 	{
-		Sym self = alloc<ISym>();
+		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_FUNC;
 		self->state = ISym::STATE_UNRESOLVED;
 		self->name = d->name.str;
@@ -72,7 +70,7 @@ namespace zay
 	Sym
 	sym_type(Decl d)
 	{
-		Sym self = alloc<ISym>();
+		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_TYPE;
 		self->state = ISym::STATE_UNRESOLVED;
 		self->name = d->name.str;
@@ -84,6 +82,6 @@ namespace zay
 	void
 	sym_free(Sym self)
 	{
-		free(self);
+		mn::free(self);
 	}
 }
