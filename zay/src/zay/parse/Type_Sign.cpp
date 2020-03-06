@@ -3,8 +3,6 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	Type_Atom
 	type_atom_named(const Tkn& t)
 	{
@@ -32,7 +30,7 @@ namespace zay
 	}
 
 	Type_Atom
-	type_atom_struct(const Buf<Field>& fields)
+	type_atom_struct(const mn::Buf<Field>& fields)
 	{
 		Type_Atom self{};
 		self.kind = Type_Atom::KIND_STRUCT;
@@ -41,7 +39,7 @@ namespace zay
 	}
 
 	Type_Atom
-	type_atom_union(const Buf<Field>& fields)
+	type_atom_union(const mn::Buf<Field>& fields)
 	{
 		Type_Atom self{};
 		self.kind = Type_Atom::KIND_UNION;
@@ -50,7 +48,7 @@ namespace zay
 	}
 
 	Type_Atom
-	type_atom_enum(const Buf<Enum_Field>& fields)
+	type_atom_enum(const mn::Buf<Enum_Field>& fields)
 	{
 		Type_Atom self{};
 		self.kind = Type_Atom::KIND_ENUM;
@@ -59,7 +57,7 @@ namespace zay
 	}
 
 	Type_Atom
-	type_atom_func(const Buf<Type_Sign>& args, const Type_Sign& ret)
+	type_atom_func(const mn::Buf<Type_Sign>& args, const Type_Sign& ret)
 	{
 		Type_Atom self{};
 		self.kind = Type_Atom::KIND_FUNC;
@@ -84,7 +82,7 @@ namespace zay
 			for (const Enum_Field& f : self.enum_fields)
 				if(f.expr)
 					expr_free(f.expr);
-			buf_free(self.enum_fields);
+			mn::buf_free(self.enum_fields);
 		}
 		else if(self.kind == Type_Atom::KIND_FUNC)
 		{
