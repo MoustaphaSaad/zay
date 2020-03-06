@@ -6,12 +6,10 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	Stmt
 	stmt_break(const Tkn& t)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_BREAK;
 		self->break_stmt = t;
 		return self;
@@ -20,7 +18,7 @@ namespace zay
 	Stmt
 	stmt_continue(const Tkn& t)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_CONTINUE;
 		self->continue_stmt = t;
 		return self;
@@ -29,7 +27,7 @@ namespace zay
 	Stmt
 	stmt_return(Expr e)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_RETURN;
 		self->return_stmt = e;
 		return self;
@@ -38,7 +36,7 @@ namespace zay
 	Stmt
 	stmt_if(Expr if_cond, Stmt if_body, const mn::Buf<Else_If>& else_ifs, Stmt else_body)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_IF;
 		self->if_stmt.if_cond = if_cond;
 		self->if_stmt.if_body = if_body;
@@ -50,7 +48,7 @@ namespace zay
 	Stmt
 	stmt_for(Stmt init_stmt, Expr loop_cond, Stmt post_stmt, Stmt loop_body)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_FOR;
 		self->for_stmt.init_stmt = init_stmt;
 		self->for_stmt.loop_cond = loop_cond;
@@ -62,7 +60,7 @@ namespace zay
 	Stmt
 	stmt_var(Var v)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_VAR;
 		self->var_stmt = v;
 		return self;
@@ -71,7 +69,7 @@ namespace zay
 	Stmt
 	stmt_block(const mn::Buf<Stmt>& stmts)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_BLOCK;
 		self->block_stmt = stmts;
 		return self;
@@ -80,7 +78,7 @@ namespace zay
 	Stmt
 	stmt_assign(const mn::Buf<Expr>& lhs, const Tkn& op, const mn::Buf<Expr>& rhs)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_ASSIGN;
 		self->assign_stmt.lhs = lhs;
 		self->assign_stmt.op = op;
@@ -91,7 +89,7 @@ namespace zay
 	Stmt
 	stmt_expr(Expr e)
 	{
-		Stmt self = alloc<IStmt>();
+		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_EXPR;
 		self->expr_stmt = e;
 		return self;
@@ -102,7 +100,7 @@ namespace zay
 	{
 		assert(expr->kind == IStmt::KIND_EXPR);
 		Expr res = expr->expr_stmt;
-		free(expr);
+		mn::free(expr);
 		return res;
 	}
 
@@ -125,7 +123,7 @@ namespace zay
 				expr_free(e.cond);
 				stmt_free(e.body);
 			}
-			buf_free(self->if_stmt.else_ifs);
+			mn::buf_free(self->if_stmt.else_ifs);
 			if(self->if_stmt.else_body)
 				stmt_free(self->if_stmt.else_body);
 			break;
@@ -153,6 +151,6 @@ namespace zay
 			break;
 		default: assert(false && "unreachable"); break;
 		}
-		free(self);
+		mn::free(self);
 	}
 }
