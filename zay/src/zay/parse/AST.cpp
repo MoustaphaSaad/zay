@@ -7,14 +7,12 @@
 
 namespace zay
 {
-	using namespace mn;
-
 	AST
 	ast_new()
 	{
-		AST self = alloc<IAST>();
+		AST self = mn::alloc<IAST>();
 		self->package = Tkn{};
-		self->decls = buf_new<Decl>();
+		self->decls = mn::buf_new<Decl>();
 		return self;
 	}
 
@@ -22,6 +20,6 @@ namespace zay
 	ast_free(AST self)
 	{
 		destruct(self->decls);
-		free(self);
+		mn::free(self);
 	}
 }
