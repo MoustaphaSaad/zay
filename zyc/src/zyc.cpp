@@ -13,9 +13,6 @@
 #include <zay/parse/Parser.h>
 #include <zay/c/Preprocessor.h>
 
-using namespace mn;
-using namespace zay;
-
 int
 main(int argc, char** argv)
 {
@@ -46,74 +43,74 @@ main(int argc, char** argv)
 	{
 		for(size_t i = 0; i < args.args.count; ++i)
 		{
-			if(path_is_file(args.args[i]) == false)
+			if(mn::path_is_file(args.args[i]) == false)
 			{
-				printerr("'{}' is not a file\n", args.args[i]);
+				mn::printerr("'{}' is not a file\n", args.args[i]);
 				continue;
 			}
 
-			auto src = src_from_file(args.args[i].ptr);
-			mn_defer(src_free(src));
+			auto src = zay::src_from_file(args.args[i].ptr);
+			mn_defer(zay::src_free(src));
 
 			//scan the file
-			if(src_scan(src) == false)
+			if(zay::src_scan(src) == false)
 			{
-				print("{}\n", src_errs_dump(src, memory::tmp()));
+				mn::print("{}\n", zay::src_errs_dump(src, mn::memory::tmp()));
 				continue;
 			}
 
 			//write the tokens
-			print("{}\n", src_tkns_dump(src, memory::tmp()));
+			mn::print("{}\n", zay::src_tkns_dump(src, mn::memory::tmp()));
 		}
 	}
 	else if(args.cmd == "parse")
 	{
 		for(size_t i = 0; i < args.args.count; ++i)
 		{
-			if(path_is_file(args.args[i]) == false)
+			if(mn::path_is_file(args.args[i]) == false)
 			{
-				printerr("'{}' is not a file\n", args.args[i]);
+				mn::printerr("'{}' is not a file\n", args.args[i]);
 				continue;
 			}
 
-			auto src = src_from_file(args.args[i].ptr);
-			mn_defer(src_free(src));
+			auto src = zay::src_from_file(args.args[i].ptr);
+			mn_defer(zay::src_free(src));
 
 			//scan the file
-			if(src_scan(src) == false)
+			if(zay::src_scan(src) == false)
 			{
-				print("{}\n", src_errs_dump(src, memory::tmp()));
+				mn::print("{}\n", zay::src_errs_dump(src, mn::memory::tmp()));
 				continue;
 			}
 
 			//parse the file
-			if(src_parse(src, MODE::LIB) == false)
+			if(zay::src_parse(src, zay::MODE::LIB) == false)
 			{
-				print("{}\n", src_errs_dump(src, memory::tmp()));
+				mn::print("{}\n", zay::src_errs_dump(src, mn::memory::tmp()));
 				continue;
 			}
 
 			//write the ast
-			print("{}\n", src_ast_dump(src, memory::tmp()));
+			mn::print("{}\n", zay::src_ast_dump(src, mn::memory::tmp()));
 		}
 	}
 	else if(args.cmd == "cpp")
 	{
 		for(size_t i = 0; i < args.args.count; ++i)
 		{
-			if(path_is_file(args.args[i]) == false)
+			if(mn::path_is_file(args.args[i]) == false)
 			{
-				printerr("'{}' is not a file\n", args.args[i]);
+				mn::printerr("'{}' is not a file\n", args.args[i]);
 				continue;
 			}
 
-			Str content = file_content_str(args.args[i]);
-			mn_defer(str_free(content));
+			auto content = mn::file_content_str(args.args[i]);
+			mn_defer(mn::str_free(content));
 
-			Str contentpp = c::preprocess(content);
-			mn_defer(str_free(contentpp));
+			auto contentpp = zay::c::preprocess(content);
+			mn_defer(mn::str_free(contentpp));
 
-			print("{}\n", contentpp);
+			mn::print("{}\n", contentpp);
 		}
 	}
 	else
