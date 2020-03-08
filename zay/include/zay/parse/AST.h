@@ -7,8 +7,7 @@
 
 namespace zay
 {
-	typedef struct IAST* AST;
-	struct IAST
+	struct AST
 	{
 		Tkn package;
 		mn::Buf<Decl> decls;
@@ -18,10 +17,10 @@ namespace zay
 	ast_new();
 
 	ZAY_EXPORT void
-	ast_free(AST self);
+	ast_free(AST &self);
 
 	inline static void
-	destruct(AST self)
+	destruct(AST &self)
 	{
 		ast_free(self);
 	}

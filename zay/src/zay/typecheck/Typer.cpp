@@ -64,7 +64,7 @@ namespace zay
 	inline static void
 	typer_shallow_walk(Typer self)
 	{
-		for(Decl d: self->src->ast->decls)
+		for(Decl d: self->src->ast.decls)
 		{
 			switch(d->kind)
 			{
@@ -176,7 +176,7 @@ namespace zay
 					auto name = mn::str_tmpf("__unnamed_struct_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
-					mn::buf_push(self->src->ast->decls, unnamed_decl);
+					mn::buf_push(self->src->ast.decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
@@ -216,7 +216,7 @@ namespace zay
 					auto name = mn::str_tmpf("__unnamed_union_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
-					mn::buf_push(self->src->ast->decls, unnamed_decl);
+					mn::buf_push(self->src->ast.decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
@@ -256,7 +256,7 @@ namespace zay
 					auto name = mn::str_tmpf("__unnamed_enum_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
-					mn::buf_push(self->src->ast->decls, unnamed_decl);
+					mn::buf_push(self->src->ast.decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);

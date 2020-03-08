@@ -50,13 +50,13 @@ namespace zay
 
 		//first parse the package declaration
 		if (mode != MODE::NONE)
-			src->ast->package = parser_pkg(self);
+			src->ast.package = parser_pkg(self);
 
 		//then everything else
 		while(self->ix < self->tkns.count)
 		{
 			if (Decl d = parser_decl(self))
-				mn::buf_push(src->ast->decls, d);
+				mn::buf_push(src->ast.decls, d);
 			else
 				break;
 		}

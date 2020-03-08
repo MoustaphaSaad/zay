@@ -124,9 +124,9 @@ namespace zay
 	{
 		auto out = mn::memory_stream_new(allocator);
 		AST_Lisp writer = ast_lisp_new(out);
-		for(size_t i = 0; i < self->ast->decls.count; ++i)
+		for(size_t i = 0; i < self->ast.decls.count; ++i)
 		{
-			ast_lisp_decl(writer, self->ast->decls[i]);
+			ast_lisp_decl(writer, self->ast.decls[i]);
 			mn::print_to(out, "\n");
 		}
 		return mn::memory_stream_str(out);

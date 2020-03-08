@@ -10,16 +10,15 @@ namespace zay
 	AST
 	ast_new()
 	{
-		AST self = mn::alloc<IAST>();
-		self->package = Tkn{};
-		self->decls = mn::buf_new<Decl>();
+		AST self{};
+		self.package = Tkn{};
+		self.decls = mn::buf_new<Decl>();
 		return self;
 	}
 
 	void
-	ast_free(AST self)
+	ast_free(AST &self)
 	{
-		destruct(self->decls);
-		mn::free(self);
+		destruct(self.decls);
 	}
 }
