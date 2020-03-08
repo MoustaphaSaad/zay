@@ -22,7 +22,7 @@ namespace zay
 	}
 
 	ZAY_EXPORT void
-	ast_lisp_expr(AST_Lisp& self, Expr expr);
+	ast_lisp_expr(AST_Lisp& self, Expr *expr);
 
 	ZAY_EXPORT void
 	ast_lisp_stmt(AST_Lisp& self, Stmt stmt);

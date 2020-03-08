@@ -46,7 +46,7 @@ namespace zay
 				Tkn id;
 				Decl decl;
 				Type_Sign type;
-				Expr expr;
+				Expr* expr;
 			} var_sym;
 			Decl type_sym;
 		};
@@ -63,7 +63,7 @@ namespace zay
 	sym_enum(Decl d);
 
 	ZAY_EXPORT Sym
-	sym_var(const Tkn& id, Decl decl, const Type_Sign& type, Expr expr);
+	sym_var(const Tkn& id, Decl decl, const Type_Sign& type, Expr* expr);
 
 	ZAY_EXPORT Sym
 	sym_func(Decl d);

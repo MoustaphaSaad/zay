@@ -7,7 +7,7 @@
 namespace zay
 {
 	inline static void
-	cgen_expr_gen(CGen self, Expr expr);
+	cgen_expr_gen(CGen self, Expr* expr);
 
 	inline static void
 	cgen_indent(CGen self)
@@ -373,36 +373,36 @@ namespace zay
 
 	//Exprs
 	inline static void
-	cgen_expr_gen(CGen self, Expr expr);
+	cgen_expr_gen(CGen self, Expr* expr);
 
 	inline static void
-	cgen_expr_atom(CGen self, Expr expr)
+	cgen_expr_atom(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_ATOM);
+		assert(expr->kind == Expr::KIND_ATOM);
 		mn::print_to(self->out, "{}", expr->atom.str);
 	}
 
 	inline static void
-	cgen_expr_binary(CGen self, Expr expr)
+	cgen_expr_binary(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_BINARY);
+		assert(expr->kind == Expr::KIND_BINARY);
 		cgen_expr_gen(self, expr->binary.lhs);
 		mn::print_to(self->out, " {} ", expr->binary.op.str);
 		cgen_expr_gen(self, expr->binary.rhs);
 	}
 
 	inline static void
-	cgen_expr_unary(CGen self, Expr expr)
+	cgen_expr_unary(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_UNARY);
+		assert(expr->kind == Expr::KIND_UNARY);
 		mn::print_to(self->out, "{}", expr->unary.op.str);
 		cgen_expr_gen(self, expr->unary.expr);
 	}
 
 	inline static void
-	cgen_expr_dot(CGen self, Expr expr)
+	cgen_expr_dot(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_DOT);
+		assert(expr->kind == Expr::KIND_DOT);
 		cgen_expr_gen(self, expr->dot.base);
 		if(expr->dot.base->type->kind == IType::KIND_ENUM)
 			mn::print_to(self->out, "::{}", expr->dot.member.str);
@@ -413,9 +413,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_expr_indexed(CGen self, Expr expr)
+	cgen_expr_indexed(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_INDEXED);
+		assert(expr->kind == Expr::KIND_INDEXED);
 		cgen_expr_gen(self, expr->indexed.base);
 		mn::print_to(self->out, "[");
 		cgen_expr_gen(self, expr->indexed.index);
@@ -423,9 +423,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_expr_call(CGen self, Expr expr)
+	cgen_expr_call(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_CALL);
+		assert(expr->kind == Expr::KIND_CALL);
 		cgen_expr_gen(self, expr->call.base);
 		mn::print_to(self->out, "(");
 		for(size_t i = 0; i < expr->call.args.count; ++i)
@@ -438,26 +438,26 @@ namespace zay
 	}
 
 	inline static void
-	cgen_expr_cast(CGen self, Expr expr)
+	cgen_expr_cast(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_CAST);
+		assert(expr->kind == Expr::KIND_CAST);
 		mn::print_to(self->out, "({})", cgen_write_field(self, expr->type, ""));
 		cgen_expr_gen(self, expr->cast.base);
 	}
 
 	inline static void
-	cgen_expr_paren(CGen self, Expr expr)
+	cgen_expr_paren(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_PAREN);
+		assert(expr->kind == Expr::KIND_PAREN);
 		mn::print_to(self->out, "(");
 		cgen_expr_gen(self, expr->paren);
 		mn::print_to(self->out, ")");
 	}
 
 	inline static void
-	cgen_expr_complit(CGen self, Expr expr)
+	cgen_expr_complit(CGen self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_COMPLIT);
+		assert(expr->kind == Expr::KIND_COMPLIT);
 		if(expr->type->kind != IType::KIND_ARRAY)
 			mn::print_to(self->out, "({})", cgen_write_field(self, expr->type, ""));
 		mn::print_to(self->out, "{{");
@@ -488,35 +488,35 @@ namespace zay
 	}
 
 	inline static void
-	cgen_expr_gen(CGen self, Expr expr)
+	cgen_expr_gen(CGen self, Expr* expr)
 	{
 		switch(expr->kind)
 		{
-		case IExpr::KIND_ATOM:
+		case Expr::KIND_ATOM:
 			cgen_expr_atom(self, expr);
 			break;
-		case IExpr::KIND_BINARY:
+		case Expr::KIND_BINARY:
 			cgen_expr_binary(self, expr);
 			break;
-		case IExpr::KIND_UNARY:
+		case Expr::KIND_UNARY:
 			cgen_expr_unary(self, expr);
 			break;
-		case IExpr::KIND_DOT:
+		case Expr::KIND_DOT:
 			cgen_expr_dot(self, expr);
 			break;
-		case IExpr::KIND_INDEXED:
+		case Expr::KIND_INDEXED:
 			cgen_expr_indexed(self, expr);
 			break;
-		case IExpr::KIND_CALL:
+		case Expr::KIND_CALL:
 			cgen_expr_call(self, expr);
 			break;
-		case IExpr::KIND_CAST:
+		case Expr::KIND_CAST:
 			cgen_expr_cast(self, expr);
 			break;
-		case IExpr::KIND_PAREN:
+		case Expr::KIND_PAREN:
 			cgen_expr_paren(self, expr);
 			break;
-		case IExpr::KIND_COMPLIT:
+		case Expr::KIND_COMPLIT:
 			cgen_expr_complit(self, expr);
 			break;
 		default:

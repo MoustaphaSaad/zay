@@ -7,13 +7,13 @@
 
 namespace zay
 {
-	typedef struct IExpr* Expr;
+	struct Expr;
 
 	struct Var
 	{
 		mn::Buf<Tkn> ids;
 		Type_Sign type;
-		mn::Buf<Expr> exprs;
+		mn::Buf<Expr*> exprs;
 	};
 
 	inline static Var
@@ -22,7 +22,7 @@ namespace zay
 		return Var{
 			mn::buf_new<Tkn>(),
 			type_sign_new(),
-			mn::buf_new<Expr>()
+			mn::buf_new<Expr*>()
 		};
 	}
 

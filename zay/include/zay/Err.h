@@ -36,7 +36,7 @@ namespace zay
 	}
 
 	inline static Err
-	err_expr(Expr e, const mn::Str& m)
+	err_expr(Expr *e, const mn::Str& m)
 	{
 		Err self{};
 		self.pos = e->pos;

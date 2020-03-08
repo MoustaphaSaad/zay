@@ -107,7 +107,7 @@ namespace zay
 	struct Enum_Value
 	{
 		Tkn id;
-		Expr value;
+		Expr* value;
 	};
 
 

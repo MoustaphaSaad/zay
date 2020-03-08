@@ -127,10 +127,10 @@ namespace zay
 	}
 
 	//Enum Field
-	typedef struct IExpr* Expr;
+	struct Expr;
 	struct Enum_Field
 	{
 		Tkn id;
-		Expr expr;
+		Expr* expr;
 	};
 }

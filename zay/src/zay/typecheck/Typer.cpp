@@ -11,7 +11,7 @@ namespace zay
 	typer_sym_resolve(Typer self, Sym sym);
 
 	inline static Type
-	typer_expr_resolve(Typer self, Expr expr);
+	typer_expr_resolve(Typer self, Expr* expr);
 
 	inline static Type
 	typer_stmt_resolve(Typer self, Stmt stmt);
@@ -71,7 +71,7 @@ namespace zay
 			case IDecl::KIND_VAR:
 				for (size_t i = 0; i < d->var_decl.ids.count; ++i)
 				{
-					Expr e = nullptr;
+					Expr* e = nullptr;
 					if (i < d->var_decl.exprs.count)
 						e = d->var_decl.exprs[i];
 					typer_sym(self, sym_var(d->var_decl.ids[i], d, d->var_decl.type, e));
@@ -333,9 +333,9 @@ namespace zay
 
 	//expressions
 	inline static Type
-	typer_expr_atom_resolve(Typer self, Expr expr)
+	typer_expr_atom_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_ATOM);
+		assert(expr->kind == Expr::KIND_ATOM);
 		switch(expr->atom.kind)
 		{
 		case Tkn::KIND_INTEGER: return type_lit_int;
@@ -357,9 +357,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_binary_resolve(Typer self, Expr expr)
+	typer_expr_binary_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_BINARY);
+		assert(expr->kind == Expr::KIND_BINARY);
 
 		Type lhs_type = typer_expr_resolve(self, expr->binary.lhs);
 		Type rhs_type = typer_expr_resolve(self, expr->binary.rhs);
@@ -400,9 +400,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_unary_resolve(Typer self, Expr expr)
+	typer_expr_unary_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_UNARY);
+		assert(expr->kind == Expr::KIND_UNARY);
 
 		Type type = typer_expr_resolve(self, expr->unary.expr);
 
@@ -461,9 +461,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_dot_resolve(Typer self, Expr expr)
+	typer_expr_dot_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_DOT);
+		assert(expr->kind == Expr::KIND_DOT);
 		Type type = typer_expr_resolve(self, expr->dot.base);
 		Type unqualified_type = type_unqualify(type);
 		Type res = type_void;
@@ -516,9 +516,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_indexed_resolve(Typer self, Expr expr)
+	typer_expr_indexed_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_INDEXED);
+		assert(expr->kind == Expr::KIND_INDEXED);
 		Type type = typer_expr_resolve(self, expr->indexed.base);
 		if(type->kind != IType::KIND_ARRAY)
 		{
@@ -540,9 +540,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_call_resolve(Typer self, Expr expr)
+	typer_expr_call_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_CALL);
+		assert(expr->kind == Expr::KIND_CALL);
 		Type res = typer_expr_resolve(self, expr->call.base);
 		if(res->kind != IType::KIND_FUNC)
 		{
@@ -574,9 +574,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_cast_resolve(Typer self, Expr expr)
+	typer_expr_cast_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_CAST);
+		assert(expr->kind == Expr::KIND_CAST);
 		Type from_type = typer_expr_resolve(self, expr->cast.base);
 		Type to_type = typer_type_sign_resolve(self, expr->cast.type, nullptr);
 
@@ -596,16 +596,16 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_paren_resolve(Typer self, Expr expr)
+	typer_expr_paren_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_PAREN);
+		assert(expr->kind == Expr::KIND_PAREN);
 		return typer_expr_resolve(self, expr->paren);
 	}
 
 	inline static Type
-	typer_expr_complit_resolve(Typer self, Expr expr)
+	typer_expr_complit_resolve(Typer self, Expr* expr)
 	{
-		assert(expr->kind == IExpr::KIND_COMPLIT);
+		assert(expr->kind == Expr::KIND_COMPLIT);
 		Type type = typer_type_sign_resolve(self, expr->complit.type, nullptr);
 		for(size_t i = 0; i < expr->complit.fields.count; ++i)
 		{
@@ -660,35 +660,35 @@ namespace zay
 	}
 
 	inline static Type
-	typer_expr_resolve(Typer self, Expr expr)
+	typer_expr_resolve(Typer self, Expr* expr)
 	{
 		switch(expr->kind)
 		{
-		case IExpr::KIND_ATOM:
+		case Expr::KIND_ATOM:
 			expr->type = typer_expr_atom_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_BINARY:
+		case Expr::KIND_BINARY:
 			expr->type = typer_expr_binary_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_UNARY:
+		case Expr::KIND_UNARY:
 			expr->type = typer_expr_unary_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_DOT:
+		case Expr::KIND_DOT:
 			expr->type = typer_expr_dot_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_INDEXED:
+		case Expr::KIND_INDEXED:
 			expr->type = typer_expr_indexed_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_CALL:
+		case Expr::KIND_CALL:
 			expr->type = typer_expr_call_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_CAST:
+		case Expr::KIND_CAST:
 			expr->type = typer_expr_cast_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_PAREN:
+		case Expr::KIND_PAREN:
 			expr->type = typer_expr_paren_resolve(self, expr);
 			return expr->type;
-		case IExpr::KIND_COMPLIT:
+		case Expr::KIND_COMPLIT:
 			expr->type = typer_expr_complit_resolve(self, expr);
 			return expr->type;
 		default: assert(false && "unreachable"); return type_void;
@@ -814,7 +814,7 @@ namespace zay
 
 		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
 		{
-			Expr e = nullptr;
+			Expr* e = nullptr;
 			if (i < stmt->var_stmt.exprs.count)
 				e = stmt->var_stmt.exprs[i];
 
@@ -1036,7 +1036,7 @@ namespace zay
 		if(infer == false)
 			type = typer_type_sign_resolve(self, sym->var_sym.type, nullptr);
 
-		Expr e = sym->var_sym.expr;
+		Expr* e = sym->var_sym.expr;
 
 		if(infer)
 		{

@@ -5,136 +5,136 @@
 
 namespace zay
 {
-	Expr
+	Expr*
 	expr_atom(const Tkn& t)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_ATOM;
+		self->kind = Expr::KIND_ATOM;
 		self->atom = t;
 		return self;
 	}
 
-	Expr
-	expr_paren(Expr e)
+	Expr*
+	expr_paren(Expr* e)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_PAREN;
+		self->kind = Expr::KIND_PAREN;
 		self->paren = e;
 		return self;
 	}
 
-	Expr
-	expr_call(Expr base, const mn::Buf<Expr>& args)
+	Expr*
+	expr_call(Expr* base, const mn::Buf<Expr*>& args)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_CALL;
+		self->kind = Expr::KIND_CALL;
 		self->call.base = base;
 		self->call.args = args;
 		return self;
 	}
 
-	Expr
-	expr_indexed(Expr base, Expr index)
+	Expr*
+	expr_indexed(Expr* base, Expr* index)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_INDEXED;
+		self->kind = Expr::KIND_INDEXED;
 		self->indexed.base = base;
 		self->indexed.index = index;
 		return self;
 	}
 
-	Expr
-	expr_dot(Expr base, const Tkn& t)
+	Expr*
+	expr_dot(Expr* base, const Tkn& t)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_DOT;
+		self->kind = Expr::KIND_DOT;
 		self->dot.base = base;
 		self->dot.member = t;
 		return self;
 	}
 
-	Expr
-	expr_unary(const Tkn& op, Expr expr)
+	Expr*
+	expr_unary(const Tkn& op, Expr* expr)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_UNARY;
+		self->kind = Expr::KIND_UNARY;
 		self->unary.op = op;
 		self->unary.expr = expr;
 		return self;
 	}
 
-	Expr
-	expr_cast(Expr expr, const Type_Sign& type)
+	Expr*
+	expr_cast(Expr* expr, const Type_Sign& type)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_CAST;
+		self->kind = Expr::KIND_CAST;
 		self->cast.base = expr;
 		self->cast.type = type;
 		return self;
 	}
 
-	Expr
-	expr_binary(Expr lhs, const Tkn& op, Expr rhs)
+	Expr*
+	expr_binary(Expr* lhs, const Tkn& op, Expr* rhs)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_BINARY;
+		self->kind = Expr::KIND_BINARY;
 		self->binary.lhs = lhs;
 		self->binary.op = op;
 		self->binary.rhs = rhs;
 		return self;
 	}
 
-	Expr
+	Expr*
 	expr_complit(const Type_Sign& type, const mn::Buf<Complit_Field>& fields)
 	{
-		Expr self = mn::alloc<IExpr>();
+		auto self = mn::alloc<Expr>();
 		self->type = type_void;
-		self->kind = IExpr::KIND_COMPLIT;
+		self->kind = Expr::KIND_COMPLIT;
 		self->complit.type = type;
 		self->complit.fields = fields;
 		return self;
 	}
 
 	void
-	expr_free(Expr self)
+	expr_free(Expr* self)
 	{
 		switch (self->kind)
 		{
-		case IExpr::KIND_ATOM: break;
-		case IExpr::KIND_BINARY:
+		case Expr::KIND_ATOM: break;
+		case Expr::KIND_BINARY:
 			expr_free(self->binary.lhs);
 			expr_free(self->binary.rhs);
 			break;
-		case IExpr::KIND_UNARY:
+		case Expr::KIND_UNARY:
 			expr_free(self->unary.expr);
 			break;
-		case IExpr::KIND_DOT:
+		case Expr::KIND_DOT:
 			expr_free(self->dot.base);
 			break;
-		case IExpr::KIND_INDEXED:
+		case Expr::KIND_INDEXED:
 			expr_free(self->indexed.base);
 			expr_free(self->indexed.index);
 			break;
-		case IExpr::KIND_CALL:
+		case Expr::KIND_CALL:
 			expr_free(self->call.base);
 			destruct(self->call.args);
 			break;
-		case IExpr::KIND_CAST:
+		case Expr::KIND_CAST:
 			expr_free(self->cast.base);
 			type_sign_free(self->cast.type);
 			break;
-		case IExpr::KIND_PAREN:
+		case Expr::KIND_PAREN:
 			expr_free(self->paren);
 			break;
-		case IExpr::KIND_COMPLIT:
+		case Expr::KIND_COMPLIT:
 			type_sign_free(self->complit.type);
 			for (const Complit_Field& f : self->complit.fields)
 			{

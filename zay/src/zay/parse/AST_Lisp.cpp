@@ -230,13 +230,13 @@ namespace zay
 
 
 	inline static void
-	ast_lisp_atom(AST_Lisp& self, Expr expr)
+	ast_lisp_atom(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(atom {})", expr->atom.str);
 	}
 
 	inline static void
-	ast_lisp_binary(AST_Lisp& self, Expr expr)
+	ast_lisp_binary(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(binary {} ", expr->binary.op.str);
 		ast_lisp_expr(self, expr->binary.lhs);
@@ -249,7 +249,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_unary(AST_Lisp& self, Expr expr)
+	ast_lisp_unary(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(unary {} ", expr->unary.op.str);
 		ast_lisp_expr(self, expr->unary.expr);
@@ -257,7 +257,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_dot(AST_Lisp& self, Expr expr)
+	ast_lisp_dot(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(dot ");
 		ast_lisp_expr(self, expr->dot.base);
@@ -265,7 +265,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_indexed(AST_Lisp& self, Expr expr)
+	ast_lisp_indexed(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(indexed ");
 		ast_lisp_expr(self, expr->indexed.base);
@@ -275,7 +275,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_call(AST_Lisp& self, Expr expr)
+	ast_lisp_call(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(call ");
 		ast_lisp_expr(self, expr->call.base);
@@ -290,7 +290,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_cast(AST_Lisp& self, Expr expr)
+	ast_lisp_cast(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(cast ");
 		ast_lisp_expr(self, expr->cast.base);
@@ -299,7 +299,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_paren(AST_Lisp& self, Expr expr)
+	ast_lisp_paren(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(paren ");
 		ast_lisp_expr(self, expr->paren);
@@ -307,7 +307,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_complit(AST_Lisp& self, Expr expr)
+	ast_lisp_complit(AST_Lisp& self, Expr* expr)
 	{
 		mn::print_to(self.out, "(complit ");
 		ast_lisp_type_sign(self, expr->complit.type);
@@ -518,19 +518,19 @@ namespace zay
 
 	//API
 	void
-	ast_lisp_expr(AST_Lisp& self, Expr expr)
+	ast_lisp_expr(AST_Lisp& self, Expr* expr)
 	{
 		switch(expr->kind)
 		{
-		case IExpr::KIND_ATOM: ast_lisp_atom(self, expr); break;
-		case IExpr::KIND_BINARY: ast_lisp_binary(self, expr); break;
-		case IExpr::KIND_UNARY: ast_lisp_unary(self, expr); break;
-		case IExpr::KIND_DOT: ast_lisp_dot(self, expr); break;
-		case IExpr::KIND_INDEXED: ast_lisp_indexed(self, expr); break;
-		case IExpr::KIND_CALL: ast_lisp_call(self, expr); break;
-		case IExpr::KIND_CAST: ast_lisp_cast(self, expr); break;
-		case IExpr::KIND_PAREN: ast_lisp_paren(self, expr); break;
-		case IExpr::KIND_COMPLIT: ast_lisp_complit(self, expr); break;
+		case Expr::KIND_ATOM: ast_lisp_atom(self, expr); break;
+		case Expr::KIND_BINARY: ast_lisp_binary(self, expr); break;
+		case Expr::KIND_UNARY: ast_lisp_unary(self, expr); break;
+		case Expr::KIND_DOT: ast_lisp_dot(self, expr); break;
+		case Expr::KIND_INDEXED: ast_lisp_indexed(self, expr); break;
+		case Expr::KIND_CALL: ast_lisp_call(self, expr); break;
+		case Expr::KIND_CAST: ast_lisp_cast(self, expr); break;
+		case Expr::KIND_PAREN: ast_lisp_paren(self, expr); break;
+		case Expr::KIND_COMPLIT: ast_lisp_complit(self, expr); break;
 		default: assert(false && "unreachable"); break;
 		}
 	}

@@ -25,7 +25,7 @@ namespace zay
 	}
 
 	Stmt
-	stmt_return(Expr e)
+	stmt_return(Expr *e)
 	{
 		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_RETURN;
@@ -34,7 +34,7 @@ namespace zay
 	}
 
 	Stmt
-	stmt_if(Expr if_cond, Stmt if_body, const mn::Buf<Else_If>& else_ifs, Stmt else_body)
+	stmt_if(Expr* if_cond, Stmt if_body, const mn::Buf<Else_If>& else_ifs, Stmt else_body)
 	{
 		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_IF;
@@ -46,7 +46,7 @@ namespace zay
 	}
 
 	Stmt
-	stmt_for(Stmt init_stmt, Expr loop_cond, Stmt post_stmt, Stmt loop_body)
+	stmt_for(Stmt init_stmt, Expr* loop_cond, Stmt post_stmt, Stmt loop_body)
 	{
 		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_FOR;
@@ -76,7 +76,7 @@ namespace zay
 	}
 
 	Stmt
-	stmt_assign(const mn::Buf<Expr>& lhs, const Tkn& op, const mn::Buf<Expr>& rhs)
+	stmt_assign(const mn::Buf<Expr*>& lhs, const Tkn& op, const mn::Buf<Expr*>& rhs)
 	{
 		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_ASSIGN;
@@ -87,7 +87,7 @@ namespace zay
 	}
 
 	Stmt
-	stmt_expr(Expr e)
+	stmt_expr(Expr* e)
 	{
 		Stmt self = mn::alloc<IStmt>();
 		self->kind = IStmt::KIND_EXPR;
@@ -95,11 +95,11 @@ namespace zay
 		return self;
 	}
 
-	Expr
+	Expr*
 	stmt_expr_decay(Stmt expr)
 	{
 		assert(expr->kind == IStmt::KIND_EXPR);
-		Expr res = expr->expr_stmt;
+		Expr* res = expr->expr_stmt;
 		mn::free(expr);
 		return res;
 	}

@@ -31,7 +31,7 @@ namespace zay
 		parser_free(self);
 	}
 
-	ZAY_EXPORT Expr
+	ZAY_EXPORT Expr*
 	parser_expr(Parser self);
 
 	ZAY_EXPORT Stmt

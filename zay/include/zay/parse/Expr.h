@@ -13,7 +13,7 @@ namespace zay
 	typedef struct IType* Type;
 
 	//Expressions
-	typedef struct IExpr* Expr;
+	struct Expr;
 
 	struct Complit_Field {
 		enum KIND
@@ -24,11 +24,11 @@ namespace zay
 		};
 
 		KIND kind;
-		Expr left;
-		Expr right;
+		Expr* left;
+		Expr* right;
 	};
 
-	struct IExpr
+	struct Expr
 	{
 		enum KIND
 		{
@@ -54,42 +54,42 @@ namespace zay
 
 			struct
 			{
-				Expr lhs;
+				Expr* lhs;
 				Tkn op;
-				Expr rhs;
+				Expr* rhs;
 			} binary;
 
 			struct
 			{
 				Tkn op;
-				Expr expr;
+				Expr* expr;
 			} unary;
 
 			struct
 			{
-				Expr base;
+				Expr* base;
 				Tkn member;
 			} dot;
 
 			struct
 			{
-				Expr base;
-				Expr index;
+				Expr* base;
+				Expr* index;
 			} indexed;
 
 			struct
 			{
-				Expr base;
-				mn::Buf<Expr> args;
+				Expr* base;
+				mn::Buf<Expr*> args;
 			} call;
 
 			struct
 			{
-				Expr base;
+				Expr* base;
 				Type_Sign type;
 			} cast;
 
-			Expr paren;
+			Expr* paren;
 
 			struct
 			{
@@ -99,38 +99,38 @@ namespace zay
 		};
 	};
 
-	ZAY_EXPORT Expr
+	ZAY_EXPORT Expr*
 	expr_atom(const Tkn& t);
 
-	ZAY_EXPORT Expr
-	expr_paren(Expr e);
+	ZAY_EXPORT Expr*
+	expr_paren(Expr* e);
 
-	ZAY_EXPORT Expr
-	expr_call(Expr base, const mn::Buf<Expr>& args);
+	ZAY_EXPORT Expr*
+	expr_call(Expr* base, const mn::Buf<Expr*>& args);
 
-	ZAY_EXPORT Expr
-	expr_indexed(Expr base, Expr index);
+	ZAY_EXPORT Expr*
+	expr_indexed(Expr* base, Expr* index);
 
-	ZAY_EXPORT Expr
-	expr_dot(Expr base, const Tkn& t);
+	ZAY_EXPORT Expr*
+	expr_dot(Expr* base, const Tkn& t);
 
-	ZAY_EXPORT Expr
-	expr_unary(const Tkn& op, Expr expr);
+	ZAY_EXPORT Expr*
+	expr_unary(const Tkn& op, Expr* expr);
 
-	ZAY_EXPORT Expr
-	expr_cast(Expr expr, const Type_Sign& type);
+	ZAY_EXPORT Expr*
+	expr_cast(Expr* expr, const Type_Sign& type);
 
-	ZAY_EXPORT Expr
-	expr_binary(Expr lhs, const Tkn& op, Expr rhs);
+	ZAY_EXPORT Expr*
+	expr_binary(Expr* lhs, const Tkn& op, Expr* rhs);
 
-	ZAY_EXPORT Expr
+	ZAY_EXPORT Expr*
 	expr_complit(const Type_Sign& type, const mn::Buf<Complit_Field>& fields);
 
 	ZAY_EXPORT void
-	expr_free(Expr self);
+	expr_free(Expr* self);
 
 	inline static void
-	destruct(Expr self)
+	destruct(Expr* self)
 	{
 		expr_free(self);
 	}
