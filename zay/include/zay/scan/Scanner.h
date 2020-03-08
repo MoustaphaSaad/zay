@@ -8,7 +8,7 @@
 
 namespace zay
 {
-	struct IScanner
+	struct Scanner
 	{
 		Src *src;
 		// iterator on the source code
@@ -18,28 +18,28 @@ namespace zay
 		// position of the current character
 		Pos pos;
 	};
-	typedef IScanner* Scanner;
 
-	ZAY_EXPORT Scanner
-	scanner_new(Src *src);
-
-	ZAY_EXPORT void
-	scanner_free(Scanner self);
-
-	inline static void
-	destruct(Scanner self)
+	inline static Scanner
+	scanner_new(Src *src)
 	{
-		scanner_free(self);
+		Scanner self{};
+		self.src = src;
+		self.it = begin(self.src->content);
+		self.c = mn::rune_read(self.it);
+		self.pos = Pos{1, 0};
+
+		src_line_begin(self.src, self.it);
+		return self;
 	}
 
 	inline static bool
-	scanner_eof(Scanner self)
+	scanner_eof(Scanner *self)
 	{
 		return self->it >= end(self->src->content);
 	}
 
 	ZAY_EXPORT Tkn
-	scanner_tkn(Scanner self);
+	scanner_tkn(Scanner *self);
 
 	inline static bool
 	src_scan(Src *src)
@@ -47,12 +47,11 @@ namespace zay
 		auto self = scanner_new(src);
 		while(true)
 		{
-			if(Tkn tkn = scanner_tkn(self))
+			if(Tkn tkn = scanner_tkn(&self))
 				src_tkn(src, tkn);
 			else
 				break;
 		}
-		scanner_free(self);
 		return src_has_err(src) == false;
 	}
 }

@@ -32,7 +32,7 @@ namespace zay
 	}
 
 	inline static bool
-	scanner_eat(Scanner self)
+	scanner_eat(Scanner *self)
 	{
 		if(scanner_eof(self))
 			return false;
@@ -56,7 +56,7 @@ namespace zay
 	}
 
 	inline static void
-	scanner_skip_whitespaces(Scanner self)
+	scanner_skip_whitespaces(Scanner *self)
 	{
 		while(is_whitespace(self->c))
 			if(scanner_eat(self) == false)
@@ -64,7 +64,7 @@ namespace zay
 	}
 
 	inline static const char*
-	scanner_id(Scanner self)
+	scanner_id(Scanner *self)
 	{
 		const char* begin_it = self->it;
 		while(is_letter(self->c) || is_digit(self->c))
@@ -86,7 +86,7 @@ namespace zay
 	}
 
 	inline static bool
-	scanner_digits(Scanner self, int base)
+	scanner_digits(Scanner *self, int base)
 	{
 		bool found = false;
 		while(digit_value(self->c) < base)
@@ -99,11 +99,11 @@ namespace zay
 	}
 
 	inline static void
-	scanner_num(Scanner self, Tkn& tkn)
+	scanner_num(Scanner *self, Tkn *tkn)
 	{
 		const char* begin_it = self->it;
 		Pos begin_pos = self->pos;
-		tkn.kind = Tkn::KIND_INTEGER;
+		tkn->kind = Tkn::KIND_INTEGER;
 
 		if(self->c == '0')
 		{
@@ -131,7 +131,7 @@ namespace zay
 						mn::strf("illegal int literal {:c}", self->c)
 					});
 				}
-				tkn.str = mn::str_intern(self->src->str_table, begin_it, self->it);
+				tkn->str = mn::str_intern(self->src->str_table, begin_it, self->it);
 				return;
 			}
 
@@ -155,7 +155,7 @@ namespace zay
 		//float part
 		if(self->c == '.')
 		{
-			tkn.kind = Tkn::KIND_FLOAT;
+			tkn->kind = Tkn::KIND_FLOAT;
 			scanner_eat(self); //for the .
 			//parse the after . part
 			if(scanner_digits(self, 10) == false)
@@ -171,7 +171,7 @@ namespace zay
 		//scientific notation part
 		if(self->c == 'e' || self->c == 'E')
 		{
-			tkn.kind = Tkn::KIND_FLOAT;
+			tkn->kind = Tkn::KIND_FLOAT;
 			scanner_eat(self); //for the e
 			if(self->c == '-' || self->c == '+')
 				scanner_eat(self);
@@ -186,11 +186,11 @@ namespace zay
 		}
 
 		//finished the parsing of the number whether it's a float or int
-		tkn.str = mn::str_intern(self->src->str_table, begin_it, self->it);
+		tkn->str = mn::str_intern(self->src->str_table, begin_it, self->it);
 	}
 
 	inline static const char*
-	scanner_comment(Scanner self)
+	scanner_comment(Scanner *self)
 	{
 		const char* begin_it = self->it;
 		const char* end_it = self->it;
@@ -216,7 +216,7 @@ namespace zay
 	}
 
 	inline static const char*
-	scanner_string(Scanner self)
+	scanner_string(Scanner *self)
 	{
 		const char* begin_it = self->it;
 		const char* end_it = self->it;
@@ -236,27 +236,8 @@ namespace zay
 
 
 	//API
-	Scanner
-	scanner_new(Src *src)
-	{
-		Scanner self = mn::alloc<IScanner>();
-		self->src = src;
-		self->it = begin(self->src->content);
-		self->c = mn::rune_read(self->it);
-		self->pos = Pos{1, 0};
-
-		src_line_begin(self->src, self->it);
-		return self;
-	}
-
-	void
-	scanner_free(Scanner self)
-	{
-		mn::free(self);
-	}
-
 	Tkn
-	scanner_tkn(Scanner self)
+	scanner_tkn(Scanner *self)
 	{
 		scanner_skip_whitespaces(self);
 
@@ -286,7 +267,7 @@ namespace zay
 		}
 		else if(is_digit(self->c))
 		{
-			scanner_num(self, tkn);
+			scanner_num(self, &tkn);
 		}
 		else
 		{
