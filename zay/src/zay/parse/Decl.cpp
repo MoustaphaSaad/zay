@@ -17,7 +17,7 @@ namespace zay
 	}
 
 	Decl
-	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt body)
+	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt* body)
 	{
 		Decl self = mn::alloc<IDecl>();
 		self->kind = IDecl::KIND_FUNC;

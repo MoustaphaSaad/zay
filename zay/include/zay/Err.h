@@ -46,7 +46,7 @@ namespace zay
 	}
 
 	inline static Err
-	err_stmt(Stmt s, const mn::Str& m)
+	err_stmt(Stmt* s, const mn::Str& m)
 	{
 		Err self{};
 		self.pos = s->pos;

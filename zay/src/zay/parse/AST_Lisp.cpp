@@ -330,21 +330,21 @@ namespace zay
 
 
 	inline static void
-	ast_lisp_stmt_break(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_break(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "({})", stmt->break_stmt.str);
 	}
 
 	inline static void
-	ast_lisp_stmt_continue(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_continue(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "({})", stmt->continue_stmt.str);
 	}
 
 	inline static void
-	ast_lisp_stmt_return(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_return(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "(return ");
@@ -354,7 +354,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_stmt_if(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_if(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "(if ");
@@ -388,7 +388,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_stmt_for(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_for(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "(for");
@@ -426,13 +426,13 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_stmt_var(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_var(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_variable(self, stmt->var_stmt);
 	}
 
 	inline static void
-	ast_lisp_stmt_assign(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_assign(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "({} ", stmt->assign_stmt.op.str);
@@ -476,7 +476,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_stmt_expr(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_expr(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "(expr-stmt");
@@ -496,7 +496,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_stmt_block(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt_block(AST_Lisp& self, Stmt* stmt)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "(block-stmt");
@@ -536,19 +536,19 @@ namespace zay
 	}
 
 	void
-	ast_lisp_stmt(AST_Lisp& self, Stmt stmt)
+	ast_lisp_stmt(AST_Lisp& self, Stmt* stmt)
 	{
 		switch(stmt->kind)
 		{
-		case IStmt::KIND_BREAK: ast_lisp_stmt_break(self, stmt); break;
-		case IStmt::KIND_CONTINUE: ast_lisp_stmt_continue(self, stmt); break;
-		case IStmt::KIND_RETURN: ast_lisp_stmt_return(self, stmt); break;
-		case IStmt::KIND_IF: ast_lisp_stmt_if(self, stmt); break;
-		case IStmt::KIND_FOR: ast_lisp_stmt_for(self, stmt); break;
-		case IStmt::KIND_VAR: ast_lisp_stmt_var(self, stmt); break;
-		case IStmt::KIND_ASSIGN: ast_lisp_stmt_assign(self, stmt); break;
-		case IStmt::KIND_EXPR: ast_lisp_stmt_expr(self, stmt); break;
-		case IStmt::KIND_BLOCK: ast_lisp_stmt_block(self, stmt); break;
+		case Stmt::KIND_BREAK: ast_lisp_stmt_break(self, stmt); break;
+		case Stmt::KIND_CONTINUE: ast_lisp_stmt_continue(self, stmt); break;
+		case Stmt::KIND_RETURN: ast_lisp_stmt_return(self, stmt); break;
+		case Stmt::KIND_IF: ast_lisp_stmt_if(self, stmt); break;
+		case Stmt::KIND_FOR: ast_lisp_stmt_for(self, stmt); break;
+		case Stmt::KIND_VAR: ast_lisp_stmt_var(self, stmt); break;
+		case Stmt::KIND_ASSIGN: ast_lisp_stmt_assign(self, stmt); break;
+		case Stmt::KIND_EXPR: ast_lisp_stmt_expr(self, stmt); break;
+		case Stmt::KIND_BLOCK: ast_lisp_stmt_block(self, stmt); break;
 		default: assert(false && "unreachable"); break;
 		}
 	}

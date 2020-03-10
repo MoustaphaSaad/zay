@@ -309,7 +309,7 @@ namespace zay
 		return arg;
 	}
 
-	inline static Stmt
+	inline static Stmt*
 	parser_stmt_block(Parser self);
 
 	inline static Decl
@@ -336,7 +336,7 @@ namespace zay
 			ret_type = parser_type(self);
 
 		//now that we have argument list we need to parse the body
-		Stmt body = parser_stmt_block(self);
+		Stmt* body = parser_stmt_block(self);
 		return decl_func(name, args, ret_type, body);
 	}
 
@@ -709,12 +709,12 @@ namespace zay
 		);
 	}
 
-	inline static Stmt
+	inline static Stmt*
 	parser_stmt_block(Parser self)
 	{
 		parser_eat_must(self, Tkn::KIND_OPEN_CURLY);
 
-		auto stmts = mn::buf_new<Stmt>();
+		auto stmts = mn::buf_new<Stmt*>();
 		while(parser_look_kind(self, Tkn::KIND_CLOSE_CURLY) == false)
 			mn::buf_push(stmts, parser_stmt(self));
 
@@ -722,20 +722,20 @@ namespace zay
 		return stmt_block(stmts);
 	}
 
-	inline static Stmt
+	inline static Stmt*
 	parser_stmt_if(Parser self)
 	{
 		parser_eat_must(self, Tkn::KIND_KEYWORD_IF);
 		Expr* if_cond = parser_expr(self);
-		Stmt if_body = parser_stmt_block(self);
-		Stmt else_body = nullptr;
+		Stmt* if_body = parser_stmt_block(self);
+		Stmt* else_body = nullptr;
 		auto else_ifs = mn::buf_new<Else_If>();
 		while(parser_eat_kind(self, Tkn::KIND_KEYWORD_ELSE))
 		{
 			if(parser_eat_kind(self, Tkn::KIND_KEYWORD_IF))
 			{
 				Expr* cond = parser_expr(self);
-				Stmt body = parser_stmt_block(self);
+				Stmt* body = parser_stmt_block(self);
 				mn::buf_push(else_ifs, Else_If{cond, body});
 			}
 			else
@@ -748,15 +748,15 @@ namespace zay
 		return stmt_if(if_cond, if_body, else_ifs, else_body);
 	}
 
-	inline static Stmt
+	inline static Stmt*
 	parser_stmt_for(Parser self)
 	{
 		parser_eat_must(self, Tkn::KIND_KEYWORD_FOR);
 
-		Stmt init_stmt = nullptr;
+		Stmt* init_stmt = nullptr;
 		Expr* loop_cond = nullptr;
-		Stmt post_stmt = nullptr;
-		Stmt loop_body = nullptr;
+		Stmt* post_stmt = nullptr;
+		Stmt* loop_body = nullptr;
 
 		//for {}
 		if(parser_look_kind(self, Tkn::KIND_OPEN_CURLY))
@@ -796,13 +796,13 @@ namespace zay
 		return stmt_for(init_stmt, loop_cond, post_stmt, loop_body);
 	}
 
-	inline static Stmt
+	inline static Stmt*
 	parser_stmt_var(Parser self)
 	{
 		return stmt_var(parser_variable(self));
 	}
 
-	inline static Stmt
+	inline static Stmt*
 	parser_stmt_simple(Parser self)
 	{
 		//simple stmt could be assignment or expression
@@ -835,7 +835,7 @@ namespace zay
 			);
 		}
 
-		Stmt s = stmt_expr(lhs[0]);
+		Stmt* s = stmt_expr(lhs[0]);
 		mn::buf_free(lhs);
 		return s;
 	}
@@ -877,11 +877,11 @@ namespace zay
 		return parser_expr_or(self);
 	}
 
-	Stmt
+	Stmt*
 	parser_stmt(Parser self)
 	{
 		Tkn tkn = parser_look(self);
-		Stmt res = nullptr;
+		Stmt* res = nullptr;
 
 		if(tkn.kind == Tkn::KIND_KEYWORD_BREAK)
 		{

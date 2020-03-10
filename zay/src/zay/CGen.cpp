@@ -528,15 +528,15 @@ namespace zay
 
 	//Stmts
 	inline static void
-	cgen_stmt_gen(CGen self, Stmt stmt);
+	cgen_stmt_gen(CGen self, Stmt* stmt);
 
 	inline static void
-	cgen_stmt_block_gen(CGen self, Stmt stmt);
+	cgen_stmt_block_gen(CGen self, Stmt* stmt);
 
 	inline static void
-	cgen_stmt_return(CGen self, Stmt stmt)
+	cgen_stmt_return(CGen self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_RETURN);
+		assert(stmt->kind == Stmt::KIND_RETURN);
 		if(stmt->return_stmt)
 		{
 			mn::print_to(self->out, "return ");
@@ -549,9 +549,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_stmt_if(CGen self, Stmt stmt)
+	cgen_stmt_if(CGen self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_IF);
+		assert(stmt->kind == Stmt::KIND_IF);
 
 		mn::print_to(self->out, "if (");
 		cgen_expr_gen(self, stmt->if_stmt.if_cond);
@@ -574,9 +574,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_stmt_for(CGen self, Stmt stmt)
+	cgen_stmt_for(CGen self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_FOR);
+		assert(stmt->kind == Stmt::KIND_FOR);
 
 		cgen_scope_enter(self, src_scope_of(self->src, stmt));
 
@@ -612,9 +612,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_stmt_var(CGen self, Stmt stmt)
+	cgen_stmt_var(CGen self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_VAR);
+		assert(stmt->kind == Stmt::KIND_VAR);
 
 		for(size_t i = 0; i < stmt->var_stmt.ids.count; ++i)
 		{
@@ -636,9 +636,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_stmt_assign_gen(CGen self, Stmt stmt)
+	cgen_stmt_assign_gen(CGen self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_ASSIGN);
+		assert(stmt->kind == Stmt::KIND_ASSIGN);
 		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
 		{
 			if (i != 0)
@@ -654,9 +654,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_stmt_anonymous_block_gen(CGen self, Stmt stmt)
+	cgen_stmt_anonymous_block_gen(CGen self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_BLOCK);
+		assert(stmt->kind == Stmt::KIND_BLOCK);
 
 		cgen_scope_enter(self, src_scope_of(self->src, stmt));
 
@@ -664,15 +664,15 @@ namespace zay
 
 		self->indent++;
 
-		for (Stmt s : stmt->block_stmt)
+		for (Stmt* s : stmt->block_stmt)
 		{
 			cgen_newline(self);
 			cgen_stmt_gen(self, s);
-			if (s->kind == IStmt::KIND_ASSIGN ||
-				s->kind == IStmt::KIND_BREAK ||
-				s->kind == IStmt::KIND_CONTINUE ||
-				s->kind == IStmt::KIND_RETURN ||
-				s->kind == IStmt::KIND_VAR)
+			if (s->kind == Stmt::KIND_ASSIGN ||
+				s->kind == Stmt::KIND_BREAK ||
+				s->kind == Stmt::KIND_CONTINUE ||
+				s->kind == Stmt::KIND_RETURN ||
+				s->kind == Stmt::KIND_VAR)
 			{
 				mn::print_to(self->out, ";");
 			}
@@ -687,23 +687,23 @@ namespace zay
 	}
 
 	inline static void
-	cgen_stmt_block_gen(CGen self, Stmt stmt)
+	cgen_stmt_block_gen(CGen self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_BLOCK);
+		assert(stmt->kind == Stmt::KIND_BLOCK);
 
 		mn::print_to(self->out, "{{");
 
 		self->indent++;
 
-		for(Stmt s: stmt->block_stmt)
+		for(Stmt* s: stmt->block_stmt)
 		{
 			cgen_newline(self);
 			cgen_stmt_gen(self, s);
-			if (s->kind == IStmt::KIND_ASSIGN ||
-				s->kind == IStmt::KIND_BREAK ||
-				s->kind == IStmt::KIND_CONTINUE ||
-				s->kind == IStmt::KIND_RETURN ||
-				s->kind == IStmt::KIND_VAR)
+			if (s->kind == Stmt::KIND_ASSIGN ||
+				s->kind == Stmt::KIND_BREAK ||
+				s->kind == Stmt::KIND_CONTINUE ||
+				s->kind == Stmt::KIND_RETURN ||
+				s->kind == Stmt::KIND_VAR)
 			{
 				mn::print_to(self->out, ";");
 			}
@@ -716,35 +716,35 @@ namespace zay
 	}
 
 	inline static void
-	cgen_stmt_gen(CGen self, Stmt stmt)
+	cgen_stmt_gen(CGen self, Stmt* stmt)
 	{
 		switch(stmt->kind)
 		{
-		case IStmt::KIND_BREAK:
+		case Stmt::KIND_BREAK:
 			mn::print_to(self->out, "break");
 			break;
-		case IStmt::KIND_CONTINUE:
+		case Stmt::KIND_CONTINUE:
 			mn::print_to(self->out, "continue");
 			break;
-		case IStmt::KIND_RETURN:
+		case Stmt::KIND_RETURN:
 			cgen_stmt_return(self, stmt);
 			break;
-		case IStmt::KIND_IF:
+		case Stmt::KIND_IF:
 			cgen_stmt_if(self, stmt);
 			break;
-		case IStmt::KIND_FOR:
+		case Stmt::KIND_FOR:
 			cgen_stmt_for(self, stmt);
 			break;
-		case IStmt::KIND_VAR:
+		case Stmt::KIND_VAR:
 			cgen_stmt_var(self, stmt);
 			break;
-		case IStmt::KIND_ASSIGN:
+		case Stmt::KIND_ASSIGN:
 			cgen_stmt_assign_gen(self, stmt);
 			break;
-		case IStmt::KIND_EXPR:
+		case Stmt::KIND_EXPR:
 			cgen_expr_gen(self, stmt->expr_stmt);
 			break;
-		case IStmt::KIND_BLOCK:
+		case Stmt::KIND_BLOCK:
 			cgen_stmt_anonymous_block_gen(self, stmt);
 			break;
 		default:

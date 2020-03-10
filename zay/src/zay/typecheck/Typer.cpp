@@ -14,10 +14,10 @@ namespace zay
 	typer_expr_resolve(Typer self, Expr* expr);
 
 	inline static Type
-	typer_stmt_resolve(Typer self, Stmt stmt);
+	typer_stmt_resolve(Typer self, Stmt* stmt);
 
 	inline static Type
-	typer_stmt_block_resolve(Typer self, Stmt stmt);
+	typer_stmt_block_resolve(Typer self, Stmt* stmt);
 
 	inline static void
 	typer_type_complete(Typer self, Sym sym);
@@ -697,27 +697,27 @@ namespace zay
 
 
 	inline static Type
-	typer_stmt_break_resolve(Typer self, Stmt stmt)
+	typer_stmt_break_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_BREAK);
+		assert(stmt->kind == Stmt::KIND_BREAK);
 		if (scope_inside_loop(typer_scope(self)) == false)
 			src_err(self->src, err_stmt(stmt, mn::strf("unexpected break statement")));
 		return type_void;
 	}
 
 	inline static Type
-	typer_stmt_continue_resolve(Typer self, Stmt stmt)
+	typer_stmt_continue_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_CONTINUE);
+		assert(stmt->kind == Stmt::KIND_CONTINUE);
 		if (scope_inside_loop(typer_scope(self)) == false)
 			src_err(self->src, err_stmt(stmt, mn::strf("unexpected continue statement")));
 		return type_void;
 	}
 
 	inline static Type
-	typer_stmt_return_resolve(Typer self, Stmt stmt)
+	typer_stmt_return_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_RETURN);
+		assert(stmt->kind == Stmt::KIND_RETURN);
 		Type ret = typer_expr_resolve(self, stmt->return_stmt);
 
 		Scope scope = typer_scope(self);
@@ -739,9 +739,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_stmt_if_resolve(Typer self, Stmt stmt)
+	typer_stmt_if_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_IF);
+		assert(stmt->kind == Stmt::KIND_IF);
 		Type type = typer_expr_resolve(self, stmt->if_stmt.if_cond);
 		if(type_is_same(type, type_bool) == false)
 		{
@@ -771,9 +771,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_stmt_for_resolve(Typer self, Stmt stmt)
+	typer_stmt_for_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_FOR);
+		assert(stmt->kind == Stmt::KIND_FOR);
 
 		Scope scope = src_scope_new(self->src, stmt, typer_scope(self), true, nullptr);
 		typer_scope_enter(self, scope);
@@ -794,7 +794,7 @@ namespace zay
 		if(stmt->for_stmt.post_stmt)
 			typer_stmt_resolve(self, stmt->for_stmt.post_stmt);
 
-		for (Stmt s : stmt->for_stmt.loop_body->block_stmt)
+		for (Stmt* s : stmt->for_stmt.loop_body->block_stmt)
 			typer_stmt_resolve(self, s);
 		typer_scope_leave(self);
 
@@ -802,9 +802,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_stmt_var_resolve(Typer self, Stmt stmt)
+	typer_stmt_var_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_VAR);
+		assert(stmt->kind == Stmt::KIND_VAR);
 
 		bool infer = stmt->var_stmt.type.count == 0;
 
@@ -858,9 +858,9 @@ namespace zay
 	}
 
 	inline static Type
-	typer_stmt_assign_resolve(Typer self, Stmt stmt)
+	typer_stmt_assign_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_ASSIGN);
+		assert(stmt->kind == Stmt::KIND_ASSIGN);
 		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
 		{
 			Type lhs_type = typer_expr_resolve(self, stmt->assign_stmt.lhs[i]);
@@ -891,30 +891,30 @@ namespace zay
 	}
 
 	inline static Type
-	typer_stmt_expr_resolve(Typer self, Stmt stmt)
+	typer_stmt_expr_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_EXPR);
+		assert(stmt->kind == Stmt::KIND_EXPR);
 		return typer_expr_resolve(self, stmt->expr_stmt);
 	}
 
 	inline static Type
-	typer_stmt_block_resolve(Typer self, Stmt stmt)
+	typer_stmt_block_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_BLOCK);
-		for(Stmt s: stmt->block_stmt)
+		assert(stmt->kind == Stmt::KIND_BLOCK);
+		for(Stmt* s: stmt->block_stmt)
 			typer_stmt_resolve(self, s);
 		return type_void;
 	}
 
 	inline static Type
-	typer_anonymous_block_resolve(Typer self, Stmt stmt)
+	typer_anonymous_block_resolve(Typer self, Stmt* stmt)
 	{
-		assert(stmt->kind == IStmt::KIND_BLOCK);
+		assert(stmt->kind == Stmt::KIND_BLOCK);
 
 		Scope scope = src_scope_new(self->src, stmt, typer_scope(self), false, nullptr);
 
 		typer_scope_enter(self, scope);
-		for (Stmt s : stmt->block_stmt)
+		for (Stmt* s : stmt->block_stmt)
 			typer_stmt_resolve(self, s);
 		typer_scope_leave(self);
 
@@ -922,19 +922,19 @@ namespace zay
 	}
 
 	inline static Type
-	typer_stmt_resolve(Typer self, Stmt stmt)
+	typer_stmt_resolve(Typer self, Stmt* stmt)
 	{
 		switch(stmt->kind)
 		{
-		case IStmt::KIND_BREAK: return typer_stmt_break_resolve(self, stmt);
-		case IStmt::KIND_CONTINUE: return typer_stmt_continue_resolve(self, stmt);
-		case IStmt::KIND_RETURN: return typer_stmt_return_resolve(self, stmt);
-		case IStmt::KIND_IF: return typer_stmt_if_resolve(self, stmt);
-		case IStmt::KIND_FOR: return typer_stmt_for_resolve(self, stmt);
-		case IStmt::KIND_VAR: return typer_stmt_var_resolve(self, stmt);
-		case IStmt::KIND_ASSIGN: return typer_stmt_assign_resolve(self, stmt);
-		case IStmt::KIND_EXPR: return typer_stmt_expr_resolve(self, stmt);
-		case IStmt::KIND_BLOCK: return typer_anonymous_block_resolve(self, stmt);
+		case Stmt::KIND_BREAK: return typer_stmt_break_resolve(self, stmt);
+		case Stmt::KIND_CONTINUE: return typer_stmt_continue_resolve(self, stmt);
+		case Stmt::KIND_RETURN: return typer_stmt_return_resolve(self, stmt);
+		case Stmt::KIND_IF: return typer_stmt_if_resolve(self, stmt);
+		case Stmt::KIND_FOR: return typer_stmt_for_resolve(self, stmt);
+		case Stmt::KIND_VAR: return typer_stmt_var_resolve(self, stmt);
+		case Stmt::KIND_ASSIGN: return typer_stmt_assign_resolve(self, stmt);
+		case Stmt::KIND_EXPR: return typer_stmt_expr_resolve(self, stmt);
+		case Stmt::KIND_BLOCK: return typer_anonymous_block_resolve(self, stmt);
 		default: assert(false && "unreachable"); return type_void;
 		}
 	}
@@ -942,19 +942,19 @@ namespace zay
 
 	//terminate functions
 	inline static bool
-	typer_is_terminating(Typer self, Stmt stmt)
+	typer_is_terminating(Typer self, Stmt* stmt)
 	{
 		switch(stmt->kind)
 		{
-		case IStmt::KIND_BLOCK:
+		case Stmt::KIND_BLOCK:
 			if (stmt->block_stmt.count == 0)
 				return false;
 			return typer_is_terminating(self, mn::buf_top(stmt->block_stmt));
-		case IStmt::KIND_RETURN:
+		case Stmt::KIND_RETURN:
 			return true;
-		case IStmt::KIND_FOR:
+		case Stmt::KIND_FOR:
 			return typer_is_terminating(self, stmt->for_stmt.loop_body);
-		case IStmt::KIND_IF:
+		case Stmt::KIND_IF:
 		{
 			bool res = typer_is_terminating(self, stmt->if_stmt.if_body);
 			for (const Else_If& f : stmt->if_stmt.else_ifs)

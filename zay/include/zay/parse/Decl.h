@@ -65,7 +65,7 @@ namespace zay
 			{
 				mn::Buf<Arg> args;
 				Type_Sign ret_type;
-				Stmt body;
+				Stmt* body;
 			} func_decl;
 
 			Type_Sign type_decl;
@@ -76,7 +76,7 @@ namespace zay
 	decl_var(const Var& v);
 
 	ZAY_EXPORT Decl
-	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt body);
+	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt* body);
 
 	ZAY_EXPORT Decl
 	decl_type(const Tkn& name, const Type_Sign& type);

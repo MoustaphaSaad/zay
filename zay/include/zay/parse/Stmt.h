@@ -11,17 +11,16 @@
 namespace zay
 {
 	struct Expr;
+	struct Stmt;
 
 	//Statements
-	typedef struct IStmt* Stmt;
-
 	struct Else_If
 	{
 		Expr* cond;
-		Stmt body;
+		Stmt* body;
 	};
 
-	struct IStmt
+	struct Stmt
 	{
 		enum KIND
 		{
@@ -51,17 +50,17 @@ namespace zay
 			struct
 			{
 				Expr* if_cond;
-				Stmt if_body;
+				Stmt* if_body;
 				mn::Buf<Else_If> else_ifs;
-				Stmt else_body;
+				Stmt* else_body;
 			} if_stmt;
 
 			struct
 			{
-				Stmt init_stmt;
+				Stmt* init_stmt;
 				Expr* loop_cond;
-				Stmt post_stmt;
-				Stmt loop_body;
+				Stmt* post_stmt;
+				Stmt* loop_body;
 			} for_stmt;
 
 			Var var_stmt;
@@ -75,45 +74,45 @@ namespace zay
 
 			Expr* expr_stmt;
 
-			mn::Buf<Stmt> block_stmt;
+			mn::Buf<Stmt*> block_stmt;
 		};
 	};
 
-	ZAY_EXPORT Stmt
+	ZAY_EXPORT Stmt*
 	stmt_break(const Tkn& t);
 
-	ZAY_EXPORT Stmt
+	ZAY_EXPORT Stmt*
 	stmt_continue(const Tkn& t);
 
-	ZAY_EXPORT Stmt
+	ZAY_EXPORT Stmt*
 	stmt_return(Expr* e);
 
-	ZAY_EXPORT Stmt
-	stmt_if(Expr* if_cond, Stmt if_body, const mn::Buf<Else_If>& else_ifs, Stmt else_body);
+	ZAY_EXPORT Stmt*
+	stmt_if(Expr* if_cond, Stmt* if_body, const mn::Buf<Else_If>& else_ifs, Stmt* else_body);
 
-	ZAY_EXPORT Stmt
-	stmt_for(Stmt init_stmt, Expr* loop_cond, Stmt post_stmt, Stmt loop_body);
+	ZAY_EXPORT Stmt*
+	stmt_for(Stmt* init_stmt, Expr* loop_cond, Stmt* post_stmt, Stmt* loop_body);
 
-	ZAY_EXPORT Stmt
+	ZAY_EXPORT Stmt*
 	stmt_var(Var v);
 
-	ZAY_EXPORT Stmt
-	stmt_block(const mn::Buf<Stmt>& stmts);
+	ZAY_EXPORT Stmt*
+	stmt_block(const mn::Buf<Stmt*>& stmts);
 
-	ZAY_EXPORT Stmt
+	ZAY_EXPORT Stmt*
 	stmt_assign(const mn::Buf<Expr*>& lhs, const Tkn& op, const mn::Buf<Expr*>& rhs);
 
-	ZAY_EXPORT Stmt
+	ZAY_EXPORT Stmt*
 	stmt_expr(Expr* e);
 
 	ZAY_EXPORT Expr*
-	stmt_expr_decay(Stmt expr);
+	stmt_expr_decay(Stmt* expr);
 
 	ZAY_EXPORT void
-	stmt_free(Stmt self);
+	stmt_free(Stmt* self);
 
 	inline static void
-	destruct(Stmt self)
+	destruct(Stmt* self)
 	{
 		stmt_free(self);
 	}
