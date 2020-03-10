@@ -5,7 +5,7 @@
 namespace zay
 {
 	Sym
-	sym_struct(Decl d)
+	sym_struct(Decl* d)
 	{
 		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_STRUCT;
@@ -17,7 +17,7 @@ namespace zay
 	}
 
 	Sym
-	sym_union(Decl d)
+	sym_union(Decl* d)
 	{
 		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_UNION;
@@ -29,7 +29,7 @@ namespace zay
 	}
 
 	Sym
-	sym_enum(Decl d)
+	sym_enum(Decl* d)
 	{
 		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_ENUM;
@@ -41,7 +41,7 @@ namespace zay
 	}
 
 	Sym
-	sym_var(const Tkn& id, Decl decl, const Type_Sign& type, Expr *expr)
+	sym_var(const Tkn& id, Decl* decl, const Type_Sign& type, Expr *expr)
 	{
 		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_VAR;
@@ -56,7 +56,7 @@ namespace zay
 	}
 
 	Sym
-	sym_func(Decl d)
+	sym_func(Decl* d)
 	{
 		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_FUNC;
@@ -68,7 +68,7 @@ namespace zay
 	}
 
 	Sym
-	sym_type(Decl d)
+	sym_type(Decl* d)
 	{
 		Sym self = mn::alloc<ISym>();
 		self->kind = ISym::KIND_TYPE;

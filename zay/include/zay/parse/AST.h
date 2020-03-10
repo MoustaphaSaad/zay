@@ -10,7 +10,7 @@ namespace zay
 	struct AST
 	{
 		Tkn package;
-		mn::Buf<Decl> decls;
+		mn::Buf<Decl*> decls;
 	};
 
 	ZAY_EXPORT AST

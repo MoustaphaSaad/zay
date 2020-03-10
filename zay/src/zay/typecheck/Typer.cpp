@@ -64,11 +64,11 @@ namespace zay
 	inline static void
 	typer_shallow_walk(Typer self)
 	{
-		for(Decl d: self->src->ast.decls)
+		for(Decl* d: self->src->ast.decls)
 		{
 			switch(d->kind)
 			{
-			case IDecl::KIND_VAR:
+			case Decl::KIND_VAR:
 				for (size_t i = 0; i < d->var_decl.ids.count; ++i)
 				{
 					Expr* e = nullptr;
@@ -77,10 +77,10 @@ namespace zay
 					typer_sym(self, sym_var(d->var_decl.ids[i], d, d->var_decl.type, e));
 				}
 				break;
-			case IDecl::KIND_TYPE:
+			case Decl::KIND_TYPE:
 				typer_sym(self, sym_type(d));
 				break;
-			case IDecl::KIND_FUNC:
+			case Decl::KIND_FUNC:
 				typer_sym(self, sym_func(d));
 				break;
 			default: assert(false && "unreachable"); break;
@@ -175,7 +175,7 @@ namespace zay
 				{
 					auto name = mn::str_tmpf("__unnamed_struct_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
-					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
+					Decl* unnamed_decl = decl_type(unnamed_id, clone(sign));
 					mn::buf_push(self->src->ast.decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
@@ -215,7 +215,7 @@ namespace zay
 				{
 					auto name = mn::str_tmpf("__unnamed_union_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
-					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
+					Decl* unnamed_decl = decl_type(unnamed_id, clone(sign));
 					mn::buf_push(self->src->ast.decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
@@ -255,7 +255,7 @@ namespace zay
 				{
 					auto name = mn::str_tmpf("__unnamed_enum_{}", self->unnamed_id++);
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
-					Decl unnamed_decl = decl_type(unnamed_id, clone(sign));
+					Decl* unnamed_decl = decl_type(unnamed_id, clone(sign));
 					mn::buf_push(self->src->ast.decls, unnamed_decl);
 					Sym unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
@@ -321,7 +321,7 @@ namespace zay
 		type->kind = IType::KIND_COMPLETING;
 		if(sym->kind == ISym::KIND_TYPE)
 		{
-			Decl decl = sym->type_sym;
+			Decl* decl = sym->type_sym;
 			sym->type = typer_type_sign_resolve(self, decl->type_decl, sym->type);
 		}
 		else 
@@ -973,7 +973,7 @@ namespace zay
 	typer_decl_func_resolve(Typer self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_FUNC);
-		Decl decl = sym->func_sym;
+		Decl* decl = sym->func_sym;
 
 		Func_Sign sign = func_sign_new();
 
@@ -991,7 +991,7 @@ namespace zay
 	typer_body_func_resolve(Typer self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_FUNC);
-		Decl decl = sym->func_sym;
+		Decl* decl = sym->func_sym;
 
 		Scope scope = src_scope_new(self->src, decl, typer_scope(self), false, sym->type->func.ret);
 

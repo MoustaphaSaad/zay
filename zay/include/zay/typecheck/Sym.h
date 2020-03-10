@@ -36,40 +36,40 @@ namespace zay
 		Type type;
 		union
 		{
-			Decl struct_sym;
-			Decl union_sym;
-			Decl enum_sym;
-			Decl func_sym;
+			Decl* struct_sym;
+			Decl* union_sym;
+			Decl* enum_sym;
+			Decl* func_sym;
 
 			struct
 			{
 				Tkn id;
-				Decl decl;
+				Decl* decl;
 				Type_Sign type;
 				Expr* expr;
 			} var_sym;
-			Decl type_sym;
+			Decl* type_sym;
 		};
 	};
 
 
 	ZAY_EXPORT Sym
-	sym_struct(Decl d);
+	sym_struct(Decl* d);
 
 	ZAY_EXPORT Sym
-	sym_union(Decl d);
+	sym_union(Decl* d);
 
 	ZAY_EXPORT Sym
-	sym_enum(Decl d);
+	sym_enum(Decl* d);
 
 	ZAY_EXPORT Sym
-	sym_var(const Tkn& id, Decl decl, const Type_Sign& type, Expr* expr);
+	sym_var(const Tkn& id, Decl* decl, const Type_Sign& type, Expr* expr);
 
 	ZAY_EXPORT Sym
-	sym_func(Decl d);
+	sym_func(Decl* d);
 
 	ZAY_EXPORT Sym
-	sym_type(Decl d);
+	sym_type(Decl* d);
 
 	ZAY_EXPORT void
 	sym_free(Sym self);
@@ -95,7 +95,7 @@ namespace zay
 		}
 	}
 
-	inline static Decl
+	inline static Decl*
 	sym_decl(Sym self)
 	{
 		switch(self->kind)

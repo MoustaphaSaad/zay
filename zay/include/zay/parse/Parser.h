@@ -37,7 +37,7 @@ namespace zay
 	ZAY_EXPORT Stmt*
 	parser_stmt(Parser self);
 
-	ZAY_EXPORT Decl
+	ZAY_EXPORT Decl*
 	parser_decl(Parser self);
 
 	ZAY_EXPORT Tkn
@@ -55,7 +55,7 @@ namespace zay
 		//then everything else
 		while(self->ix < self->tkns.count)
 		{
-			if (Decl d = parser_decl(self))
+			if (Decl* d = parser_decl(self))
 				mn::buf_push(src->ast.decls, d);
 			else
 				break;

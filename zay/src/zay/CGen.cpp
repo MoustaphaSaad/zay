@@ -759,7 +759,7 @@ namespace zay
 	cgen_sym_func_gen(CGen self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_FUNC);
-		Decl decl = sym->func_sym;
+		Decl* decl = sym->func_sym;
 		
 		mn::print_to(
 			self->out,

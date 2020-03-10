@@ -251,7 +251,7 @@ namespace zay
 		return field;
 	}
 
-	inline static Decl
+	inline static Decl*
 	parser_decl_type(Parser self)
 	{
 		//only working with struct, and enums
@@ -287,7 +287,7 @@ namespace zay
 		return v;
 	}
 
-	inline static Decl
+	inline static Decl*
 	parser_decl_var(Parser self)
 	{
 		return decl_var(parser_variable(self));
@@ -312,7 +312,7 @@ namespace zay
 	inline static Stmt*
 	parser_stmt_block(Parser self);
 
-	inline static Decl
+	inline static Decl*
 	parser_decl_func(Parser self)
 	{
 		parser_eat_must(self, Tkn::KIND_KEYWORD_FUNC);
@@ -926,11 +926,11 @@ namespace zay
 		return res;
 	}
 
-	Decl
+	Decl*
 	parser_decl(Parser self)
 	{
 		Tkn tkn = parser_look(self);
-		Decl res = nullptr;
+		Decl* res = nullptr;
 
 		if(tkn.kind == Tkn::KIND_KEYWORD_TYPE)
 		{

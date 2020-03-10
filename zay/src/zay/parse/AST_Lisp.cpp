@@ -156,13 +156,13 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_var(AST_Lisp& self, Decl decl)
+	ast_lisp_var(AST_Lisp& self, Decl* decl)
 	{
 		ast_lisp_variable(self, decl->var_decl);
 	}
 
 	inline static void
-	ast_lisp_func(AST_Lisp& self, Decl decl)
+	ast_lisp_func(AST_Lisp& self, Decl* decl)
 	{
 		ast_lisp_indent(self);
 		mn::print_to(self.out, "(func {}", decl->name.str);
@@ -211,7 +211,7 @@ namespace zay
 	}
 
 	inline static void
-	ast_lisp_type_decl(AST_Lisp& self, Decl decl)
+	ast_lisp_type_decl(AST_Lisp& self, Decl* decl)
 	{
 		ast_lisp_indent(self);
 
@@ -554,19 +554,19 @@ namespace zay
 	}
 
 	void
-	ast_lisp_decl(AST_Lisp& self, Decl decl)
+	ast_lisp_decl(AST_Lisp& self, Decl* decl)
 	{
 		switch(decl->kind)
 		{
-		case IDecl::KIND_VAR:
+		case Decl::KIND_VAR:
 			ast_lisp_var(self, decl);
 			break;
 
-		case IDecl::KIND_FUNC:
+		case Decl::KIND_FUNC:
 			ast_lisp_func(self, decl);
 			break;
 
-		case IDecl::KIND_TYPE:
+		case Decl::KIND_TYPE:
 			ast_lisp_type_decl(self, decl);
 			break;
 

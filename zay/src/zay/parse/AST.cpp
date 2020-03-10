@@ -12,7 +12,7 @@ namespace zay
 	{
 		AST self{};
 		self.package = Tkn{};
-		self.decls = mn::buf_new<Decl>();
+		self.decls = mn::buf_new<Decl*>();
 		return self;
 	}
 

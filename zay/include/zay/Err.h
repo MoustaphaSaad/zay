@@ -56,7 +56,7 @@ namespace zay
 	}
 
 	inline static Err
-	err_decl(Decl d, const mn::Str& m)
+	err_decl(Decl* d, const mn::Str& m)
 	{
 		Err self{};
 		self.pos = d->pos;

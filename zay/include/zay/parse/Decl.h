@@ -10,9 +10,6 @@
 
 namespace zay
 {
-	//Declarations
-	typedef struct IDecl* Decl;
-
 	//Function Arguments
 	struct Arg
 	{
@@ -42,7 +39,7 @@ namespace zay
 		arg_free(self);
 	}
 
-	struct IDecl
+	struct Decl
 	{
 		enum KIND
 		{
@@ -72,20 +69,20 @@ namespace zay
 		};
 	};
 
-	ZAY_EXPORT Decl
+	ZAY_EXPORT Decl*
 	decl_var(const Var& v);
 
-	ZAY_EXPORT Decl
+	ZAY_EXPORT Decl*
 	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt* body);
 
-	ZAY_EXPORT Decl
+	ZAY_EXPORT Decl*
 	decl_type(const Tkn& name, const Type_Sign& type);
 
 	ZAY_EXPORT void
-	decl_free(Decl self);
+	decl_free(Decl* self);
 
 	inline static void
-	destruct(Decl self)
+	destruct(Decl* self)
 	{
 		decl_free(self);
 	}
