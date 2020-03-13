@@ -21,8 +21,8 @@ namespace zay
 		MODE mode;
 		Src *src;
 
-		mn::Buf<Scope> scope_stack;
-		Scope global_scope;
+		mn::Buf<Scope*> scope_stack;
+		Scope* global_scope;
 
 		size_t unnamed_id;
 	};

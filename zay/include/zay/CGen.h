@@ -17,7 +17,7 @@ namespace zay
 		size_t indent;
 		Src *src;
 		mn::Memory_Stream out;
-		mn::Buf<Scope> scope_stack;
+		mn::Buf<Scope*> scope_stack;
 	};
 
 	ZAY_EXPORT CGen

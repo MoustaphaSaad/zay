@@ -21,8 +21,8 @@ namespace zay
 		self->errs = mn::buf_new<Err>();
 		self->tkns = mn::buf_new<Tkn>();
 		self->ast = ast_new();
-		self->scopes = mn::buf_new<Scope>();
-		self->scope_table = mn::map_new<void*, Scope>();
+		self->scopes = mn::buf_new<Scope*>();
+		self->scope_table = mn::map_new<void*, Scope*>();
 		self->type_table = type_intern_new();
 		self->reachable_syms = mn::buf_new<Sym*>();
 		return self;
@@ -39,8 +39,8 @@ namespace zay
 		self->errs = mn::buf_new<Err>();
 		self->tkns = mn::buf_new<Tkn>();
 		self->ast = ast_new();
-		self->scopes = mn::buf_new<Scope>();
-		self->scope_table = mn::map_new<void*, Scope>();
+		self->scopes = mn::buf_new<Scope*>();
+		self->scope_table = mn::map_new<void*, Scope*>();
 		self->type_table = type_intern_new();
 		self->reachable_syms = mn::buf_new<Sym*>();
 		return self;

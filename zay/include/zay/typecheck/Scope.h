@@ -8,40 +8,39 @@
 
 namespace zay
 {
-	typedef struct IScope* Scope;
-	struct IScope
+	struct Scope
 	{
-		Scope parent;
+		Scope* parent;
 		mn::Buf<Sym*> syms;
 		mn::Map<const char*, Sym*> table;
 		bool inside_loop;
 		Type* ret;
 	};
 
-	ZAY_EXPORT Scope
-	scope_new(Scope parent, bool inside_loop, Type* ret);
+	ZAY_EXPORT Scope*
+	scope_new(Scope* parent, bool inside_loop, Type* ret);
 
 	ZAY_EXPORT void
-	scope_free(Scope self);
+	scope_free(Scope* self);
 
 	inline static void
-	destruct(Scope self)
+	destruct(Scope* self)
 	{
 		scope_free(self);
 	}
 
 	ZAY_EXPORT Sym*
-	scope_has(Scope self, const char* name);
+	scope_has(Scope* self, const char* name);
 
 	ZAY_EXPORT Sym*
-	scope_find(Scope self, const char* name);
+	scope_find(Scope* self, const char* name);
 
 	ZAY_EXPORT Sym*
-	scope_add(Scope self, Sym* sym);
+	scope_add(Scope* self, Sym* sym);
 
 	ZAY_EXPORT bool
-	scope_inside_loop(Scope self);
+	scope_inside_loop(Scope* self);
 
 	ZAY_EXPORT Type*
-	scope_ret(Scope self);
+	scope_ret(Scope* self);
 }

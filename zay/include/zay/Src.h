@@ -43,9 +43,9 @@ namespace zay
 		// AST of this compilation unit
 		AST ast;
 		// All the scopes created for this translation unit
-		mn::Buf<Scope> scopes;
+		mn::Buf<Scope*> scopes;
 		// Scopes can be attached to AST Entities so here's the attachment table
-		mn::Map<void*, Scope> scope_table;
+		mn::Map<void*, Scope*> scope_table;
 		// Type Interning table to hold all the types of this complication unit
 		Type_Intern type_table;
 		// Reachable symbols
@@ -97,16 +97,16 @@ namespace zay
 		mn::buf_push(self->tkns, t);
 	}
 
-	inline static Scope
-	src_scope_new(Src *self, void* ast_node, Scope parent, bool inside_loop, Type* ret)
+	inline static Scope*
+	src_scope_new(Src *self, void* ast_node, Scope* parent, bool inside_loop, Type* ret)
 	{
-		Scope scope = scope_new(parent, inside_loop, ret);
+		auto scope = scope_new(parent, inside_loop, ret);
 		mn::buf_push(self->scopes, scope);
 		mn::map_insert(self->scope_table, ast_node, scope);
 		return scope;
 	}
 
-	inline static Scope
+	inline static Scope*
 	src_scope_of(Src *self, void* ast_node)
 	{
 		if(auto it = mn::map_lookup(self->scope_table, ast_node))

@@ -23,14 +23,14 @@ namespace zay
 		cgen_indent(self);
 	}
 
-	inline static Scope
+	inline static Scope*
 	cgen_scope(CGen self)
 	{
 		return buf_top(self->scope_stack);
 	}
 
 	inline static void
-	cgen_scope_enter(CGen self, Scope scope)
+	cgen_scope_enter(CGen self, Scope* scope)
 	{
 		buf_push(self->scope_stack, scope);
 	}
@@ -845,7 +845,7 @@ namespace zay
 		self->indent = 0;
 		self->src = src;
 		self->out = mn::memory_stream_new();
-		self->scope_stack = mn::buf_new<Scope>();
+		self->scope_stack = mn::buf_new<Scope*>();
 
 		mn::buf_push(self->scope_stack, src_scope_of(src, nullptr));
 		return self;

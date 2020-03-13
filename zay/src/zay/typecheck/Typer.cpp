@@ -23,7 +23,7 @@ namespace zay
 	typer_type_complete(Typer self, Sym* sym);
 
 	inline static void
-	typer_scope_enter(Typer self, Scope scope)
+	typer_scope_enter(Typer self, Scope* scope)
 	{
 		mn::buf_push(self->scope_stack, scope);
 	}
@@ -34,7 +34,7 @@ namespace zay
 		mn::buf_pop(self->scope_stack);
 	}
 
-	inline static Scope
+	inline static Scope*
 	typer_scope(Typer self)
 	{
 		return mn::buf_top(self->scope_stack);
@@ -720,7 +720,7 @@ namespace zay
 		assert(stmt->kind == Stmt::KIND_RETURN);
 		Type* ret = typer_expr_resolve(self, stmt->return_stmt);
 
-		Scope scope = typer_scope(self);
+		auto scope = typer_scope(self);
 		Type* expected = scope_ret(scope);
 		if(expected == nullptr)
 		{
@@ -775,7 +775,7 @@ namespace zay
 	{
 		assert(stmt->kind == Stmt::KIND_FOR);
 
-		Scope scope = src_scope_new(self->src, stmt, typer_scope(self), true, nullptr);
+		auto scope = src_scope_new(self->src, stmt, typer_scope(self), true, nullptr);
 		typer_scope_enter(self, scope);
 
 		if(stmt->for_stmt.init_stmt)
@@ -911,7 +911,7 @@ namespace zay
 	{
 		assert(stmt->kind == Stmt::KIND_BLOCK);
 
-		Scope scope = src_scope_new(self->src, stmt, typer_scope(self), false, nullptr);
+		auto scope = src_scope_new(self->src, stmt, typer_scope(self), false, nullptr);
 
 		typer_scope_enter(self, scope);
 		for (Stmt* s : stmt->block_stmt)
@@ -1139,7 +1139,7 @@ namespace zay
 		Typer self = mn::alloc<ITyper>();
 		self->mode = mode;
 		self->src = src;
-		self->scope_stack = mn::buf_new<Scope>();
+		self->scope_stack = mn::buf_new<Scope*>();
 		self->global_scope = src_scope_new(self->src, nullptr, nullptr, false, nullptr);
 		self->unnamed_id = 0;
 

@@ -4,10 +4,10 @@
 
 namespace zay
 {
-	Scope
-	scope_new(Scope parent, bool inside_loop, Type* ret)
+	Scope*
+	scope_new(Scope* parent, bool inside_loop, Type* ret)
 	{
-		Scope self = mn::alloc<IScope>();
+		Scope* self = mn::alloc<Scope>();
 		self->parent = parent;
 		self->syms = mn::buf_new<Sym*>();
 		self->table = mn::map_new<const char*, Sym*>();
@@ -17,7 +17,7 @@ namespace zay
 	}
 
 	void
-	scope_free(Scope self)
+	scope_free(Scope* self)
 	{
 		destruct(self->syms);
 		mn::map_free(self->table);
@@ -25,7 +25,7 @@ namespace zay
 	}
 
 	Sym*
-	scope_has(Scope self, const char* name)
+	scope_has(Scope* self, const char* name)
 	{
 		if(auto it = mn::map_lookup(self->table, name))
 			return it->value;
@@ -33,9 +33,9 @@ namespace zay
 	}
 
 	Sym*
-	scope_find(Scope self, const char* name)
+	scope_find(Scope* self, const char* name)
 	{
-		for(Scope it = self; it != nullptr; it = it->parent)
+		for(auto it = self; it != nullptr; it = it->parent)
 		{
 			if(auto sym = scope_has(it, name))
 				return sym;
@@ -44,7 +44,7 @@ namespace zay
 	}
 
 	Sym*
-	scope_add(Scope self, Sym* sym)
+	scope_add(Scope* self, Sym* sym)
 	{
 		mn::buf_push(self->syms, sym);
 		mn::map_insert(self->table, sym->name, sym);
@@ -52,9 +52,9 @@ namespace zay
 	}
 
 	bool
-	scope_inside_loop(Scope self)
+	scope_inside_loop(Scope* self)
 	{
-		for(Scope it = self; it != nullptr; it = it->parent)
+		for(auto it = self; it != nullptr; it = it->parent)
 		{
 			if (it->inside_loop)
 				return true;
@@ -63,9 +63,9 @@ namespace zay
 	}
 
 	Type*
-	scope_ret(Scope self)
+	scope_ret(Scope* self)
 	{
-		for(Scope it = self; it != nullptr; it = it->parent)
+		for(auto it = self; it != nullptr; it = it->parent)
 		{
 			if (it->ret)
 				return it->ret;
