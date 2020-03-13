@@ -144,7 +144,7 @@ namespace zay
 		};
 
 		KIND kind;
-		Sym sym;
+		Sym* sym;
 		union
 		{
 			struct { Type* base; } ptr;
@@ -167,7 +167,7 @@ namespace zay
 	type_func(const Func_Sign& sign);
 
 	ZAY_EXPORT Type*
-	type_incomplete(Sym sym);
+	type_incomplete(Sym* sym);
 
 	ZAY_EXPORT void
 	type_alias_complete(Type* self, Type* alias);

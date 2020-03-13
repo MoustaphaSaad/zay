@@ -97,7 +97,7 @@ namespace zay
 	}
 
 	Type*
-	type_incomplete(Sym sym)
+	type_incomplete(Sym* sym)
 	{
 		auto self = mn::alloc<Type>();
 		self->kind = Type::KIND_INCOMPLETE;

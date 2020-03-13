@@ -12,8 +12,8 @@ namespace zay
 	struct IScope
 	{
 		Scope parent;
-		mn::Buf<Sym> syms;
-		mn::Map<const char*, Sym> table;
+		mn::Buf<Sym*> syms;
+		mn::Map<const char*, Sym*> table;
 		bool inside_loop;
 		Type* ret;
 	};
@@ -30,14 +30,14 @@ namespace zay
 		scope_free(self);
 	}
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	scope_has(Scope self, const char* name);
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	scope_find(Scope self, const char* name);
 
-	ZAY_EXPORT Sym
-	scope_add(Scope self, Sym sym);
+	ZAY_EXPORT Sym*
+	scope_add(Scope self, Sym* sym);
 
 	ZAY_EXPORT bool
 	scope_inside_loop(Scope self);

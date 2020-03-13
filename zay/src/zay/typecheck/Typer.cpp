@@ -8,7 +8,7 @@
 namespace zay
 {
 	inline static void
-	typer_sym_resolve(Typer self, Sym sym);
+	typer_sym_resolve(Typer self, Sym* sym);
 
 	inline static Type*
 	typer_expr_resolve(Typer self, Expr* expr);
@@ -20,7 +20,7 @@ namespace zay
 	typer_stmt_block_resolve(Typer self, Stmt* stmt);
 
 	inline static void
-	typer_type_complete(Typer self, Sym sym);
+	typer_type_complete(Typer self, Sym* sym);
 
 	inline static void
 	typer_scope_enter(Typer self, Scope scope)
@@ -41,10 +41,10 @@ namespace zay
 	}
 
 	inline static void
-	typer_sym(Typer self, Sym sym)
+	typer_sym(Typer self, Sym* sym)
 	{
-		Scope scope = typer_scope(self);
-		if(Sym old = scope_has(scope, sym->name))
+		auto scope = typer_scope(self);
+		if(auto old = scope_has(scope, sym->name))
 		{
 			Tkn new_tkn = sym_tkn(sym);
 			Tkn old_tkn = sym_tkn(old);
@@ -88,7 +88,7 @@ namespace zay
 		}
 	}
 
-	inline static Sym
+	inline static Sym*
 	typer_sym_by_name(Typer self, const char* name)
 	{
 		return scope_find(typer_scope(self), name);
@@ -134,7 +134,7 @@ namespace zay
 				//and we should find it in the symbol table
 				if(type_is_same(res, type_void))
 				{
-					if(Sym sym = typer_sym_by_name(self, atom.named.str))
+					if(auto sym = typer_sym_by_name(self, atom.named.str))
 					{
 						//so we make sure we did resolve this symbol
 						typer_sym_resolve(self, sym);
@@ -177,7 +177,7 @@ namespace zay
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl* unnamed_decl = decl_type(unnamed_id, clone(sign));
 					mn::buf_push(self->src->ast.decls, unnamed_decl);
-					Sym unnamed_sym = sym_type(unnamed_decl);
+					auto unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
 
@@ -217,7 +217,7 @@ namespace zay
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl* unnamed_decl = decl_type(unnamed_id, clone(sign));
 					mn::buf_push(self->src->ast.decls, unnamed_decl);
-					Sym unnamed_sym = sym_type(unnamed_decl);
+					auto unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
 
@@ -257,7 +257,7 @@ namespace zay
 					Tkn unnamed_id = tkn_anonymous_id(str_intern(self->src->str_table, name));
 					Decl* unnamed_decl = decl_type(unnamed_id, clone(sign));
 					mn::buf_push(self->src->ast.decls, unnamed_decl);
-					Sym unnamed_sym = sym_type(unnamed_decl);
+					auto unnamed_sym = sym_type(unnamed_decl);
 					scope_add(self->global_scope, unnamed_sym);
 					typer_sym_resolve(self, unnamed_sym);
 
@@ -305,7 +305,7 @@ namespace zay
 	}
 
 	inline static void
-	typer_type_complete(Typer self, Sym sym)
+	typer_type_complete(Typer self, Sym* sym)
 	{
 		Type* type = sym->type;
 		if(type->kind == Type::KIND_COMPLETING)
@@ -319,7 +319,7 @@ namespace zay
 		}
 
 		type->kind = Type::KIND_COMPLETING;
-		if(sym->kind == ISym::KIND_TYPE)
+		if(sym->kind == Sym::KIND_TYPE)
 		{
 			Decl* decl = sym->type_sym;
 			sym->type = typer_type_sign_resolve(self, decl->type_decl, sym->type);
@@ -345,7 +345,7 @@ namespace zay
 		case Tkn::KIND_KEYWORD_TRUE:
 			return type_bool;
 		case Tkn::KIND_ID:
-			if(Sym sym = typer_sym_by_name(self, expr->atom.str))
+			if(auto sym = typer_sym_by_name(self, expr->atom.str))
 			{
 				typer_sym_resolve(self, sym);
 				return sym->type;
@@ -818,7 +818,7 @@ namespace zay
 			if (i < stmt->var_stmt.exprs.count)
 				e = stmt->var_stmt.exprs[i];
 
-			Sym s = sym_var(stmt->var_stmt.ids[i], nullptr, stmt->var_stmt.type, e);
+			auto s = sym_var(stmt->var_stmt.ids[i], nullptr, stmt->var_stmt.type, e);
 
 			if(infer)
 			{
@@ -851,7 +851,7 @@ namespace zay
 			}
 
 			typer_type_complete(self, s);
-			s->state = ISym::STATE_RESOLVED;
+			s->state = Sym::STATE_RESOLVED;
 			typer_sym(self, s);
 		}
 		return type_void;
@@ -970,9 +970,9 @@ namespace zay
 
 
 	inline static Type*
-	typer_decl_func_resolve(Typer self, Sym sym)
+	typer_decl_func_resolve(Typer self, Sym* sym)
 	{
-		assert(sym->kind == ISym::KIND_FUNC);
+		assert(sym->kind == Sym::KIND_FUNC);
 		Decl* decl = sym->func_sym;
 
 		Func_Sign sign = func_sign_new();
@@ -988,12 +988,12 @@ namespace zay
 	}
 
 	inline static void
-	typer_body_func_resolve(Typer self, Sym sym)
+	typer_body_func_resolve(Typer self, Sym* sym)
 	{
-		assert(sym->kind == ISym::KIND_FUNC);
+		assert(sym->kind == Sym::KIND_FUNC);
 		Decl* decl = sym->func_sym;
 
-		Scope scope = src_scope_new(self->src, decl, typer_scope(self), false, sym->type->func.ret);
+		auto scope = src_scope_new(self->src, decl, typer_scope(self), false, sym->type->func.ret);
 
 		typer_scope_enter(self, scope);
 
@@ -1004,9 +1004,9 @@ namespace zay
 			Type* type = sym->type->func.args[i];
 			for(const Tkn& id: arg.ids)
 			{
-				Sym v = sym_var(id, nullptr, arg.type, nullptr);
+				auto v = sym_var(id, nullptr, arg.type, nullptr);
 				v->type = type;
-				v->state = ISym::STATE_RESOLVED;
+				v->state = Sym::STATE_RESOLVED;
 				typer_sym(self, v);
 			}
 			i += arg.ids.count;
@@ -1027,9 +1027,9 @@ namespace zay
 	}
 
 	inline static Type*
-	typer_decl_var_resolve(Typer self, Sym sym)
+	typer_decl_var_resolve(Typer self, Sym* sym)
 	{
-		assert(sym->kind == ISym::KIND_VAR);
+		assert(sym->kind == Sym::KIND_VAR);
 		bool infer = sym->var_sym.type.count == 0;
 
 		Type* type = type_void;
@@ -1069,59 +1069,59 @@ namespace zay
 		}
 
 		typer_type_complete(self, sym);
-		sym->state = ISym::STATE_RESOLVED;
+		sym->state = Sym::STATE_RESOLVED;
 		return sym->type;
 	}
 
 	inline static void
-	typer_sym_resolve(Typer self, Sym sym)
+	typer_sym_resolve(Typer self, Sym* sym)
 	{
-		if(sym->state == ISym::STATE_RESOLVED)
+		if(sym->state == Sym::STATE_RESOLVED)
 		{
 			return;
 		}
-		else if(sym->state == ISym::STATE_RESOLVING)
+		else if(sym->state == Sym::STATE_RESOLVING)
 		{
 			Tkn id = sym_tkn(sym);
 			src_err(self->src, err_tkn(id, mn::strf("'{}' symbol cyclic dependency", id.str)));
 			return;
 		}
 
-		assert(sym->state == ISym::STATE_UNRESOLVED);
-		sym->state = ISym::STATE_RESOLVING;
+		assert(sym->state == Sym::STATE_UNRESOLVED);
+		sym->state = Sym::STATE_RESOLVING;
 		switch(sym->kind)
 		{
-		case ISym::KIND_STRUCT:
-		case ISym::KIND_UNION:
-		case ISym::KIND_ENUM:
-		case ISym::KIND_TYPE:
+		case Sym::KIND_STRUCT:
+		case Sym::KIND_UNION:
+		case Sym::KIND_ENUM:
+		case Sym::KIND_TYPE:
 			sym->type = type_intern_incomplete(self->src->type_table, type_incomplete(sym));
 			break;
 
-		case ISym::KIND_VAR:
+		case Sym::KIND_VAR:
 			typer_decl_var_resolve(self, sym);
 			break;
-		case ISym::KIND_FUNC:
+		case Sym::KIND_FUNC:
 			sym->type = typer_decl_func_resolve(self, sym);
 			break;
 
 		default:
 			break;
 		}
-		sym->state = ISym::STATE_RESOLVED;
+		sym->state = Sym::STATE_RESOLVED;
 
 		switch(sym->kind)
 		{
-		case ISym::KIND_STRUCT:
-		case ISym::KIND_UNION:
-		case ISym::KIND_ENUM:
-		case ISym::KIND_TYPE:
+		case Sym::KIND_STRUCT:
+		case Sym::KIND_UNION:
+		case Sym::KIND_ENUM:
+		case Sym::KIND_TYPE:
 			typer_type_complete(self, sym);
 			break;
-		case ISym::KIND_FUNC:
+		case Sym::KIND_FUNC:
 			typer_body_func_resolve(self, sym);
 			break;
-		case ISym::KIND_VAR:
+		case Sym::KIND_VAR:
 			//do nothing
 			break;
 		default:
@@ -1162,7 +1162,7 @@ namespace zay
 		if (self->mode == ITyper::MODE_EXE)
 		{
 			const char* main = str_intern(self->src->str_table, "main");
-			Sym main_sym = nullptr;
+			Sym* main_sym = nullptr;
 			for (size_t i = 0; i < self->global_scope->syms.count; ++i)
 			{
 				if (self->global_scope->syms[i]->name == main)

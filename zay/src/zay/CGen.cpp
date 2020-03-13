@@ -41,7 +41,7 @@ namespace zay
 		buf_pop(self->scope_stack);
 	}
 
-	inline static Sym
+	inline static Sym*
 	cgen_sym(CGen self, const char* name)
 	{
 		return scope_find(cgen_scope(self), name);
@@ -756,9 +756,9 @@ namespace zay
 
 	//symbols
 	inline static void
-	cgen_sym_func_gen(CGen self, Sym sym)
+	cgen_sym_func_gen(CGen self, Sym* sym)
 	{
-		assert(sym->kind == ISym::KIND_FUNC);
+		assert(sym->kind == Sym::KIND_FUNC);
 		Decl* decl = sym->func_sym;
 		
 		mn::print_to(
@@ -795,9 +795,9 @@ namespace zay
 	}
 
 	inline static void
-	cgen_sym_var_gen(CGen self, Sym sym)
+	cgen_sym_var_gen(CGen self, Sym* sym)
 	{
-		assert(sym->kind == ISym::KIND_VAR);
+		assert(sym->kind == Sym::KIND_VAR);
 		mn::print_to(self->out, "{}", cgen_write_field(self, sym->type, sym->name));
 		if(sym->var_sym.expr)
 		{
@@ -808,26 +808,26 @@ namespace zay
 	}
 
 	inline static void
-	cgen_sym_type_gen(CGen self, Sym sym)
+	cgen_sym_type_gen(CGen self, Sym* sym)
 	{
-		assert(sym->kind == ISym::KIND_TYPE);
+		assert(sym->kind == Sym::KIND_TYPE);
 		mn::print_to(self->out, "typedef ");
 		cgen_write_type(self, sym->type, sym->name, sym->name);
 		mn::print_to(self->out, ";");
 	}
 
 	inline static void
-	cgen_sym_gen(CGen self, Sym sym)
+	cgen_sym_gen(CGen self, Sym* sym)
 	{
 		switch(sym->kind)
 		{
-		case ISym::KIND_FUNC:
+		case Sym::KIND_FUNC:
 			cgen_sym_func_gen(self, sym);
 			break;
-		case ISym::KIND_VAR:
+		case Sym::KIND_VAR:
 			cgen_sym_var_gen(self, sym);
 			break;
-		case ISym::KIND_TYPE:
+		case Sym::KIND_TYPE:
 			cgen_sym_type_gen(self, sym);
 			break;
 		default:

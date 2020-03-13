@@ -9,8 +9,7 @@
 namespace zay
 {
 	struct Type;
-	typedef struct ISym* Sym;
-	struct ISym
+	struct Sym
 	{
 		enum KIND
 		{
@@ -53,59 +52,59 @@ namespace zay
 	};
 
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	sym_struct(Decl* d);
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	sym_union(Decl* d);
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	sym_enum(Decl* d);
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	sym_var(const Tkn& id, Decl* decl, const Type_Sign& type, Expr* expr);
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	sym_func(Decl* d);
 
-	ZAY_EXPORT Sym
+	ZAY_EXPORT Sym*
 	sym_type(Decl* d);
 
 	ZAY_EXPORT void
-	sym_free(Sym self);
+	sym_free(Sym* self);
 
 	inline static void
-	destruct(Sym self)
+	destruct(Sym* self)
 	{
 		sym_free(self);
 	}
 
 	inline static Tkn
-	sym_tkn(Sym self)
+	sym_tkn(Sym* self)
 	{
 		switch(self->kind)
 		{
-		case ISym::KIND_STRUCT: return self->struct_sym->name;
-		case ISym::KIND_UNION: return self->union_sym->name;
-		case ISym::KIND_ENUM: return self->enum_sym->name;
-		case ISym::KIND_VAR: return self->var_sym.id;
-		case ISym::KIND_FUNC: return self->func_sym->name;
-		case ISym::KIND_TYPE: return self->type_sym->name;
+		case Sym::KIND_STRUCT: return self->struct_sym->name;
+		case Sym::KIND_UNION: return self->union_sym->name;
+		case Sym::KIND_ENUM: return self->enum_sym->name;
+		case Sym::KIND_VAR: return self->var_sym.id;
+		case Sym::KIND_FUNC: return self->func_sym->name;
+		case Sym::KIND_TYPE: return self->type_sym->name;
 		default: assert(false && "unreachable"); return Tkn{};
 		}
 	}
 
 	inline static Decl*
-	sym_decl(Sym self)
+	sym_decl(Sym* self)
 	{
 		switch(self->kind)
 		{
-		case ISym::KIND_STRUCT: return self->struct_sym;
-		case ISym::KIND_UNION: return self->union_sym;
-		case ISym::KIND_ENUM: return self->enum_sym;
-		case ISym::KIND_VAR: return self->var_sym.decl;
-		case ISym::KIND_FUNC: return self->func_sym;
-		case ISym::KIND_TYPE: return self->type_sym;
+		case Sym::KIND_STRUCT: return self->struct_sym;
+		case Sym::KIND_UNION: return self->union_sym;
+		case Sym::KIND_ENUM: return self->enum_sym;
+		case Sym::KIND_VAR: return self->var_sym.decl;
+		case Sym::KIND_FUNC: return self->func_sym;
+		case Sym::KIND_TYPE: return self->type_sym;
 		default: assert(false && "unreachable"); return nullptr;
 		}
 	}

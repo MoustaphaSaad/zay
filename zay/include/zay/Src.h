@@ -49,7 +49,7 @@ namespace zay
 		// Type Interning table to hold all the types of this complication unit
 		Type_Intern type_table;
 		// Reachable symbols
-		mn::Buf<Sym> reachable_syms;
+		mn::Buf<Sym*> reachable_syms;
 	};
 
 	ZAY_EXPORT Src*
