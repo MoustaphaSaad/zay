@@ -26,19 +26,19 @@ namespace zay
 	inline static Scope*
 	cgen_scope(CGen& self)
 	{
-		return buf_top(self.scope_stack);
+		return mn::buf_top(self.scope_stack);
 	}
 
 	inline static void
 	cgen_scope_enter(CGen& self, Scope* scope)
 	{
-		buf_push(self.scope_stack, scope);
+		mn::buf_push(self.scope_stack, scope);
 	}
 
 	inline static void
 	cgen_scope_leave(CGen& self)
 	{
-		buf_pop(self.scope_stack);
+		mn::buf_pop(self.scope_stack);
 	}
 
 	inline static Sym*
