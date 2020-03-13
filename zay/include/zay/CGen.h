@@ -11,8 +11,7 @@
 
 namespace zay
 {
-	typedef struct ICGen* CGen;
-	struct ICGen
+	struct CGen
 	{
 		size_t indent;
 		Src *src;
@@ -24,23 +23,23 @@ namespace zay
 	cgen_new(Src *src);
 
 	ZAY_EXPORT void
-	cgen_free(CGen self);
+	cgen_free(CGen& self);
 
 	inline static void
-	destruct(CGen self)
+	destruct(CGen& self)
 	{
 		cgen_free(self);
 	}
 
 	ZAY_EXPORT void
-	cgen_gen(CGen self);
+	cgen_gen(CGen& self);
 
 	inline static mn::Str
 	src_c(Src *src, mn::Allocator allocator = mn::allocator_top())
 	{
 		CGen self = cgen_new(src);
 		cgen_gen(self);
-		mn::Str res = mn::str_from_c(mn::memory_stream_ptr(self->out), allocator);
+		mn::Str res = mn::str_from_c(mn::memory_stream_ptr(self.out), allocator);
 		cgen_free(self);
 		return res;
 	}
