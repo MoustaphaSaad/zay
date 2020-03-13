@@ -337,8 +337,7 @@ namespace zay
 		return false;
 	}
 
-	typedef struct IType_Intern* Type_Intern;
-	struct IType_Intern
+	struct Type_Intern
 	{
 		mn::Buf<Type*> types;
 		mn::Map<Type*, Type*> ptr_table;
@@ -350,23 +349,23 @@ namespace zay
 	type_intern_new();
 
 	ZAY_EXPORT void
-	type_intern_free(Type_Intern self);
+	type_intern_free(Type_Intern& self);
 
 	inline static void
-	destruct(Type_Intern self)
+	destruct(Type_Intern& self)
 	{
 		type_intern_free(self);
 	}
 
 	ZAY_EXPORT Type*
-	type_intern_ptr(Type_Intern self, Type* base);
+	type_intern_ptr(Type_Intern& self, Type* base);
 
 	ZAY_EXPORT Type*
-	type_intern_array(Type_Intern self, const Array_Sign& sign);
+	type_intern_array(Type_Intern& self, const Array_Sign& sign);
 
 	ZAY_EXPORT Type*
-	type_intern_func(Type_Intern self, Func_Sign& func);
+	type_intern_func(Type_Intern& self, Func_Sign& func);
 
 	ZAY_EXPORT Type*
-	type_intern_incomplete(Type_Intern self, Type* type);
+	type_intern_incomplete(Type_Intern& self, Type* type);
 }

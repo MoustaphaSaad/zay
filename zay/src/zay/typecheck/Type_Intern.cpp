@@ -185,66 +185,65 @@ namespace zay
 	Type_Intern
 	type_intern_new()
 	{
-		Type_Intern self = mn::alloc<IType_Intern>();
-		self->types = mn::buf_new<Type*>();
-		self->ptr_table = mn::map_new<Type*, Type*>();
-		self->array_table = mn::map_new<Array_Sign, Type*, Array_Sign_Hasher>();
-		self->func_table = mn::map_new<Func_Sign, Type*, Func_Sign_Hasher>();
+		Type_Intern self{};
+		self.types = mn::buf_new<Type*>();
+		self.ptr_table = mn::map_new<Type*, Type*>();
+		self.array_table = mn::map_new<Array_Sign, Type*, Array_Sign_Hasher>();
+		self.func_table = mn::map_new<Func_Sign, Type*, Func_Sign_Hasher>();
 		return self;
 	}
 
 	void
-	type_intern_free(Type_Intern self)
+	type_intern_free(Type_Intern& self)
 	{
-		destruct(self->types);
-		mn::map_free(self->ptr_table);
-		mn::map_free(self->array_table);
-		mn::map_free(self->func_table);
-		mn::free(self);
+		destruct(self.types);
+		mn::map_free(self.ptr_table);
+		mn::map_free(self.array_table);
+		mn::map_free(self.func_table);
 	}
 
 	Type*
-	type_intern_ptr(Type_Intern self, Type* base)
+	type_intern_ptr(Type_Intern& self, Type* base)
 	{
-		if(auto it = mn::map_lookup(self->ptr_table, base))
+		if(auto it = mn::map_lookup(self.ptr_table, base))
 			return it->value;
 
 		Type* new_type = type_ptr(base);
-		mn::buf_push(self->types, new_type);
-		mn::map_insert(self->ptr_table, base, new_type);
+		mn::buf_push(self.types, new_type);
+		mn::map_insert(self.ptr_table, base, new_type);
 		return new_type;
 	}
 
 	Type*
-	type_intern_array(Type_Intern self, const Array_Sign& sign)
+	type_intern_array(Type_Intern& self, const Array_Sign& sign)
 	{
-		if(auto it = mn::map_lookup(self->array_table, sign))
+		if(auto it = mn::map_lookup(self.array_table, sign))
 			return it->value;
 
 		Type* new_type = type_array(sign);
-		mn::buf_push(self->types, new_type);
-		mn::map_insert(self->array_table, sign, new_type);
+		mn::buf_push(self.types, new_type);
+		mn::map_insert(self.array_table, sign, new_type);
 		return new_type;
 	}
 
 	Type*
-	type_intern_func(Type_Intern self, Func_Sign& func)
+	type_intern_func(Type_Intern& self, Func_Sign& func)
 	{
-		if(auto it = mn::map_lookup(self->func_table, func))
+		if(auto it = mn::map_lookup(self.func_table, func))
 		{
 			func_sign_free(func);
 			return it->value;
 		}
 
 		Type* new_type = type_func(func);
-		mn::buf_push(self->types, new_type);
-		mn::map_insert(self->func_table, func, new_type);
+		mn::buf_push(self.types, new_type);
+		mn::map_insert(self.func_table, func, new_type);
 		return new_type;
 	}
 
 	Type*
-	type_intern_incomplete(Type_Intern self, Type* type)
+	type_intern_incomplete(Type_Intern& self, Type* type)
 	{
-		return *mn::buf_push(self->types, type);
+		return *mn::buf_push(self.types, type);
 	}
 }
