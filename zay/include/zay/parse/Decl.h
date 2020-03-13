@@ -46,7 +46,7 @@ namespace zay
 			KIND_NONE,
 			KIND_VAR,
 			KIND_FUNC,
-			KIND_TYPE
+			KIND_TYPE,
 		};
 
 		KIND kind;

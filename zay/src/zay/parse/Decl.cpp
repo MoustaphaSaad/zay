@@ -7,7 +7,7 @@ namespace zay
 	Decl*
 	decl_var(const Var& v)
 	{
-		auto self = mn::alloc<Decl>();
+		auto self = mn::alloc_zerod<Decl>();
 		self->kind = Decl::KIND_VAR;
 		//let's put the first id as the name of this declaration
 		if(v.ids.count > 0)
@@ -19,7 +19,7 @@ namespace zay
 	Decl*
 	decl_func(const Tkn& name, const mn::Buf<Arg>& args, const Type_Sign& ret_type, Stmt* body)
 	{
-		auto self = mn::alloc<Decl>();
+		auto self = mn::alloc_zerod<Decl>();
 		self->kind = Decl::KIND_FUNC;
 		self->name = name;
 		self->func_decl.args = args;
@@ -31,7 +31,7 @@ namespace zay
 	Decl*
 	decl_type(const Tkn& name, const Type_Sign& type)
 	{
-		auto self = mn::alloc<Decl>();
+		auto self = mn::alloc_zerod<Decl>();
 		self->kind = Decl::KIND_TYPE;
 		self->name = name;
 		self->type_decl = type;

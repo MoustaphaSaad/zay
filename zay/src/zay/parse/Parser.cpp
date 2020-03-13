@@ -99,7 +99,7 @@ namespace zay
 			t.kind == Tkn::KIND_KEYWORD_UINT64 ||
 			t.kind == Tkn::KIND_KEYWORD_FLOAT32 ||
 			t.kind == Tkn::KIND_KEYWORD_FLOAT64 ||
-			t.kind == Tkn::KIND_STRING)
+			t.kind == Tkn::KIND_KEYWORD_STRING)
 		{
 			return true;
 		}
@@ -132,7 +132,7 @@ namespace zay
 				tkn.kind == Tkn::KIND_KEYWORD_UINT64 ||
 				tkn.kind == Tkn::KIND_KEYWORD_FLOAT32 ||
 				tkn.kind == Tkn::KIND_KEYWORD_FLOAT64 ||
-				tkn.kind == Tkn::KIND_STRING ||
+				tkn.kind == Tkn::KIND_KEYWORD_STRING ||
 				tkn.kind == Tkn::KIND_ID)
 			{
 				if (parser_is_type(self, tkn) == false)
@@ -335,8 +335,10 @@ namespace zay
 		if(parser_eat_kind(self, Tkn::KIND_COLON))
 			ret_type = parser_type(self);
 
-		//now that we have argument list we need to parse the body
-		Stmt* body = parser_stmt_block(self);
+		//now that we have argument list we need to parse the body if it exists
+		Stmt* body = nullptr;
+		if(parser_look_kind(self, Tkn::KIND_OPEN_CURLY))
+			body = parser_stmt_block(self);
 		return decl_func(name, args, ret_type, body);
 	}
 

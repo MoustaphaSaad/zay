@@ -40,7 +40,7 @@ namespace zay
 		return mn::buf_top(self.scope_stack);
 	}
 
-	inline static void
+	inline static Sym*
 	typer_sym(Typer& self, Sym* sym)
 	{
 		auto scope = typer_scope(self);
@@ -56,9 +56,11 @@ namespace zay
 			);
 			src_err(self.src, err_tkn(new_tkn, msg));
 			sym_free(sym);
+			return nullptr;
 		}
 
 		scope_add(scope, sym);
+		return sym;
 	}
 
 	inline static void
@@ -1012,15 +1014,19 @@ namespace zay
 			i += arg.ids.count;
 		}
 
-		typer_stmt_block_resolve(self, decl->func_decl.body);
-
-		if (type_is_same(sym->type->func.ret, type_void) == false &&
-			typer_is_terminating(self, decl->func_decl.body) == false)
+		// typecheck the function body if it exists
+		if (decl->func_decl.body)
 		{
-			src_err(
-				self.src,
-				err_decl(decl, mn::strf("missing return at the end of the function"))
-			);
+			typer_stmt_block_resolve(self, decl->func_decl.body);
+
+			if (type_is_same(sym->type->func.ret, type_void) == false &&
+				typer_is_terminating(self, decl->func_decl.body) == false)
+			{
+				src_err(
+					self.src,
+					err_decl(decl, mn::strf("missing return at the end of the function"))
+				);
+			}
 		}
 
 		typer_scope_leave(self);

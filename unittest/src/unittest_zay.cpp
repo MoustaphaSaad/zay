@@ -1185,3 +1185,12 @@ __unnamed_struct_0 color = (__unnamed_struct_0){
 };)CODE";
 	CHECK(answer == expected);
 }
+
+TEST_CASE("[zay]: function prototypes")
+{
+	auto answer = cgen(R"CODE(
+		func puts(str: string): int32
+	)CODE");
+	const char* expected = R"CODE(int32_t puts(ZayString str);)CODE";
+	CHECK(answer == expected);
+}

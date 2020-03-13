@@ -73,7 +73,7 @@ namespace zay
 			mn::Str res = mn::str_tmpf("(*{})(", name);
 			if(type->func.args.count == 0)
 			{
-				mn::str_push(res, "ZayVoid");
+				mn::str_push(res, "void");
 			}
 			else
 			{
@@ -787,11 +787,19 @@ namespace zay
 				}
 			}
 		}
-		mn::print_to(self.out, ") ");
+		mn::print_to(self.out, ")");
 
-		cgen_scope_enter(self, src_scope_of(self.src, decl));
-		cgen_stmt_block_gen(self, decl->func_decl.body);
-		cgen_scope_leave(self);
+		if(decl->func_decl.body)
+		{
+			mn::print_to(self.out, " ");
+			cgen_scope_enter(self, src_scope_of(self.src, decl));
+			cgen_stmt_block_gen(self, decl->func_decl.body);
+			cgen_scope_leave(self);
+		}
+		else
+		{
+			mn::print_to(self.out, ";");
+		}
 	}
 
 	inline static void
