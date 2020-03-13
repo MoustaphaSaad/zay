@@ -56,7 +56,7 @@ namespace zay
 	}
 
 	inline static mn::Str
-	cgen_write_field(CGen self, Type type, const mn::Str& name)
+	cgen_write_field(CGen self, Type* type, const mn::Str& name)
 	{
 		mn::Rune c = 0;
 		if (name.count > 0)
@@ -64,11 +64,11 @@ namespace zay
 
 		switch(type->kind)
 		{
-		case IType::KIND_PTR:
+		case Type::KIND_PTR:
 			return cgen_write_field(self, type->ptr.base, cdecl_paren(mn::str_tmpf("*{}", name), c));
-		case IType::KIND_ARRAY:
+		case Type::KIND_ARRAY:
 			return cgen_write_field(self, type->array.base, cdecl_paren(mn::str_tmpf("{}[{}]", name, type->array.count), c));
-		case IType::KIND_FUNC:
+		case Type::KIND_FUNC:
 		{
 			mn::Str res = mn::str_tmpf("(*{})(", name);
 			if(type->func.args.count == 0)
@@ -87,89 +87,89 @@ namespace zay
 			res = mn::strf(res, ")");
 			return cgen_write_field(self, type->func.ret, res);
 		}
-		case IType::KIND_VOID:
+		case Type::KIND_VOID:
 			if (name.count)
 				return mn::str_tmpf("void {}", name);
 			else
 				return mn::str_tmpf("void");
-		case IType::KIND_BOOL:
+		case Type::KIND_BOOL:
 			if (name.count)
 				return mn::str_tmpf("bool {}", name);
 			else
 				return mn::str_tmpf("bool");
-		case IType::KIND_INT:
+		case Type::KIND_INT:
 			if (name.count)
 				return mn::str_tmpf("ZayInt {}", name);
 			else
 				return mn::str_tmpf("ZayInt");
-		case IType::KIND_UINT:
+		case Type::KIND_UINT:
 			if (name.count)
 				return mn::str_tmpf("ZayUint {}", name);
 			else
 				return mn::str_tmpf("ZayUint");
-		case IType::KIND_INT8:
+		case Type::KIND_INT8:
 			if (name.count)
 				return mn::str_tmpf("int8_t {}", name);
 			else
 				return mn::str_tmpf("int8_t");
-		case IType::KIND_UINT8:
+		case Type::KIND_UINT8:
 			if (name.count)
 				return mn::str_tmpf("uint8_t {}", name);
 			else
 				return mn::str_tmpf("uint8_t");
-		case IType::KIND_INT16:
+		case Type::KIND_INT16:
 			if (name.count)
 				return mn::str_tmpf("int16_t {}", name);
 			else
 				return mn::str_tmpf("int16_t");
-		case IType::KIND_UINT16:
+		case Type::KIND_UINT16:
 			if (name.count)
 				return mn::str_tmpf("uint16_t {}", name);
 			else
 				return mn::str_tmpf("uint16_t");
-		case IType::KIND_INT32:
+		case Type::KIND_INT32:
 			if (name.count)
 				return mn::str_tmpf("int32_t {}", name);
 			else
 				return mn::str_tmpf("int32_t");
-		case IType::KIND_UINT32:
+		case Type::KIND_UINT32:
 			if (name.count)
 				return mn::str_tmpf("uint32_t {}", name);
 			else
 				return mn::str_tmpf("uint32_t");
-		case IType::KIND_INT64:
+		case Type::KIND_INT64:
 			if (name.count)
 				return mn::str_tmpf("int64_t {}", name);
 			else
 				return mn::str_tmpf("int64_t");
-		case IType::KIND_UINT64:
+		case Type::KIND_UINT64:
 			if (name.count)
 				return mn::str_tmpf("uint64_t {}", name);
 			else
 				return mn::str_tmpf("uint64_t");
-		case IType::KIND_FLOAT32:
+		case Type::KIND_FLOAT32:
 			if (name.count)
 				return mn::str_tmpf("float {}", name);
 			else
 				return mn::str_tmpf("float");
-		case IType::KIND_FLOAT64:
+		case Type::KIND_FLOAT64:
 			if (name.count)
 				return mn::str_tmpf("double {}", name);
 			else
 				return mn::str_tmpf("double");
-		case IType::KIND_STRING:
+		case Type::KIND_STRING:
 			if (name.count)
 				return mn::str_tmpf("ZayString {}", name);
 			else
 				return mn::str_tmpf("ZayString");
-		case IType::KIND_STRUCT:
-		case IType::KIND_UNION:
-		case IType::KIND_ENUM:
+		case Type::KIND_STRUCT:
+		case Type::KIND_UNION:
+		case Type::KIND_ENUM:
 			if (name.count)
 				return mn::str_tmpf("{} {}", type->sym->name, name);
 			else
 				return mn::str_tmpf("{}", type->sym->name);
-		case IType::KIND_ALIAS:
+		case Type::KIND_ALIAS:
 			return cgen_write_field(self, type->alias, name);
 		default:
 			return mn::str_tmpf("<UNDEFINED TYPE>");
@@ -177,13 +177,13 @@ namespace zay
 	}
 
 	inline static mn::Str
-	cgen_write_field(CGen self, Type type, const char* name)
+	cgen_write_field(CGen self, Type* type, const char* name)
 	{
 		return cgen_write_field(self, type, mn::str_lit(name));
 	}
 
 	inline static void
-	cgen_write_type(CGen self, Type type, const char* type_name, const mn::Str& name)
+	cgen_write_type(CGen self, Type* type, const char* type_name, const mn::Str& name)
 	{
 		auto c = 0;
 		if (name.count > 0)
@@ -191,13 +191,13 @@ namespace zay
 
 		switch(type->kind)
 		{
-		case IType::KIND_PTR:
+		case Type::KIND_PTR:
 			cgen_write_type(self, type->ptr.base, type_name, cdecl_paren(mn::str_tmpf("*{}", name), c));
 			break;
-		case IType::KIND_ARRAY:
+		case Type::KIND_ARRAY:
 			cgen_write_type(self, type->array.base, type_name, cdecl_paren(mn::str_tmpf("{}[{}]", name, type->array.count), c));
 			break;
-		case IType::KIND_FUNC:
+		case Type::KIND_FUNC:
 		{
 			auto res = mn::str_tmpf("(*{})(", name);
 			if(type->func.args.count == 0)
@@ -217,97 +217,97 @@ namespace zay
 			mn::print_to(self->out, "{}", cgen_write_field(self, type->func.ret, res));
 			break;
 		}
-		case IType::KIND_VOID:
+		case Type::KIND_VOID:
 			if (name.count)
 				mn::print_to(self->out, "void {}", name);
 			else
 				mn::print_to(self->out, "void");
 			break;
-		case IType::KIND_BOOL:
+		case Type::KIND_BOOL:
 			if (name.count)
 				mn::print_to(self->out, "bool {}", name);
 			else
 				mn::print_to(self->out, "bool");
 			break;
-		case IType::KIND_INT:
+		case Type::KIND_INT:
 			if (name.count)
 				mn::print_to(self->out, "ZayInt {}", name);
 			else
 				mn::print_to(self->out, "ZayInt");
 			break;
-		case IType::KIND_UINT:
+		case Type::KIND_UINT:
 			if (name.count)
 				mn::print_to(self->out, "ZayUint {}", name);
 			else
 				mn::print_to(self->out, "ZayUint");
 			break;
-		case IType::KIND_INT8:
+		case Type::KIND_INT8:
 			if (name.count)
 				mn::print_to(self->out, "int8_t {}", name);
 			else
 				mn::print_to(self->out, "int8_t");
 			break;
-		case IType::KIND_UINT8:
+		case Type::KIND_UINT8:
 			if (name.count)
 				mn::print_to(self->out, "uint8_t {}", name);
 			else
 				mn::print_to(self->out, "uint8_t");
 			break;
-		case IType::KIND_INT16:
+		case Type::KIND_INT16:
 			if (name.count)
 				mn::print_to(self->out, "int16_t {}", name);
 			else
 				mn::print_to(self->out, "int16_t");
 			break;
-		case IType::KIND_UINT16:
+		case Type::KIND_UINT16:
 			if (name.count)
 				mn::print_to(self->out, "uint16_t {}", name);
 			else
 				mn::print_to(self->out, "uint16_t");
 			break;
-		case IType::KIND_INT32:
+		case Type::KIND_INT32:
 			if (name.count)
 				mn::print_to(self->out, "int32_t {}", name);
 			else
 				mn::print_to(self->out, "int32_t");
 			break;
-		case IType::KIND_UINT32:
+		case Type::KIND_UINT32:
 			if (name.count)
 				mn::print_to(self->out, "uint32_t {}", name);
 			else
 				mn::print_to(self->out, "uint32_t");
 			break;
-		case IType::KIND_INT64:
+		case Type::KIND_INT64:
 			if (name.count)
 				mn::print_to(self->out, "int64_t {}", name);
 			else
 				mn::print_to(self->out, "int64_t");
 			break;
-		case IType::KIND_UINT64:
+		case Type::KIND_UINT64:
 			if (name.count)
 				mn::print_to(self->out, "uint64_t {}", name);
 			else
 				mn::print_to(self->out, "uint64_t");
 			break;
-		case IType::KIND_FLOAT32:
+		case Type::KIND_FLOAT32:
 			if (name.count)
 				mn::print_to(self->out, "float {}", name);
 			else
 				mn::print_to(self->out, "float");
 			break;
-		case IType::KIND_FLOAT64:
+		case Type::KIND_FLOAT64:
 			if (name.count)
 				mn::print_to(self->out, "double {}", name);
 			else
 				mn::print_to(self->out, "double");
 			break;
-		case IType::KIND_STRING:
+		case Type::KIND_STRING:
 			if (name.count)
 				mn::print_to(self->out, "ZayString {}", name);
 			else
 				mn::print_to(self->out, "ZayString");
 			break;
-		case IType::KIND_STRUCT:
+		case Type::KIND_STRUCT:
 		{
 			mn::print_to(self->out, "struct {} {{", type_name);
 			self->indent++;
@@ -321,7 +321,7 @@ namespace zay
 			mn::print_to(self->out, "}} {}", name);
 			break;
 		}
-		case IType::KIND_UNION:
+		case Type::KIND_UNION:
 		{
 			mn::print_to(self->out, "union {} {{", type_name);
 			self->indent++;
@@ -335,7 +335,7 @@ namespace zay
 			mn::print_to(self->out, "}} {}", name);
 			break;
 		}
-		case IType::KIND_ENUM:
+		case Type::KIND_ENUM:
 		{
 			mn::print_to(self->out, "enum {} {{", type_name);
 			self->indent++;
@@ -356,7 +356,7 @@ namespace zay
 			mn::print_to(self->out, "}} {}", name);
 			break;
 		}
-		case IType::KIND_ALIAS:
+		case Type::KIND_ALIAS:
 			cgen_write_type(self, type->alias, type_name, name);
 			break;
 		default:
@@ -366,7 +366,7 @@ namespace zay
 	}
 
 	inline static void
-	cgen_write_type(CGen self, Type type, const char* type_name, const char* name)
+	cgen_write_type(CGen self, Type* type, const char* type_name, const char* name)
 	{
 		cgen_write_type(self, type, type_name, mn::str_lit(name));
 	}
@@ -404,9 +404,9 @@ namespace zay
 	{
 		assert(expr->kind == Expr::KIND_DOT);
 		cgen_expr_gen(self, expr->dot.base);
-		if(expr->dot.base->type->kind == IType::KIND_ENUM)
+		if(expr->dot.base->type->kind == Type::KIND_ENUM)
 			mn::print_to(self->out, "::{}", expr->dot.member.str);
-		else if(expr->dot.base->type->kind == IType::KIND_PTR)
+		else if(expr->dot.base->type->kind == Type::KIND_PTR)
 			mn::print_to(self->out, "->{}", expr->dot.member.str);
 		else
 			mn::print_to(self->out, ".{}", expr->dot.member.str);
@@ -458,7 +458,7 @@ namespace zay
 	cgen_expr_complit(CGen self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_COMPLIT);
-		if(expr->type->kind != IType::KIND_ARRAY)
+		if(expr->type->kind != Type::KIND_ARRAY)
 			mn::print_to(self->out, "({})", cgen_write_field(self, expr->type, ""));
 		mn::print_to(self->out, "{{");
 		self->indent++;
@@ -624,7 +624,7 @@ namespace zay
 				cgen_newline(self);
 			}
 
-			Type t = cgen_sym(self, stmt->var_stmt.ids[i].str)->type;
+			Type* t = cgen_sym(self, stmt->var_stmt.ids[i].str)->type;
 			mn::print_to(self->out, "{}", cgen_write_field(self, t, stmt->var_stmt.ids[i].str));
 
 			if(i < stmt->var_stmt.exprs.count)
@@ -777,7 +777,7 @@ namespace zay
 			size_t i = 0;
 			for(const Arg& arg: decl->func_decl.args)
 			{
-				Type t = sym->type->func.args[i];
+				Type* t = sym->type->func.args[i];
 				for(const Tkn& id: arg.ids)
 				{
 					if (i != 0)

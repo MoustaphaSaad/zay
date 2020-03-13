@@ -5,7 +5,7 @@
 namespace zay
 {
 	Scope
-	scope_new(Scope parent, bool inside_loop, Type ret)
+	scope_new(Scope parent, bool inside_loop, Type* ret)
 	{
 		Scope self = mn::alloc<IScope>();
 		self->parent = parent;
@@ -62,7 +62,7 @@ namespace zay
 		return false;
 	}
 
-	Type
+	Type*
 	scope_ret(Scope self)
 	{
 		for(Scope it = self; it != nullptr; it = it->parent)

@@ -10,13 +10,13 @@ namespace zay
 	inline static void
 	typer_sym_resolve(Typer self, Sym sym);
 
-	inline static Type
+	inline static Type*
 	typer_expr_resolve(Typer self, Expr* expr);
 
-	inline static Type
+	inline static Type*
 	typer_stmt_resolve(Typer self, Stmt* stmt);
 
-	inline static Type
+	inline static Type*
 	typer_stmt_block_resolve(Typer self, Stmt* stmt);
 
 	inline static void
@@ -94,7 +94,7 @@ namespace zay
 		return scope_find(typer_scope(self), name);
 	}
 
-	inline static Type
+	inline static Type*
 	token_to_type(const Tkn& tkn)
 	{
 		switch(tkn.kind)
@@ -117,10 +117,10 @@ namespace zay
 		}
 	}
 
-	inline static Type
-	typer_type_sign_resolve(Typer self, const Type_Sign& sign, Type incomplete_type)
+	inline static Type*
+	typer_type_sign_resolve(Typer self, const Type_Sign& sign, Type* incomplete_type)
 	{
-		Type res = type_void;
+		Type* res = type_void;
 
 		for(size_t i = 1; i <= sign.count; ++i)
 		{
@@ -182,16 +182,16 @@ namespace zay
 					typer_sym_resolve(self, unnamed_sym);
 
 					incomplete_type = type_intern_incomplete(self->src->type_table, type_incomplete(unnamed_sym));
-					incomplete_type->kind = IType::KIND_COMPLETING;
+					incomplete_type->kind = Type::KIND_COMPLETING;
 				}
 				res = incomplete_type;
 
 				auto fields = mn::buf_new<Field_Sign>();
 				for(size_t j = 0; j < atom.struct_fields.count; ++j)
 				{
-					Type field_type = typer_type_sign_resolve(self, atom.struct_fields[j].type, nullptr);
-					if (field_type->kind == IType::KIND_COMPLETING ||
-						field_type->kind == IType::KIND_INCOMPLETE)
+					Type* field_type = typer_type_sign_resolve(self, atom.struct_fields[j].type, nullptr);
+					if (field_type->kind == Type::KIND_COMPLETING ||
+						field_type->kind == Type::KIND_INCOMPLETE)
 					{
 						typer_type_complete(self, field_type->sym);
 					}
@@ -222,16 +222,16 @@ namespace zay
 					typer_sym_resolve(self, unnamed_sym);
 
 					incomplete_type = type_intern_incomplete(self->src->type_table, type_incomplete(unnamed_sym));
-					incomplete_type->kind = IType::KIND_COMPLETING;
+					incomplete_type->kind = Type::KIND_COMPLETING;
 				}
 				res = incomplete_type;
 
 				auto fields = mn::buf_new<Field_Sign>();
 				for(size_t j = 0; j < atom.union_fields.count; ++j)
 				{
-					Type field_type = typer_type_sign_resolve(self, atom.union_fields[j].type, nullptr);
-					if (field_type->kind == IType::KIND_COMPLETING ||
-						field_type->kind == IType::KIND_INCOMPLETE)
+					Type* field_type = typer_type_sign_resolve(self, atom.union_fields[j].type, nullptr);
+					if (field_type->kind == Type::KIND_COMPLETING ||
+						field_type->kind == Type::KIND_INCOMPLETE)
 					{
 						typer_type_complete(self, field_type->sym);
 					}
@@ -262,7 +262,7 @@ namespace zay
 					typer_sym_resolve(self, unnamed_sym);
 
 					incomplete_type = type_intern_incomplete(self->src->type_table, type_incomplete(unnamed_sym));
-					incomplete_type->kind = IType::KIND_COMPLETING;
+					incomplete_type->kind = Type::KIND_COMPLETING;
 				}
 				res = incomplete_type;
 
@@ -272,7 +272,7 @@ namespace zay
 					Enum_Value v{ atom.enum_fields[j].id, atom.enum_fields[j].expr };
 					if(v.value)
 					{
-						Type value_type = typer_expr_resolve(self, v.value);
+						Type* value_type = typer_expr_resolve(self, v.value);
 						if(type_is_integer(value_type) == false)
 						{
 							src_err(
@@ -307,18 +307,18 @@ namespace zay
 	inline static void
 	typer_type_complete(Typer self, Sym sym)
 	{
-		Type type = sym->type;
-		if(type->kind == IType::KIND_COMPLETING)
+		Type* type = sym->type;
+		if(type->kind == Type::KIND_COMPLETING)
 		{
 			src_err(self->src, err_tkn(sym_tkn(sym), mn::strf("'{}' recursive type", sym->name)));
 			return;
 		}
-		else if(type->kind != IType::KIND_INCOMPLETE)
+		else if(type->kind != Type::KIND_INCOMPLETE)
 		{
 			return;
 		}
 
-		type->kind = IType::KIND_COMPLETING;
+		type->kind = Type::KIND_COMPLETING;
 		if(sym->kind == ISym::KIND_TYPE)
 		{
 			Decl* decl = sym->type_sym;
@@ -332,7 +332,7 @@ namespace zay
 
 
 	//expressions
-	inline static Type
+	inline static Type*
 	typer_expr_atom_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_ATOM);
@@ -356,13 +356,13 @@ namespace zay
 		}
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_binary_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_BINARY);
 
-		Type lhs_type = typer_expr_resolve(self, expr->binary.lhs);
-		Type rhs_type = typer_expr_resolve(self, expr->binary.rhs);
+		Type* lhs_type = typer_expr_resolve(self, expr->binary.lhs);
+		Type* rhs_type = typer_expr_resolve(self, expr->binary.rhs);
 
 		if(type_is_same(lhs_type, rhs_type) == false)
 			src_err(self->src, err_expr(expr, mn::strf("type mismatch in binary expression")));
@@ -399,12 +399,12 @@ namespace zay
 		return lhs_type;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_unary_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_UNARY);
 
-		Type type = typer_expr_resolve(self, expr->unary.expr);
+		Type* type = typer_expr_resolve(self, expr->unary.expr);
 
 		//works with numbers
 		if (expr->unary.op.kind == Tkn::KIND_INC ||
@@ -436,7 +436,7 @@ namespace zay
 		}
 		else if(expr->unary.op.kind == Tkn::KIND_STAR)
 		{
-			if(type->kind != IType::KIND_PTR)
+			if(type->kind != Type::KIND_PTR)
 			{
 				src_err(
 					self->src,
@@ -452,22 +452,22 @@ namespace zay
 		return type;
 	}
 
-	inline static Type
-	type_unqualify(Type t)
+	inline static Type*
+	type_unqualify(Type* t)
 	{
-		if (t->kind == IType::KIND_PTR)
+		if (t->kind == Type::KIND_PTR)
 			return t->ptr.base;
 		return t;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_dot_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_DOT);
-		Type type = typer_expr_resolve(self, expr->dot.base);
-		Type unqualified_type = type_unqualify(type);
-		Type res = type_void;
-		if(unqualified_type->kind == IType::KIND_STRUCT)
+		Type* type = typer_expr_resolve(self, expr->dot.base);
+		Type* unqualified_type = type_unqualify(type);
+		Type* res = type_void;
+		if(unqualified_type->kind == Type::KIND_STRUCT)
 		{
 			for(const Field_Sign& f: unqualified_type->fields)
 			{
@@ -482,7 +482,7 @@ namespace zay
 				src_err(self->src, err_tkn(expr->dot.member, mn::strf("undefined struct field")));
 			}
 		}
-		else if (unqualified_type->kind == IType::KIND_UNION)
+		else if (unqualified_type->kind == Type::KIND_UNION)
 		{
 			for (const Field_Sign& f : unqualified_type->fields)
 			{
@@ -497,7 +497,7 @@ namespace zay
 				src_err(self->src, err_tkn(expr->dot.member, mn::strf("undefined union field")));
 			}
 		}
-		else if (unqualified_type->kind == IType::KIND_ENUM)
+		else if (unqualified_type->kind == Type::KIND_ENUM)
 		{
 			for (const Enum_Value& v : unqualified_type->enum_values)
 			{
@@ -515,12 +515,12 @@ namespace zay
 		return res;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_indexed_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_INDEXED);
-		Type type = typer_expr_resolve(self, expr->indexed.base);
-		if(type->kind != IType::KIND_ARRAY)
+		Type* type = typer_expr_resolve(self, expr->indexed.base);
+		if(type->kind != Type::KIND_ARRAY)
 		{
 			src_err(
 				self->src,
@@ -539,12 +539,12 @@ namespace zay
 		return type->array.base;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_call_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_CALL);
-		Type res = typer_expr_resolve(self, expr->call.base);
-		if(res->kind != IType::KIND_FUNC)
+		Type* res = typer_expr_resolve(self, expr->call.base);
+		if(res->kind != Type::KIND_FUNC)
 		{
 			src_err(self->src, err_expr(expr->call.base, mn::strf("invalid call, expression is not a function")));
 			return type_void;
@@ -563,7 +563,7 @@ namespace zay
 
 		for(size_t i = 0; i < expr->call.args.count; ++i)
 		{
-			Type type = typer_expr_resolve(self, expr->call.args[i]);
+			Type* type = typer_expr_resolve(self, expr->call.args[i]);
 			if(type_is_same(type, res->func.args[i]) == false)
 			{
 				auto msg = mn::strf("function argument {} type mismatch", i);
@@ -573,19 +573,19 @@ namespace zay
 		return res->func.ret;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_cast_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_CAST);
-		Type from_type = typer_expr_resolve(self, expr->cast.base);
-		Type to_type = typer_type_sign_resolve(self, expr->cast.type, nullptr);
+		Type* from_type = typer_expr_resolve(self, expr->cast.base);
+		Type* to_type = typer_type_sign_resolve(self, expr->cast.type, nullptr);
 
 		from_type = type_unwrap(from_type);
 		to_type = type_unwrap(to_type);
 
 		if(type_is_numeric(from_type) && type_is_numeric(to_type))
 			return to_type;
-		else if(from_type->kind == IType::KIND_PTR && to_type->kind == IType::KIND_PTR)
+		else if(from_type->kind == Type::KIND_PTR && to_type->kind == Type::KIND_PTR)
 			return to_type;
 
 		src_err(
@@ -595,26 +595,26 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_paren_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_PAREN);
 		return typer_expr_resolve(self, expr->paren);
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_complit_resolve(Typer self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_COMPLIT);
-		Type type = typer_type_sign_resolve(self, expr->complit.type, nullptr);
+		Type* type = typer_type_sign_resolve(self, expr->complit.type, nullptr);
 		for(size_t i = 0; i < expr->complit.fields.count; ++i)
 		{
 			Complit_Field field = expr->complit.fields[i];
-			Type left_type = type_void;
+			Type* left_type = type_void;
 			if(field.kind == Complit_Field::KIND_MEMBER)
 			{
-				if (type->kind == IType::KIND_STRUCT ||
-					type->kind == IType::KIND_UNION)
+				if (type->kind == Type::KIND_STRUCT ||
+					type->kind == Type::KIND_UNION)
 				{
 					for(size_t j = 0; j < type->fields.count; ++j)
 					{
@@ -635,7 +635,7 @@ namespace zay
 			}
 			else if(field.kind == Complit_Field::KIND_ARRAY)
 			{
-				if(type->kind == IType::KIND_ARRAY)
+				if(type->kind == Type::KIND_ARRAY)
 				{
 					left_type = type->array.base;
 				}
@@ -648,7 +648,7 @@ namespace zay
 				}
 			}
 
-			Type right_type = typer_expr_resolve(self, field.right);
+			Type* right_type = typer_expr_resolve(self, field.right);
 
 			if(type_is_same(left_type, right_type) == false)
 			{
@@ -659,7 +659,7 @@ namespace zay
 		return type;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_expr_resolve(Typer self, Expr* expr)
 	{
 		switch(expr->kind)
@@ -696,7 +696,7 @@ namespace zay
 	}
 
 
-	inline static Type
+	inline static Type*
 	typer_stmt_break_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_BREAK);
@@ -705,7 +705,7 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_continue_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_CONTINUE);
@@ -714,14 +714,14 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_return_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_RETURN);
-		Type ret = typer_expr_resolve(self, stmt->return_stmt);
+		Type* ret = typer_expr_resolve(self, stmt->return_stmt);
 
 		Scope scope = typer_scope(self);
-		Type expected = scope_ret(scope);
+		Type* expected = scope_ret(scope);
 		if(expected == nullptr)
 		{
 			src_err(self->src, err_stmt(stmt, mn::strf("unexpected return statement")));
@@ -738,11 +738,11 @@ namespace zay
 		return ret;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_if_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_IF);
-		Type type = typer_expr_resolve(self, stmt->if_stmt.if_cond);
+		Type* type = typer_expr_resolve(self, stmt->if_stmt.if_cond);
 		if(type_is_same(type, type_bool) == false)
 		{
 			src_err(
@@ -754,7 +754,7 @@ namespace zay
 
 		for(const Else_If& e: stmt->if_stmt.else_ifs)
 		{
-			Type cond_type = typer_expr_resolve(self, e.cond);
+			Type* cond_type = typer_expr_resolve(self, e.cond);
 			if(type_is_same(cond_type, type_bool) == false)
 			{
 				src_err(
@@ -770,7 +770,7 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_for_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_FOR);
@@ -782,7 +782,7 @@ namespace zay
 			typer_stmt_resolve(self, stmt->for_stmt.init_stmt);
 		if(stmt->for_stmt.loop_cond)
 		{
-			Type cond_type = typer_expr_resolve(self, stmt->for_stmt.loop_cond);
+			Type* cond_type = typer_expr_resolve(self, stmt->for_stmt.loop_cond);
 			if(type_is_same(cond_type, type_bool) == false)
 			{
 				src_err(
@@ -801,14 +801,14 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_var_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_VAR);
 
 		bool infer = stmt->var_stmt.type.count == 0;
 
-		Type type = type_void;
+		Type* type = type_void;
 		if(infer == false)
 			type = typer_type_sign_resolve(self, stmt->var_stmt.type, nullptr);
 
@@ -838,7 +838,7 @@ namespace zay
 			{
 				if(e)
 				{
-					Type expr_type = typer_expr_resolve(self, e);
+					Type* expr_type = typer_expr_resolve(self, e);
 					if(type_is_same(type_unwrap(expr_type), type_unwrap(type)) == false)
 					{
 						src_err(
@@ -857,20 +857,20 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_assign_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_ASSIGN);
 		for(size_t i = 0; i < stmt->assign_stmt.lhs.count; ++i)
 		{
-			Type lhs_type = typer_expr_resolve(self, stmt->assign_stmt.lhs[i]);
+			Type* lhs_type = typer_expr_resolve(self, stmt->assign_stmt.lhs[i]);
 			if(type_is_same(lhs_type, type_void))
 			{
 				auto msg = mn::strf("can't assign into a void type");
 				src_err(self->src, err_expr(stmt->assign_stmt.lhs[i], msg));
 			}
 
-			Type rhs_type = typer_expr_resolve(self, stmt->assign_stmt.rhs[i]);
+			Type* rhs_type = typer_expr_resolve(self, stmt->assign_stmt.rhs[i]);
 			if (type_is_same(rhs_type, type_void))
 			{
 				auto msg = mn::strf("can't assign into a void type");
@@ -890,14 +890,14 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_expr_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_EXPR);
 		return typer_expr_resolve(self, stmt->expr_stmt);
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_block_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_BLOCK);
@@ -906,7 +906,7 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_anonymous_block_resolve(Typer self, Stmt* stmt)
 	{
 		assert(stmt->kind == Stmt::KIND_BLOCK);
@@ -921,7 +921,7 @@ namespace zay
 		return type_void;
 	}
 
-	inline static Type
+	inline static Type*
 	typer_stmt_resolve(Typer self, Stmt* stmt)
 	{
 		switch(stmt->kind)
@@ -969,7 +969,7 @@ namespace zay
 	}
 
 
-	inline static Type
+	inline static Type*
 	typer_decl_func_resolve(Typer self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_FUNC);
@@ -979,7 +979,7 @@ namespace zay
 
 		for(const Arg& arg: decl->func_decl.args)
 		{
-			Type type = typer_type_sign_resolve(self, arg.type, nullptr);
+			Type* type = typer_type_sign_resolve(self, arg.type, nullptr);
 			buf_pushn(sign.args, arg.ids.count, type);
 		}
 
@@ -1001,7 +1001,7 @@ namespace zay
 		size_t i = 0;
 		for(const Arg& arg: decl->func_decl.args)
 		{
-			Type type = sym->type->func.args[i];
+			Type* type = sym->type->func.args[i];
 			for(const Tkn& id: arg.ids)
 			{
 				Sym v = sym_var(id, nullptr, arg.type, nullptr);
@@ -1026,13 +1026,13 @@ namespace zay
 		typer_scope_leave(self);
 	}
 
-	inline static Type
+	inline static Type*
 	typer_decl_var_resolve(Typer self, Sym sym)
 	{
 		assert(sym->kind == ISym::KIND_VAR);
 		bool infer = sym->var_sym.type.count == 0;
 
-		Type type = type_void;
+		Type* type = type_void;
 		if(infer == false)
 			type = typer_type_sign_resolve(self, sym->var_sym.type, nullptr);
 
@@ -1056,7 +1056,7 @@ namespace zay
 		{
 			if(e)
 			{
-				Type expr_type = typer_expr_resolve(self, e);
+				Type* expr_type = typer_expr_resolve(self, e);
 				if(type_is_same(expr_type, type) == false)
 				{
 					src_err(

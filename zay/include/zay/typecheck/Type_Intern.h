@@ -10,14 +10,14 @@
 
 namespace zay
 {
-	typedef struct IType* Type;
+	struct Type;
 
 	//now we'll need to represent function types since this is what we're currently doing
 	//function types is the aggregate of their argument types and return type
 	struct Func_Sign
 	{
-		mn::Buf<Type> args;
-		Type ret;
+		mn::Buf<Type*> args;
+		Type* ret;
 
 		inline bool
 		operator==(const Func_Sign& other) const
@@ -45,7 +45,7 @@ namespace zay
 	inline static Func_Sign
 	func_sign_new()
 	{
-		return Func_Sign { mn::buf_new<Type>(), nullptr };
+		return Func_Sign { mn::buf_new<Type*>(), nullptr };
 	}
 
 	inline static void
@@ -65,13 +65,13 @@ namespace zay
 		inline size_t
 		operator()(const Func_Sign& a) const
 		{
-			return mn::hash_mix(mn::murmur_hash(block_from(a.args)), mn::Hash<Type>()(a.ret));
+			return mn::hash_mix(mn::murmur_hash(block_from(a.args)), mn::Hash<Type*>()(a.ret));
 		}
 	};
 
 	struct Array_Sign
 	{
-		Type base;
+		Type* base;
 		size_t count;
 
 		inline bool
@@ -92,7 +92,7 @@ namespace zay
 		inline size_t
 		operator()(const Array_Sign& a) const
 		{
-			return mn::hash_mix(mn::Hash<Type>()(a.base), mn::Hash<size_t>()(a.count));
+			return mn::hash_mix(mn::Hash<Type*>()(a.base), mn::Hash<size_t>()(a.count));
 		}
 	};
 
@@ -100,7 +100,7 @@ namespace zay
 	struct Field_Sign
 	{
 		const char* name;
-		Type type;
+		Type* type;
 		size_t offset;
 	};
 
@@ -111,7 +111,7 @@ namespace zay
 	};
 
 
-	struct IType
+	struct Type
 	{
 		enum KIND
 		{
@@ -147,76 +147,76 @@ namespace zay
 		Sym sym;
 		union
 		{
-			struct { Type base; } ptr;
+			struct { Type* base; } ptr;
 			Array_Sign array;
 			Func_Sign func;
 			mn::Buf<Field_Sign> fields;
 			mn::Buf<Enum_Value> enum_values;
-			Type alias;
+			Type* alias;
 		};
 		
 	};
 
-	ZAY_EXPORT Type
-	type_ptr(Type base);
+	ZAY_EXPORT Type*
+	type_ptr(Type* base);
 
-	ZAY_EXPORT Type
+	ZAY_EXPORT Type*
 	type_array(const Array_Sign& sign);
 
-	ZAY_EXPORT Type
+	ZAY_EXPORT Type*
 	type_func(const Func_Sign& sign);
 
-	ZAY_EXPORT Type
+	ZAY_EXPORT Type*
 	type_incomplete(Sym sym);
 
 	ZAY_EXPORT void
-	type_alias_complete(Type self, Type alias);
+	type_alias_complete(Type* self, Type* alias);
 
 	ZAY_EXPORT void
-	type_struct_complete(Type self, const mn::Buf<Field_Sign>& fields);
+	type_struct_complete(Type* self, const mn::Buf<Field_Sign>& fields);
 
 	ZAY_EXPORT void
-	type_union_complete(Type self, const mn::Buf<Field_Sign>& fields);
+	type_union_complete(Type* self, const mn::Buf<Field_Sign>& fields);
 
 	ZAY_EXPORT void
-	type_enum_complete(Type self, const mn::Buf<Enum_Value>& values);
+	type_enum_complete(Type* self, const mn::Buf<Enum_Value>& values);
 
 	ZAY_EXPORT void
-	type_free(Type self);
+	type_free(Type* self);
 
 	inline static void
-	destruct(Type self)
+	destruct(Type* self)
 	{
 		type_free(self);
 	}
 
 	inline static std::ostream&
-	operator<<(std::ostream& out, const IType &type)
+	operator<<(std::ostream& out, const Type &type)
 	{
 		switch(type.kind)
 		{
-		case IType::KIND_VOID: out << "void"; break;
-		case IType::KIND_BOOL: out << "bool"; break;
-		case IType::KIND_INT: out << "int"; break;
-		case IType::KIND_UINT: out << "uint"; break;
-		case IType::KIND_INT8: out << "int8"; break;
-		case IType::KIND_UINT8: out << "uint8"; break;
-		case IType::KIND_INT16: out << "int16"; break;
-		case IType::KIND_UINT16: out << "uint16"; break;
-		case IType::KIND_INT32: out << "int32"; break;
-		case IType::KIND_UINT32: out << "uint32"; break;
-		case IType::KIND_INT64: out << "int64"; break;
-		case IType::KIND_UINT64: out << "uint64"; break;
-		case IType::KIND_FLOAT32: out << "float32"; break;
-		case IType::KIND_FLOAT64: out << "float64"; break;
-		case IType::KIND_STRING: out << "string"; break;
-		case IType::KIND_PTR:
+		case Type::KIND_VOID: out << "void"; break;
+		case Type::KIND_BOOL: out << "bool"; break;
+		case Type::KIND_INT: out << "int"; break;
+		case Type::KIND_UINT: out << "uint"; break;
+		case Type::KIND_INT8: out << "int8"; break;
+		case Type::KIND_UINT8: out << "uint8"; break;
+		case Type::KIND_INT16: out << "int16"; break;
+		case Type::KIND_UINT16: out << "uint16"; break;
+		case Type::KIND_INT32: out << "int32"; break;
+		case Type::KIND_UINT32: out << "uint32"; break;
+		case Type::KIND_INT64: out << "int64"; break;
+		case Type::KIND_UINT64: out << "uint64"; break;
+		case Type::KIND_FLOAT32: out << "float32"; break;
+		case Type::KIND_FLOAT64: out << "float64"; break;
+		case Type::KIND_STRING: out << "string"; break;
+		case Type::KIND_PTR:
 			out << "*" << *type.ptr.base;
 			break;
-		case IType::KIND_ARRAY:
+		case Type::KIND_ARRAY:
 			out << "[" << type.array.count << "]" << *type.array.base;
 			break;
-		case IType::KIND_FUNC:
+		case Type::KIND_FUNC:
 		{
 			out << "func(";
 			for(size_t i = 0; i < type.func.args.count; ++i)
@@ -228,10 +228,10 @@ namespace zay
 			out << "): " << *type.func.ret;
 			break;
 		}
-		case IType::KIND_STRUCT:
-		case IType::KIND_UNION:
-		case IType::KIND_ENUM:
-		case IType::KIND_ALIAS:
+		case Type::KIND_STRUCT:
+		case Type::KIND_UNION:
+		case Type::KIND_ENUM:
+		case Type::KIND_ALIAS:
 			out << type.sym->name;
 			break;
 		default:
@@ -242,34 +242,34 @@ namespace zay
 	}
 
 
-	ZAY_EXPORT extern Type type_void;
-	ZAY_EXPORT extern Type type_bool;
-	ZAY_EXPORT extern Type type_int;
-	ZAY_EXPORT extern Type type_uint;
-	ZAY_EXPORT extern Type type_int8;
-	ZAY_EXPORT extern Type type_uint8;
-	ZAY_EXPORT extern Type type_int16;
-	ZAY_EXPORT extern Type type_uint16;
-	ZAY_EXPORT extern Type type_int32;
-	ZAY_EXPORT extern Type type_uint32;
-	ZAY_EXPORT extern Type type_int64;
-	ZAY_EXPORT extern Type type_uint64;
-	ZAY_EXPORT extern Type type_float32;
-	ZAY_EXPORT extern Type type_float64;
-	ZAY_EXPORT extern Type type_string;
-	ZAY_EXPORT extern Type type_lit_int;
-	ZAY_EXPORT extern Type type_lit_float64;
+	ZAY_EXPORT extern Type* type_void;
+	ZAY_EXPORT extern Type* type_bool;
+	ZAY_EXPORT extern Type* type_int;
+	ZAY_EXPORT extern Type* type_uint;
+	ZAY_EXPORT extern Type* type_int8;
+	ZAY_EXPORT extern Type* type_uint8;
+	ZAY_EXPORT extern Type* type_int16;
+	ZAY_EXPORT extern Type* type_uint16;
+	ZAY_EXPORT extern Type* type_int32;
+	ZAY_EXPORT extern Type* type_uint32;
+	ZAY_EXPORT extern Type* type_int64;
+	ZAY_EXPORT extern Type* type_uint64;
+	ZAY_EXPORT extern Type* type_float32;
+	ZAY_EXPORT extern Type* type_float64;
+	ZAY_EXPORT extern Type* type_string;
+	ZAY_EXPORT extern Type* type_lit_int;
+	ZAY_EXPORT extern Type* type_lit_float64;
 
-	inline static Type
-	type_unwrap(Type type)
+	inline static Type*
+	type_unwrap(Type* type)
 	{
-		if (type->kind == IType::KIND_ALIAS)
+		if (type->kind == Type::KIND_ALIAS)
 			return type->alias;
 		return type;
 	}
 
 	inline static bool
-	type_is_numeric(Type t)
+	type_is_numeric(Type* t)
 	{
 		return (
 			t == type_int ||
@@ -290,7 +290,7 @@ namespace zay
 	}
 
 	inline static bool
-	type_is_integer(Type t)
+	type_is_integer(Type* t)
 	{
 		return (
 			t == type_int ||
@@ -308,19 +308,19 @@ namespace zay
 	}
 
 	inline static bool
-	type_is_float(Type t)
+	type_is_float(Type* t)
 	{
 		return t == type_float32 || t == type_float64 || t == type_lit_float64;
 	}
 
 	inline static bool
-	type_is_lit(Type t)
+	type_is_lit(Type* t)
 	{
 		return t == type_lit_float64 || t == type_lit_int;
 	}
 
 	inline static bool
-	type_is_same(Type lhs, Type rhs)
+	type_is_same(Type* lhs, Type* rhs)
 	{
 		if (lhs == rhs)
 		{
@@ -340,10 +340,10 @@ namespace zay
 	typedef struct IType_Intern* Type_Intern;
 	struct IType_Intern
 	{
-		mn::Buf<Type> types;
-		mn::Map<Type, Type> ptr_table;
-		mn::Map<Array_Sign, Type, Array_Sign_Hasher> array_table;
-		mn::Map<Func_Sign, Type, Func_Sign_Hasher> func_table;
+		mn::Buf<Type*> types;
+		mn::Map<Type*, Type*> ptr_table;
+		mn::Map<Array_Sign, Type*, Array_Sign_Hasher> array_table;
+		mn::Map<Func_Sign, Type*, Func_Sign_Hasher> func_table;
 	};
 
 	ZAY_EXPORT Type_Intern
@@ -358,15 +358,15 @@ namespace zay
 		type_intern_free(self);
 	}
 
-	ZAY_EXPORT Type
-	type_intern_ptr(Type_Intern self, Type base);
+	ZAY_EXPORT Type*
+	type_intern_ptr(Type_Intern self, Type* base);
 
-	ZAY_EXPORT Type
+	ZAY_EXPORT Type*
 	type_intern_array(Type_Intern self, const Array_Sign& sign);
 
-	ZAY_EXPORT Type
+	ZAY_EXPORT Type*
 	type_intern_func(Type_Intern self, Func_Sign& func);
 
-	ZAY_EXPORT Type
-	type_intern_incomplete(Type_Intern self, Type type);
+	ZAY_EXPORT Type*
+	type_intern_incomplete(Type_Intern self, Type* type);
 }

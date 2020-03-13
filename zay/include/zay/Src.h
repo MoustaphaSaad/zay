@@ -98,7 +98,7 @@ namespace zay
 	}
 
 	inline static Scope
-	src_scope_new(Src *self, void* ast_node, Scope parent, bool inside_loop, Type ret)
+	src_scope_new(Src *self, void* ast_node, Scope parent, bool inside_loop, Type* ret)
 	{
 		Scope scope = scope_new(parent, inside_loop, ret);
 		mn::buf_push(self->scopes, scope);

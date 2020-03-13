@@ -10,7 +10,7 @@
 
 namespace zay
 {
-	typedef struct IType* Type;
+	struct Type;
 
 	//Expressions
 	struct Expr;
@@ -47,7 +47,7 @@ namespace zay
 		KIND kind;
 		Rng rng;
 		Pos pos;
-		Type type;
+		Type* type;
 		union
 		{
 			Tkn atom;

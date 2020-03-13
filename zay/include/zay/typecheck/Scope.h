@@ -15,11 +15,11 @@ namespace zay
 		mn::Buf<Sym> syms;
 		mn::Map<const char*, Sym> table;
 		bool inside_loop;
-		Type ret;
+		Type* ret;
 	};
 
 	ZAY_EXPORT Scope
-	scope_new(Scope parent, bool inside_loop, Type ret);
+	scope_new(Scope parent, bool inside_loop, Type* ret);
 
 	ZAY_EXPORT void
 	scope_free(Scope self);
@@ -42,6 +42,6 @@ namespace zay
 	ZAY_EXPORT bool
 	scope_inside_loop(Scope self);
 
-	ZAY_EXPORT Type
+	ZAY_EXPORT Type*
 	scope_ret(Scope self);
 }
