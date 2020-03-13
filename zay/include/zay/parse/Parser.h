@@ -10,38 +10,37 @@
 
 namespace zay
 {
-	struct IParser
+	struct Parser
 	{
 		Src *src;
 		mn::Buf<Tkn> tkns;
 		size_t ix;
 		mn::Buf<Tkn> typenames;
 	};
-	typedef IParser* Parser;
 
 	ZAY_EXPORT Parser
 	parser_new(Src *src);
 
 	ZAY_EXPORT void
-	parser_free(Parser self);
+	parser_free(Parser& self);
 
 	inline static void
-	destruct(Parser self)
+	destruct(Parser& self)
 	{
 		parser_free(self);
 	}
 
 	ZAY_EXPORT Expr*
-	parser_expr(Parser self);
+	parser_expr(Parser& self);
 
 	ZAY_EXPORT Stmt*
-	parser_stmt(Parser self);
+	parser_stmt(Parser& self);
 
 	ZAY_EXPORT Decl*
-	parser_decl(Parser self);
+	parser_decl(Parser& self);
 
 	ZAY_EXPORT Tkn
-	parser_pkg(Parser self);
+	parser_pkg(Parser& self);
 
 	inline static bool
 	src_parse(Src *src, MODE mode)
@@ -53,7 +52,7 @@ namespace zay
 			src->ast.package = parser_pkg(self);
 
 		//then everything else
-		while(self->ix < self->tkns.count)
+		while(self.ix < self.tkns.count)
 		{
 			if (Decl* d = parser_decl(self))
 				mn::buf_push(src->ast.decls, d);
