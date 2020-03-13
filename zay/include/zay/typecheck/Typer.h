@@ -8,8 +8,7 @@
 
 namespace zay
 {
-	typedef struct ITyper* Typer;
-	struct ITyper
+	struct Typer
 	{
 		enum MODE
 		{
@@ -28,24 +27,24 @@ namespace zay
 	};
 
 	ZAY_EXPORT Typer
-	typer_new(Src *src, ITyper::MODE mode);
+	typer_new(Src *src, Typer::MODE mode);
 
 	ZAY_EXPORT void
-	typer_free(Typer self);
+	typer_free(Typer &self);
 
 	inline static void
-	destruct(Typer self)
+	destruct(Typer &self)
 	{
 		typer_free(self);
 	}
 
 	ZAY_EXPORT void
-	typer_check(Typer self);
+	typer_check(Typer &self);
 
 	inline static bool
-	src_typecheck(Src *src, ITyper::MODE mode)
+	src_typecheck(Src *src, Typer::MODE mode)
 	{
-		Typer self = typer_new(src, mode);
+		auto self = typer_new(src, mode);
 		typer_check(self);
 		typer_free(self);
 		return src_has_err(src) == false;

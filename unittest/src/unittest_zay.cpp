@@ -483,7 +483,7 @@ typecheck(const char* str)
 	auto src = zay::src_from_str(str);
 	CHECK(zay::src_scan(src));
 	CHECK(zay::src_parse(src, zay::MODE::NONE));
-	bool res = zay::src_typecheck(src, zay::ITyper::MODE_NONE);
+	bool res = zay::src_typecheck(src, zay::Typer::MODE_NONE);
 	auto errs = zay::src_errs_dump(src);
 	zay::src_free(src);
 	mn::str_free(errs);
@@ -870,7 +870,7 @@ cgen(const char* str)
 	auto src = zay::src_from_str(str);
 	CHECK(zay::src_scan(src));
 	CHECK(zay::src_parse(src, zay::MODE::NONE));
-	CHECK(zay::src_typecheck(src, zay::ITyper::MODE_NONE));
+	CHECK(zay::src_typecheck(src, zay::Typer::MODE_NONE));
 	auto res = zay::src_c(src, mn::memory::tmp());
 	zay::src_free(src);
 	return res;

@@ -144,7 +144,7 @@ main(int argc, char** argv)
 			}
 
 			//typecheck the file
-			if(zay::src_typecheck(src, zay::ITyper::MODE_EXE) == false)
+			if(zay::src_typecheck(src, zay::Typer::MODE_EXE) == false)
 			{
 				mn::print("{}\n", zay::src_errs_dump(src, mn::memory::tmp()));
 				continue;
