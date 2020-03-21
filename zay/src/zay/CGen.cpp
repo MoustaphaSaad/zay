@@ -166,9 +166,9 @@ namespace zay
 		case Type::KIND_UNION:
 		case Type::KIND_ENUM:
 			if (name.count)
-				return mn::str_tmpf("{} {}", type->sym->name, name);
+				return mn::str_tmpf("{} {}", type->sym->package_name, name);
 			else
-				return mn::str_tmpf("{}", type->sym->name);
+				return mn::str_tmpf("{}", type->sym->package_name);
 		case Type::KIND_ALIAS:
 			return cgen_write_field(self, type->alias, name);
 		default:
@@ -183,7 +183,7 @@ namespace zay
 	}
 
 	inline static void
-	cgen_write_type(CGen& self, Type* type, const char* type_name, const mn::Str& name)
+	cgen_write_type(CGen& self, Type* type, const mn::Str& type_name, const mn::Str& name)
 	{
 		auto c = 0;
 		if (name.count > 0)
@@ -368,7 +368,7 @@ namespace zay
 	inline static void
 	cgen_write_type(CGen& self, Type* type, const char* type_name, const char* name)
 	{
-		cgen_write_type(self, type, type_name, mn::str_lit(name));
+		cgen_write_type(self, type, mn::str_lit(type_name), mn::str_lit(name));
 	}
 
 	//Exprs
@@ -379,7 +379,14 @@ namespace zay
 	cgen_expr_atom(CGen& self, Expr* expr)
 	{
 		assert(expr->kind == Expr::KIND_ATOM);
-		mn::print_to(self.out, "{}", expr->atom.str);
+		if(auto sym = cgen_sym(self, expr->atom.str))
+		{
+			mn::print_to(self.out, "{}", sym->package_name);
+		}
+		else
+		{
+			mn::print_to(self.out, "{}", expr->atom.str);
+		}
 	}
 
 	inline static void
@@ -765,7 +772,7 @@ namespace zay
 			self.out,
 			"{} {}(",
 			cgen_write_field(self, sym->type->func.ret, ""),
-			sym->name
+			sym->package_name
 		);
 
 		if(sym->type->func.args.count == 0)
@@ -806,7 +813,7 @@ namespace zay
 	cgen_sym_var_gen(CGen& self, Sym* sym)
 	{
 		assert(sym->kind == Sym::KIND_VAR);
-		mn::print_to(self.out, "{}", cgen_write_field(self, sym->type, sym->name));
+		mn::print_to(self.out, "{}", cgen_write_field(self, sym->type, sym->package_name));
 		if(sym->var_sym.expr)
 		{
 			mn::print_to(self.out, " = ");
@@ -820,7 +827,7 @@ namespace zay
 	{
 		assert(sym->kind == Sym::KIND_TYPE);
 		mn::print_to(self.out, "typedef ");
-		cgen_write_type(self, sym->type, sym->name, sym->name);
+		cgen_write_type(self, sym->type, sym->package_name, sym->package_name);
 		mn::print_to(self.out, ";");
 	}
 
@@ -874,6 +881,7 @@ namespace zay
 			if (i != 0)
 				cgen_newline(self);
 			cgen_sym_gen(self, self.src->reachable_syms[i]);
+			mn::print_to(self.out, "\n");
 		}
 	}
 }

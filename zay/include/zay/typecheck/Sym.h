@@ -4,6 +4,8 @@
 #include "zay/scan/Tkn.h"
 #include "zay/parse/AST.h"
 
+#include <mn/Str.h>
+
 #include <assert.h>
 
 namespace zay
@@ -32,6 +34,7 @@ namespace zay
 		KIND kind;
 		STATE state;
 		const char* name;
+		mn::Str package_name;
 		Type* type;
 		union
 		{

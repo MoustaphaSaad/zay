@@ -1190,5 +1190,13 @@ namespace zay
 			for (size_t i = 0; i < self.global_scope->syms.count; ++i)
 				typer_sym_resolve(self, self.global_scope->syms[i]);
 		}
+
+		if(src_has_err(self.src) == false)
+		{
+			// provide package name for all the reachable symbols
+			for(auto sym: self.src->reachable_syms)
+				if(self.src->ast.package)
+					sym->package_name = mn::strf("{}_{}", self.src->ast.package.str, sym->name);
+		}
 	}
 }
