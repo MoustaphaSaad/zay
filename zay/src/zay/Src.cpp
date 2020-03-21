@@ -70,31 +70,38 @@ namespace zay
 		mn_defer(mn::memory_stream_free(out));
 		for(const Err& e: self->errs)
 		{
-			Line l = self->lines[e.pos.line - 1];
-			//we need to put ^^^ under the word the compiler means by the error
-			if(e.rng.begin && e.rng.end)
+			if(e.pos.line > 0)
 			{
-				mn::print_to(out, ">> {}\n", mn::str_from_substr(l.begin, l.end, mn::memory::tmp()));
-				mn::print_to(out, ">> ");
-				for(const char* it = l.begin; it != l.end; it = mn::rune_next(it))
+				Line l = self->lines[e.pos.line - 1];
+				//we need to put ^^^ under the word the compiler means by the error
+				if(e.rng.begin && e.rng.end)
 				{
-					auto c = mn::rune_read(it);
-					if(it >= e.rng.begin && it < e.rng.end)
+					mn::print_to(out, ">> {}\n", mn::str_from_substr(l.begin, l.end, mn::memory::tmp()));
+					mn::print_to(out, ">> ");
+					for(const char* it = l.begin; it != l.end; it = mn::rune_next(it))
 					{
-						mn::print_to(out, "^");
+						auto c = mn::rune_read(it);
+						if(it >= e.rng.begin && it < e.rng.end)
+						{
+							mn::print_to(out, "^");
+						}
+						else if(c == '\t')
+						{
+							mn::print_to(out, "\t");
+						}
+						else
+						{
+							mn::print_to(out, " ");
+						}
 					}
-					else if(c == '\t')
-					{
-						mn::print_to(out, "\t");
-					}
-					else
-					{
-						mn::print_to(out, " ");
-					}
+					mn::print_to(out, "\n");
 				}
-				mn::print_to(out, "\n");
+				mn::print_to(out, "Error[{}:{}:{}]: {}\n\n", self->path, e.pos.line, e.pos.col, e.msg);
 			}
-			mn::print_to(out, "Error[{}:{}:{}]: {}\n\n", self->path, e.pos.line, e.pos.col, e.msg);
+			else
+			{
+				mn::print_to(out, "Error[{}]: {}", self->path, e.msg);
+			}
 		}
 		return mn::memory_stream_str(out);
 	}

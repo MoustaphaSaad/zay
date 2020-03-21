@@ -27,6 +27,9 @@ main(int argc, char** argv)
 	flag::args_cmd(args, "cpp", "preprocesses c file");
 	flag::args_cmd(args, "build", "builds and outputs C file");
 
+	bool lib;
+	flag::args_bool(args, &lib, "-lib", false, "specifies whether to compile in library or exe");
+
 	mn::Str output;
 	flag::args_str(args, &output, "-o", "a.out", "output of the compiler");
 	mn_defer(mn::str_free(output));
@@ -136,15 +139,17 @@ main(int argc, char** argv)
 				continue;
 			}
 
+			auto parser_mode = lib ? zay::MODE::LIB : zay::MODE::EXE;
 			//parse the file
-			if(zay::src_parse(src, zay::MODE::EXE) == false)
+			if(zay::src_parse(src, parser_mode) == false)
 			{
 				mn::print("{}\n", zay::src_errs_dump(src, mn::memory::tmp()));
 				continue;
 			}
 
+			auto typer_mode = lib ? zay::Typer::MODE_LIB : zay::Typer::MODE_EXE;
 			//typecheck the file
-			if(zay::src_typecheck(src, zay::Typer::MODE_EXE) == false)
+			if(zay::src_typecheck(src, typer_mode) == false)
 			{
 				mn::print("{}\n", zay::src_errs_dump(src, mn::memory::tmp()));
 				continue;
@@ -152,7 +157,6 @@ main(int argc, char** argv)
 
 			auto c = zay::src_c(src, mn::memory::tmp());
 
-			//write the ast
 			mn::print("{}\n", c);
 		}
 	}

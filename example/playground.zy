@@ -20,7 +20,7 @@ func point_new(x, y: float32): Point {
 	return self
 }
 
-var origin: Point = point_new(0, 0)
+var origin: Point = point_new(0:float32, 0:float32)
 
 func add(a, b: Point): Point {
 	var res: Point
@@ -29,7 +29,14 @@ func add(a, b: Point): Point {
 	return res
 }
 
-func foo(a: *Point, b: int) {
+func add2(a, b: Point): Point {
+	return Point {
+		y: a.y + b.y,
+		x: a.x + b.x,
+	}
+}
+
+func foo(a: *Point, b: float32) {
 	a.x *= b
 	a.y *= b
 }

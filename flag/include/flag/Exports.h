@@ -22,7 +22,7 @@
 #endif
 
 #ifndef FLAG_DEPRECATED
-#  define FLAG_DEPRECATED __declspec(deprecated)
+#  define FLAG_DEPRECATED __attribute__ ((__deprecated__))
 #endif
 
 #ifndef FLAG_DEPRECATED_EXPORT
