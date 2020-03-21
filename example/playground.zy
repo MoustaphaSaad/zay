@@ -21,11 +21,12 @@ func point_new(x, y: float32): Point {
 }
 
 var origin = point_new(0:float32, 0:float32)
-var origin2 = add(origin, Point{x: 1:float32, y: 2:float32})
+var origin2 = add(origin, Point{y: 2:float32, x: 1:float32})
 var origin3 = foo(&origin2, 5:float32)
 
-var axis = []Point{
-	[0]: Point{}
+var axis = [4]Point{
+	[0]: Point{},
+	[3]: Point{x: 7:float32}
 }
 
 func add(a, b: Point): Point {
