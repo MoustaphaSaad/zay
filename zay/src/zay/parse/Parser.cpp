@@ -503,8 +503,10 @@ namespace zay
 		}
 		else
 		{
-			//error here
-			assert(false && "unreachable");
+			src_err(
+				self.src,
+				err_tkn(tkn, mn::strf("expected an expression but found '{}'", Tkn::NAMES[tkn.kind]))
+			);
 		}
 		return expr;
 	}

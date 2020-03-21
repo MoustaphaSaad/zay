@@ -24,7 +24,7 @@ var origin = point_new(0:float32, 0:float32)
 var origin2 = add(origin, Point{x: 1:float32, y: 2:float32})
 var origin3 = foo(&origin2, 5:float32)
 
-var axis = [4]Point{
+var axis = []Point{
 	[0]: Point{}
 }
 
