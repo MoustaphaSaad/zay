@@ -1195,8 +1195,13 @@ namespace zay
 		{
 			// provide package name for all the reachable symbols
 			for(auto sym: self.src->reachable_syms)
+			{
 				if(self.src->ast.package)
+				{
+					mn::str_free(sym->package_name);
 					sym->package_name = mn::strf("{}_{}", self.src->ast.package.str, sym->name);
+				}
+			}
 		}
 	}
 }
